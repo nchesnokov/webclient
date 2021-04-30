@@ -78,7 +78,7 @@ export default defineComponent({
 
         const fieldsBuild = (model, view) => {
             let fcols = [];
-            for (let i = 0, columns = Object.keys(props.metas[model].views[view].columns); i < columns.length; i++)
+            for (let i = 0, columns = props.metas[model].views[view].columns.map((v) => v.col); i < columns.length; i++)
                 switch (props.metas[model].meta.columns[columns[i]].type) {
                     case 'one2many':
                     case 'many2many':

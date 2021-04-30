@@ -24,7 +24,7 @@
         <el-table @selection-change="handleSelectionChange" :data="tableDataDisplay">
             <el-table-column type="selection" width="55">
             </el-table-column>
-            <el-table-column :prop="getProp(col)" :label="colsLabel[col]" v-for="col in cols" :key="col"></el-table-column>
+            <el-table-column fixed :prop="getProp(col)" :label="colsLabel[col]" v-for="col in cols" :key="col"></el-table-column>
         </el-table>
     </el-container>
     <el-pagination v-if="tableData.length > pageSize" background layout="prev, pager, next" @current-change="handleCurrentChange" :page-size="pageSize" :total="tableData.length">
@@ -91,7 +91,7 @@ export default defineComponent({
                         'models',
                         props.model,
                         'select', {
-                            fields: Object.keys(props.metas[props.model].views.search.columns),
+                            fields: props.metas[props.model].views.search.columns.map((v) => v.col),
                             cond: event.cond,
                             context: proxy.$UserPreferences.Context,
                             offset: event.offset.value,
@@ -163,7 +163,7 @@ export default defineComponent({
         onMounted(() => {
             for (
                 let i = 0,
-                    c = Object.keys(props.metas[props.model].views.list.columns),
+                    c = props.metas[props.model].views.list.columns.map((v) => v.col ) ,
                     meta = props.metas[props.model].meta.columns; i < c.length; i++
             ) {
                 colsType[c[i]] = meta[c[i]].type

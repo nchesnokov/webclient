@@ -148,7 +148,7 @@ export default defineComponent({
                         'models',
                         props.model,
                         'select', {
-                            fields: Object.keys(metas[props.model].views.find.columns),
+                            fields: metas[props.model].views.find.columns.map((v) => v.col),
                             cond: event.cond,
                             context: proxy.$UserPreferences.Context,
                             offset: event.offset.value,
@@ -176,7 +176,7 @@ export default defineComponent({
             console.log('meta:', msg)
             Object.assign(metas, msg[0])
             for (
-                let i = 0, c = Object.keys(metas[props.model].views.find.columns), meta = metas[props.model].meta.columns; i < c.length; i++
+                let i = 0, c = metas[props.model].views.find.columns.map((v) => v.col), meta = metas[props.model].meta.columns; i < c.length; i++
             ) {
                 colsType[c[i]] = meta[c[i]].type
                 colsLabel[c[i]] = meta[c[i]].label

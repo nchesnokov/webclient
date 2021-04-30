@@ -122,7 +122,7 @@ export default defineComponent({
 
         const fieldsBuild = (model, view) => {
             let fcols = []
-            for (let i = 0, columns = Object.keys(props.metas[model].views[view].columns), k = {}; i < columns.length; i++)
+            for (let i = 0, columns = props.metas[model].views[view].columns.map((v) => v.col), k = {}; i < columns.length; i++)
                 switch (props.metas[model].meta.columns[columns[i]].type) {
                     case 'one2many':
                         k = {}
@@ -231,7 +231,7 @@ export default defineComponent({
         onMounted(() => {
             for (
                 let i = 0,
-                    c = Object.keys(props.metas[props.model].views.form.columns),
+                    c = props.metas[props.model].views.form.columns.map((v) => v.col),
                     meta = props.metas[props.model].meta.columns; i < c.length; i++
             ) {
                 colsType[c[i]] = meta[c[i]].type

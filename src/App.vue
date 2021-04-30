@@ -263,12 +263,14 @@ export default defineComponent({
                     proxy.$UserPreferences.country = getCountryID(msg[2].preferences[0].country);
                     proxy.$UserPreferences.timezone = msg[2].preferences[0].timezone;
                 } else {
-                    proxy.$UserPreferences.framework = 'EL'
+                    proxy.$UserPreferences.user_id = uid[1]
+                    proxy.$UserPreferences.framework = 'element-plus'
                     proxy.$UserPreferences.lang = 'EN'
                     proxy.$UserPreferences.country = 'EN'
                     proxy.$UserPreferences.timezone = 'UTC'
                 }
                 proxy.$UserPreferences.Context = {
+                    'user':  proxy.$UserPreferences.user_id,
                     'framework': proxy.$UserPreferences.framework,
                     'lang': proxy.$UserPreferences.lang,
                     'tz': proxy.$UserPreferences.timezone

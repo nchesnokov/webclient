@@ -190,20 +190,18 @@ export default defineComponent({
 
         const fieldsBuild = (model, view) => {
             let fcols = []
-            for (let i = 0, columns = Object.keys(props.metas[model].views[view].columns), k = {}; i < columns.length; i++)
+            for (let i = 0, columns = props.metas[model].views[view].columns.map((v) => v.col), k = {}; i < columns.length; i++)
                 switch (props.metas[model].meta.columns[columns[i]].type) {
                     case 'one2many':
                         k = {}
                         if (props.metas[model].meta.columns[columns[i]].obj != model)
                             k[columns[i]] = fieldsBuild(props.metas[model].meta.columns[columns[i]].obj, 'form')
-                        else k[columns[i]] = Object.keys(props.metas[model].views.list.columns)
+                        else k[columns[i]] = props.metas[model].views.list.columns.map((v) => v.col)
                         fcols.push(k)
                         break
                     case 'many2many':
                         k = {}
-                        k[columns[i]] = Object.keys(
-                            props.metas[props.metas[model].meta.columns[columns[i]].obj].views.m2mlist.columns
-                        )
+                        k[columns[i]] = props.metas[props.metas[model].meta.columns[columns[i]].obj].views.m2mlist.columns.map((v) => v.col)
                         fcols.push(k)
                         break
                     default:
@@ -381,7 +379,7 @@ export default defineComponent({
         onMounted(() => {
             for (
                 let i = 0,
-                    c = Object.keys(props.metas[props.model].views.form.columns),
+                    c = props.metas[props.model].views.form.columns.map((v) => v.col),
                     meta = props.metas[props.model].meta.columns; i < c.length; i++
             ) {
                 colsType[c[i]] = meta[c[i]].type

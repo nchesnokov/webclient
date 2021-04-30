@@ -72,7 +72,7 @@ export default defineComponent({
         onMounted(() => {
             for (
                 let i = 0,
-                    c = Object.keys(props.metas[props.model].views.list.columns),
+                    c = props.metas[props.model].views.list.columns.map((v) => v.col),
                     meta = props.metas[props.model].meta.columns; i < c.length; i++
             ) {
                 colsType[c[i]] = meta[c[i]].type

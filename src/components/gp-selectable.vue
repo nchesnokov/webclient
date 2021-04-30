@@ -121,7 +121,7 @@ export default defineComponent({
             if (props.columns[col].type == 'related') {
                 let extcond = [];
                 for (let i = 0, relatedy = props.columns[col].relatedy; i < relatedy.length; i++) extcond.push({
-                    '__tuple__': [relatedy[i], '=', dataForm[relatedy[i]].name]
+                    '__tuple__': [relatedy[i], '=', ['many2one','related'].indexOf(colsType[relatedy[i]]) >= 0 ? dataForm[relatedy[i]].name : dataForm[relatedy[i]]]
                 });
                 if ('extcond' in rootProps) rootProps.extcond.splice(0, 0, ...extcond);
                 else rootProps.extcond = extcond;
@@ -146,6 +146,11 @@ export default defineComponent({
             for (let k in dataForm) {
                 switch (colsType[k]) {
                     case 'many2one':
+                        if (dataForm[k].name != null && dataForm[k].name.length > 0) cond.push({
+                            __tuple__: [k, dataForm[k].name.match(/%/g) ? 'like' : '=', dataForm[k].name]
+                        });
+                        break;
+                    case 'related':
                         if (dataForm[k].name != null && dataForm[k].name.length > 0) cond.push({
                             __tuple__: [k, dataForm[k].name.match(/%/g) ? 'like' : '=', dataForm[k].name]
                         });

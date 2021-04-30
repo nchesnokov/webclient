@@ -161,18 +161,18 @@ export default defineComponent({
 
         const fieldsBuild = (model, view) => {
             let fcols = []
-            for (let i = 0, columns = Object.keys(metas[model].views[view].columns), k = {}; i < columns.length; i++)
+            for (let i = 0, columns = metas[model].views[view].columns.map((v) => v.col), k = {}; i < columns.length; i++)
                 switch (metas[model].meta.columns[columns[i]].type) {
                     case 'one2many':
                         k = {}
                         if (metas[model].meta.columns[columns[i]].obj != model)
                             k[columns[i]] = fieldsBuild(metas[model].meta.columns[columns[i]].obj, 'form')
-                        else k[columns[i]] = Object.keys(metas[model].views.list.columns)
+                        else k[columns[i]] = metas[model].views.list.columns.map((v) => v.col)
                         fcols.push(k)
                         break
                     case 'many2many':
                         k = {}
-                        k[columns[i]] = Object.keys(metas[metas[model].meta.columns[columns[i]].obj].views.m2mlist.columns)
+                        k[columns[i]] = metas[metas[model].meta.columns[columns[i]].obj].views.m2mlist.columns.map((v) => v.col)
                         fcols.push(k)
                         break
                     default:
@@ -182,8 +182,8 @@ export default defineComponent({
         }
 
         const on_find_new = (value, opts) => {
-            console.log('on_find_new:', value, opts)
-            if (['new', 'edit'].indexOf(props.mode) >= 0 && value.id.length > 0 && value.name.length)
+            console.log('on_find_new:', props.mode,value, opts)
+            if ((['new', 'edit'].indexOf(props.mode) >= 0 || opts.mode == 'find' ) && value.id.length > 0 && value.name.length)
                 dataForm[opts.col] = value
         }
 
@@ -217,7 +217,7 @@ export default defineComponent({
                     relatedy = metas[props.model].meta.columns[col].relatedy
                 for (let i = 0; i < relatedy.length; i++)
                     extcond.push({
-                        __tuple__: [relatedy[i], '=', dataForm[relatedy[i]].name]
+                        __tuple__: [relatedy[i], '=',  ['many2one','related'].indexOf(colsType[relatedy[i]]) >= 0 ? dataForm[relatedy[i]].name : dataForm[relatedy[i]]]
                     })
                 if ('extcond' in rootProps) rootProps.extcond.splice(0, 0, ...extcond)
                 else rootProps.extcond = extcond
@@ -296,7 +296,7 @@ export default defineComponent({
             console.log('on-load-meta:', msg)
             if (msg && msg.length > 0) Object.assign(metas, msg[0])
             for (
-                let i = 0, c = Object.keys(metas[props.model].views.form.columns), meta = metas[props.model].meta.columns; i < c.length; i++
+                let i = 0, c = metas[props.model].views.form.columns.map((v) => v.col), meta = metas[props.model].meta.columns; i < c.length; i++
             ) {
                 colsType[c[i]] = meta[c[i]].type
                 colsLabel[c[i]] = meta[c[i]].label

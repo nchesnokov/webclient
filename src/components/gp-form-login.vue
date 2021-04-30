@@ -49,7 +49,7 @@ export default defineComponent({
         const isVisible = ref(false);
         const form = reactive({
             url: 'ws://localhost:8100/ws',
-            slot: 'test002',
+            slot: 'test003',
             user: 'admin',
             password: 'admin'
         });
