@@ -14,7 +14,7 @@ function genID(){ return uuidv4()}
 
 
 const defOptions = {
-    'debug': true,
+    'debug': false,
     'load-on-start': true,   
     'create-id-func': genID ,
 };
