@@ -15,7 +15,7 @@
     <el-table @selection-change="handleSelectionChange" :data="tableData" style="width: 100%">
         <el-table-column type="selection" width="55">
         </el-table-column>
-        <el-table-column :prop="getProp(col)" :label="metas[model].meta.columns[col].label" v-for="col in Object.keys(this.metas[model].views.m2mlist.columns)" :key="col"></el-table-column>
+        <el-table-column :prop="getProp(col)" :label="colsLabel[col]" v-for="col in cols" :key="col"></el-table-column>
     </el-table>
 </el-container>
 <el-pagination v-if="tableData.length > pageSize" background layout="prev, pager, next" @current-change="handleCurrentChange" :page-size="pageSize" :total="tableData.length">
@@ -26,7 +26,7 @@
 <script>
 
 import {
-    defineComponent, ref, reactive
+    defineComponent, ref, reactive, onMounted
 }
 from 'vue'
 export default defineComponent({
@@ -35,6 +35,10 @@ export default defineComponent({
     setup(props) {
         const page = ref(1);
         const pageSize = ref(15);
+        const cols = reactive([]);
+        const colsType = reactive({})
+        const colsLabel = reactive({})
+
         const multipleSelection = reactive([]);
 
         const handleSelectionChange = (val) => {
@@ -47,12 +51,27 @@ export default defineComponent({
         };
 
         const getProp = (col) => {
-            return props.metas[props.model].meta.columns[col].type == 'many2one' ? col + '.name' : col
+            return ['many2one', 'related'].indexOf(colsType[col]) >= 0 ? col + '.name' : col
         };
         const addRow = () => {};
+        onMounted(() => {
+            for (
+                let i = 0,
+                    c = props.metas[props.model].views.m2mlist.columns.map((v) => v.col),
+                    meta = props.metas[props.model].meta.columns; i < c.length; i++
+            ) {
+                colsType[c[i]] = meta[c[i]].type
+                colsLabel[c[i]] = meta[c[i]].label
+                cols.push(c[i])
+            }
+        })
+
         return {
             page,
             pageSize,
+            cols,
+            colsType,
+            colsLabel,
             multipleSelection,
             handleSelectionChange,
             handleCurrentChange,

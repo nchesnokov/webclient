@@ -15,6 +15,7 @@
                 <el-button v-if="cdata[page-1][col].id != null" type="primary" size="mini" icon="el-icon-view" @click="do_lookup(col,cdata[page-1][col].id)"></el-button>
             </template>
         </el-input>
+        <json-viewer v-if="colsType[col] == 'json'" :value="cdata[page-1][col]" copyable boxed sort />
         <el-input :modelValue="cdata[page-1][col]" v-else-if="['char','varchar','composite','integer','float','decimal','numeric','timedelta'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
             <template #ffix>
                 <el-button type="primary" size="mini" icon="el-icon-monitor" v-if="isCompute(col)"></el-button>

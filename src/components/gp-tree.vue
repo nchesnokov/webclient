@@ -6,7 +6,7 @@
 
 <template>
 
-<gp-selectable v-if="showSearch" :columns="metas[model].meta.columns" :names="metas[model].meta.names" @update:search="do_search" @update:search-cancel="showSearch = false">
+<gp-selectable v-if="showSearch" :columns="metas[model].meta.columns" :names="metas[model].meta.names" :cid="cid" @update:search="do_search" @update:search-cancel="showSearch = false">
 </gp-selectable>
 <el-row>{{ metas[model].description }}</el-row>
 <el-row v-if="!showSearch">
@@ -51,16 +51,16 @@ export default defineComponent({
         const multipleSelection = reactive([]);
 
         const load = (tree, treeNode, resolve) => {
-          console.log('load-tree:',tree)
-          console.log('load-treeNode:',treeNode)
-          console.log('load-resolve:',resolve)
-            proxy.$websocket.send({
+          //console.log('load-tree:',tree)
+          //console.log('load-treeNode:',treeNode)
+          //console.log('load-resolve:',resolve)
+            proxy.$websocket.sendAsync({
                 _msg: [props.cid, 'models', props.model, 'select', {
                     fields: fields,
                     cond: [{__tuple__:[props.metas[props.model].meta.names.parent_id,'=', tree[props.metas[props.model].meta.names.rec_name]]}],
                     context: proxy.$UserPreferences.Context
                 }]
-            }, resolve);
+            }).then(v => resolve(v.map((r) => {r.hasChildren = true; return r;})));
 
         }
 
@@ -79,8 +79,8 @@ export default defineComponent({
             showSearch.value = true;
         };
 
-        const do_search = () => {
-            console.log('select data:');
+        const do_search = (event) => {
+            console.log('select data:',event);
 
             //proxy.$websocket.sendAsync({_msg:[props.cid,'models',props.model,'tree',{fields:fields,context:{}}]}).then(msg=>tableData.splice(0,tableData.length,...msg));
             proxy.$websocket.send({
@@ -94,8 +94,7 @@ export default defineComponent({
         const on_select_data = (msg) => {
             console.log('select data:', treeProps, msg);
             if (msg.length > 0) showSearch.value = false;
-            for(let i = 0; i < msg.length; i++) msg[i].hasChildren = true
-            tableData.splice(0, tableData.length, ...msg);
+            tableData.splice(0, tableData.length, ...msg.map(v => {v.hasChildren = true;return v;}));
         };
         onMounted(() => {
             fields.splice(0, fields.length, ...props.metas[props.model].views.tree.columns.map((v) => v.col).filter(col => col != props.metas[props.model].meta.names.childs_id))

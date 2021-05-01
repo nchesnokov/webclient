@@ -15,10 +15,12 @@
     <el-row v-if="!showSearch">
         <el-button type="primary" size="mini" icon="el-icon-search" @click="do_action('find')"></el-button>
         <el-button v-if="multipleSelection.length == 0" type="primary" size="mini" icon="el-icon-document-add" @click="do_action('new')"></el-button>
+        <el-button v-if="multipleSelection.length > 0" type="primary" size="mini" icon="el-icon-copy-document" @click="do_action('copy')"></el-button>
         <el-button v-if="multipleSelection.length > 0" type="primary" size="mini" icon="el-icon-edit" @click="do_action('edit')"></el-button>
         <el-button v-if="multipleSelection.length > 0" type="primary" size="mini" icon="el-icon-view" @click="do_action('lookup')"></el-button>
         <el-button type="primary" size="mini" icon="el-icon-upload" @click="do_action('upload')"></el-button>
         <el-button v-if="multipleSelection.length > 0" type="primary" size="mini" icon="el-icon-download" @click="do_action('download')"></el-button>
+        <el-button type="primary" size="mini" icon="el-icon-setting" @click="do_action('setting')"></el-button>
     </el-row>
     <el-container>
         <el-table @selection-change="handleSelectionChange" :data="tableDataDisplay">
