@@ -15,12 +15,13 @@
                     <el-button v-if="dataForm[col].id != null" type="primary" size="mini" icon="el-icon-view" @click="do_lookup(col,dataForm[col].id)"></el-button>
                 </template>
             </el-input>
+            <json-viewer v-if="colsType[col] == 'json'" :value="dataForm[col]" copyable boxed sort />
             <el-input v-model="dataForm[col]" v-else-if="['char','varchar','composite','integer','float','decimal','numeric','timedelta'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
                 <template #ffix>
                     <el-button type="primary" size="mini" icon="el-icon-monitor" v-if="isCompute(col)"></el-button>
                 </template>
             </el-input>
-            <el-input v-model="dataForm[col]" type="textarea" v-else-if="['text','xml'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)"></el-input>
+            <el-input v-model="dataForm[col]" autosize type="textarea" v-else-if="['text','xml'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)"></el-input>
             <el-date-picker v-model="dataForm[col]" v-else-if="colsType[col] == 'date'" :readonly="readonly(col)"></el-date-picker>
             <el-time-picker v-model="dataForm[col]" v-else-if="colsType[col] == 'time'" :readonly="readonly(col)"></el-time-picker>
             <el-date-picker v-model="dataForm[col]" type="datetime" v-else-if="colsType[col] == 'datetime'" :readonly="readonly(col)"></el-date-picker>
@@ -34,7 +35,7 @@
         </el-form-item>
         <el-tabs type="border-card" v-if="o2mcols.length > 0">
             <el-tab-pane :label="colsLabel[o2mcol]" v-for="o2mcol in o2mcols" :key="o2mcol">
-                <gp-o2m-components :cid="cid" :metas="metas" :model="metas[model].meta.columns[o2mcol].obj" :cdata="dataForm[o2mcol]" :mode="mode"/>
+                <gp-o2m-components :cid="cid" :metas="metas" :model="metas[model].meta.columns[o2mcol].obj" :cdata="dataForm[o2mcol]" :mode="mode" :rel="metas[model].meta.columns[o2mcol].rel"/>
                 <!-- <gp-list :metas="metas" :model="metas[model].meta.columns[o2mcol].obj" :tableData="dataForm[o2mcol]" /> -->
             </el-tab-pane>
         </el-tabs>

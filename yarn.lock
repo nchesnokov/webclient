@@ -919,6 +919,11 @@
   resolved "https://registry.npm.taobao.org/@nodelib/fs.stat/download/@nodelib/fs.stat-1.1.3.tgz?cache=0&sync_timestamp=1609074653238&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40nodelib%2Ffs.stat%2Fdownload%2F%40nodelib%2Ffs.stat-1.1.3.tgz#2b5a3ab3f918cca48a8c754c08168e3f03eba61b"
   integrity sha1-K1o6s/kYzKSKjHVMCBaOPwPrphs=
 
+"@pdftron/webviewer@^7.3.1":
+  version "7.3.1"
+  resolved "https://registry.yarnpkg.com/@pdftron/webviewer/-/webviewer-7.3.1.tgz#0fff099b650a4c8c700bac566fd22c7385b3e1ff"
+  integrity sha512-uoCwA0Ueqd7DdAGaUPdCB8aVKgZNr5JMJeBkR70EJx04eyGofp7TB+AvIE5oQdzVtnruBR8oSONgnP2kWI+Msg==
+
 "@popperjs/core@^2.4.4":
   version "2.9.2"
   resolved "https://registry.npm.taobao.org/@popperjs/core/download/@popperjs/core-2.9.2.tgz#adea7b6953cbb34651766b0548468e743c6a2353"

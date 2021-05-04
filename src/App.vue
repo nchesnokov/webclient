@@ -41,7 +41,7 @@ button.active {
 <template>
 
 <el-drawer v-if="isLogged" append-to-body v-model="drawer" direction='ltr' size="20%" title="Root Menu">
-    <el-tree :data="menuData" :props="defaultProps" @node-click="handleNodeClick" title="Root Menu"></el-tree>
+    <el-tree :data="menuData" :props="defaultProps" @node-click="handleNodeClick"/>
 </el-drawer>
 <el-container style="height: 880px; border: 1px solid #eee">
     <el-header style="text-align: right; font-size: 12px">
@@ -265,6 +265,7 @@ export default defineComponent({
                 } else {
                     proxy.$UserPreferences.user_id = uid[1]
                     proxy.$UserPreferences.framework = 'element-plus'
+                    proxy.$UserPreferences.frameworks = msg[2].frameworks
                     proxy.$UserPreferences.lang = 'EN'
                     proxy.$UserPreferences.country = 'EN'
                     proxy.$UserPreferences.timezone = 'UTC'

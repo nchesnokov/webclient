@@ -16,7 +16,7 @@
             <template #default="props">
                 <el-tabs type="border-card" v-if="o2mcols.length > 0">
                     <el-tab-pane :label="colsLabel[o2mcol]" v-for="o2mcol in o2mcols" :key="o2mcol">
-                        <gp-o2m-components :metas="metas" :model="metas[model].meta.columns[o2mcol].obj" :cdata="props.row[o2mcol]" :mode="mode" />
+                        <gp-o2m-components :metas="metas" :model="metas[model].meta.columns[o2mcol].obj" :cdata="props.row[o2mcol]" :mode="mode" :rel="metas[model].meta.columns[o2mcol].rel"/>
                     </el-tab-pane>
                 </el-tabs>
             </template>
@@ -37,7 +37,7 @@ import {
 from 'vue'
 export default defineComponent({
     name: 'gp-o2m-list',
-    props: ['cid', 'metas', 'model', 'cdata', 'mode'],
+    props: ['cid', 'metas', 'model', 'cdata', 'mode','rel'],
     setup(props) {
         const page = ref(1)
         const pageSize = ref(15)
@@ -72,7 +72,7 @@ export default defineComponent({
         onMounted(() => {
             for (
                 let i = 0,
-                    c = props.metas[props.model].views.list.columns.map((v) => v.col),
+                    c = props.metas[props.model].views.list.columns.map((v) => v.col).filter((c) => c != props.rel),
                     meta = props.metas[props.model].meta.columns; i < c.length; i++
             ) {
                 colsType[c[i]] = meta[c[i]].type

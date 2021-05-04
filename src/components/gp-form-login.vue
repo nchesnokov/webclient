@@ -9,7 +9,14 @@
 <el-dialog title="Login" v-model="isVisible">
     <el-form :model="form">
         <el-form-item label="URL" :label-width="formLabelWidth">
-            <el-input v-model="form.url" autocomplete="off"></el-input>
+            <el-input v-model="form.url" autocomplete="off" class="input-with-select">
+                <template #prepend>
+                  <el-select v-model="select" placeholder="Select">
+                    <el-option label="ws://" value="ws://"></el-option>
+                    <el-option label="wss://" value="wss://"></el-option>
+                  </el-select>
+                </template>            
+            </el-input>
         </el-form-item>
         <el-form-item label="Slot" :label-width="formLabelWidth">
             <el-input v-model="form.slot" autocomplete="off"></el-input>
@@ -47,8 +54,9 @@ export default defineComponent({
         } = getCurrentInstance();
 
         const isVisible = ref(false);
+        const select = ref('ws://')
         const form = reactive({
-            url: 'ws://localhost:8100/ws',
+            url: 'localhost:8100/ws',
             slot: 'test003',
             user: 'admin',
             password: 'admin'
@@ -56,7 +64,7 @@ export default defineComponent({
         const formLabelWidth = ref('120px');
         const do_login = () => {
             proxy.$emit('update:login', {
-                url: form.url,
+                url: select.value + form.url,
                 slot: form.slot,
                 user: form.user,
                 password: form.password
@@ -64,6 +72,7 @@ export default defineComponent({
         }
         if (!props.isLogged) isVisible.value = true;
         return {
+            select,
             isVisible,
             form,
             formLabelWidth,
@@ -73,3 +82,12 @@ export default defineComponent({
 });
 
 </script>
+
+<style>
+  .el-select .el-input {
+    width: 110px;
+  }
+  .input-with-select .el-input-group__prepend {
+    background-color: #3ff;
+  }
+</style>

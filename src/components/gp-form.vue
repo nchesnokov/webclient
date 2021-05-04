@@ -60,7 +60,7 @@
 
             <json-viewer v-if="colsType[col] == 'json'" :value="dataForm[col]" copyable boxed sort />
             <el-input v-model="dataForm[col]" v-else-if="['integer','float','decimal','numeric','timedelta'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)"></el-input>
-            <el-input v-model="dataForm[col]" type="textarea" v-else-if="['text','xml'].indexOf(colsType[col]) >= 0" :readonly="readonly(col)">            
+            <el-input v-model="dataForm[col]" autosize type="textarea" v-else-if="['text','xml'].indexOf(colsType[col]) >= 0" :readonly="readonly(col)">            
             </el-input>
             <el-date-picker v-model="dataForm[col]" v-else-if="colsType[col] == 'date'" :readonly="readonly(col)"></el-date-picker>
             <el-time-picker v-model="dataForm[col]" v-else-if="colsType[col] == 'time'" :readonly="readonly(col)"></el-time-picker>
@@ -75,7 +75,7 @@
         </el-form-item>
         <el-tabs type="border-card" v-if="o2mcols.length > 0">
             <el-tab-pane :label="colsLabel[o2mcol]" v-for="o2mcol in o2mcols" :key="o2mcol">
-                <gp-o2m-components :cid="cid" :metas="metas" :model="metas[model].meta.columns[o2mcol].obj" :cdata="dataForm[o2mcol]" :mode="mode"/>
+                <gp-o2m-components :cid="cid" :metas="metas" :model="metas[model].meta.columns[o2mcol].obj" :cdata="dataForm[o2mcol]" :mode="mode" :rel="metas[model].meta.columns[o2mcol].rel"/>
             </el-tab-pane>
         </el-tabs>
     </el-form>

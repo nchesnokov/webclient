@@ -17,25 +17,24 @@
         </el-input>
         <json-viewer v-if="colsType[col] == 'json'" :value="cdata[page-1][col]" copyable boxed sort />
         <el-input :modelValue="cdata[page-1][col]" v-else-if="['char','varchar','composite','integer','float','decimal','numeric','timedelta'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
-            <template #ffix>
+            <template #prefix>
                 <el-button type="primary" size="mini" icon="el-icon-monitor" v-if="isCompute(col)"></el-button>
             </template>
         </el-input>
-        <el-input :modelValue="cdata[page-1][col]" type="textarea" v-else-if="['text','xml'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)"></el-input>
+        <el-input :modelValue="cdata[page-1][col]" autosize type="textarea" v-else-if="['text','xml'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)"></el-input>
         <el-date-picker :modelValue="cdata[page-1][col]" v-else-if="colsType[col] == 'date'" :readonly="readonly(col)"></el-date-picker>
         <el-time-picker :modelValue="cdata[page-1][col]" v-else-if="colsType[col] == 'time'" :readonly="readonly(col)"></el-time-picker>
         <el-date-picker :modelValue="cdata[page-1][col]" type="datetime" v-else-if="colsType[col] == 'datetime'" :readonly="readonly(col)"></el-date-picker>
         <el-select :modelValue="cdata[page-1][col]" v-else-if="colsType[col] == 'selection'" :disabled="readonly(col)">
-            <el-option v-for="item in selOptions[col]" :key="item.value" :label="item.label" :value="item.value">
-            </el-option>
+            <el-option v-for="item in selOptions[col]" :key="item.value" :label="item.label" :value="item.value"></el-option>
         </el-select>
         <gp-m2m-list :metas="metas" :model="metas[model].meta.columns[col].obj" :tableData="cdata[page-1][col]" v-else-if="colsType[col] == 'many2many'">{{ colsLabel[col] }}</gp-m2m-list>
-        <el-checkbox :modelValue="cdata[page-1][col]" v-else-if="colsType[col] == 'boolean'" :disabled="readonly(col)"></el-checkbox>
+        <el-checkbox :value="cdata[page-1][col]" v-else-if="colsType[col] == 'boolean'" :disabled="readonly(col)"></el-checkbox>
         <el-image v-else-if="colsType[page-1][col] == 'binary' && metas[model].meta.columns[col].accept == 'image/*'" style="width: 100px; height: 100px" src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg" fit="fit"></el-image>
     </el-form-item>
     <el-tabs type="border-card" v-if="o2mcols.length > 0">
         <el-tab-pane :label="colsLabel[o2mcol]" v-for="o2mcol in o2mcols" :key="o2mcol">
-            <gp-o2m-components :cid="cid" :metas="metas" :model="metas[model].meta.columns[o2mcol].obj" :cdata="cdata[page-1][o2mcol]" :mode="mode" />
+            <gp-o2m-components :cid="cid" :metas="metas" :model="metas[model].meta.columns[o2mcol].obj" :cdata="cdata[page-1][o2mcol]" :mode="mode" :rel="metas[model].meta.columns[o2mcol].rel"/>
         </el-tab-pane>
     </el-tabs>
 </el-form>
@@ -58,7 +57,7 @@ from 'vue'
 
 export default defineComponent({
     name: 'gp-o2m-form',
-    props: ['cid', 'metas', 'model', 'cdata', 'mode'],
+    props: ['cid', 'metas', 'model', 'cdata', 'mode','rel'],
     setup(props) {
         const {
             proxy
@@ -123,20 +122,18 @@ export default defineComponent({
 
         const fieldsBuild = (model, view) => {
             let fcols = []
-            for (let i = 0, columns = props.metas[model].views[view].columns.map((v) => v.col), k = {}; i < columns.length; i++)
+            for (let i = 0, columns = props.metas[model].views[view].columns.map((v) => v.col).filter((c) => c != props.rel), k = {}; i < columns.length; i++)
                 switch (props.metas[model].meta.columns[columns[i]].type) {
                     case 'one2many':
                         k = {}
                         if (props.metas[model].meta.columns[columns[i]].obj != model)
-                            k[columns[i]] = fieldsBuild(props.metas[model].meta.columns[columns[i]].obj, 'list')
-                        else k[columns[i]] = Object.keys(props.metas[model].views.list.columns)
+                            k[columns[i]] = fieldsBuild(props.metas[model].meta.columns[columns[i]].obj, 'form')
+                        else k[columns[i]] = props.metas[model].views.form.columns.map((v) => v.col)
                         fcols.push(k)
                         break
                     case 'many2many':
                         k = {}
-                        k[columns[i]] = Object.keys(
-                            props.metas[props.metas[model].meta.columns[columns[i]].obj].views.m2mlist.columns
-                        )
+                        k[columns[i]] = props.metas[model].meta.columns[columns[i].obj].views.m2mlist.columns.map((v) => v.col)
                         fcols.push(k)
                         break
                     default:
@@ -232,7 +229,7 @@ export default defineComponent({
         onMounted(() => {
             for (
                 let i = 0,
-                    c = props.metas[props.model].views.form.columns.map((v) => v.col),
+                    c = props.metas[props.model].views.form.columns.map((v) => v.col).filter((c) => c != props.rel),
                     meta = props.metas[props.model].meta.columns; i < c.length; i++
             ) {
                 colsType[c[i]] = meta[c[i]].type
@@ -266,6 +263,9 @@ export default defineComponent({
                 }
             }
             fields.splice(0, fields.length, ...fieldsBuild(props.model, 'form'))
+            console.log('colstype:',colsType)
+            console.log('colslabel:',colsLabel)
+            console.log('cols:',cols)
         })
         return {
             readonly,
