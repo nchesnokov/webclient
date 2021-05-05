@@ -59,7 +59,7 @@
             </el-input>
 
             <json-viewer v-if="colsType[col] == 'json'" :value="dataForm[col]" copyable boxed sort />
-            <el-input v-model="dataForm[col]" v-else-if="['integer','float','decimal','numeric','timedelta'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)"></el-input>
+            <el-input v-model="dataForm[col]" v-else-if="['uuid','integer','float','decimal','numeric','timedelta'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)"></el-input>
             <el-input v-model="dataForm[col]" autosize type="textarea" v-else-if="['text','xml'].indexOf(colsType[col]) >= 0" :readonly="readonly(col)">            
             </el-input>
             <el-date-picker v-model="dataForm[col]" v-else-if="colsType[col] == 'date'" :readonly="readonly(col)"></el-date-picker>

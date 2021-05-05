@@ -16,7 +16,7 @@
                 </template>
             </el-input>
             <json-viewer v-if="colsType[col] == 'json'" :value="dataForm[col]" copyable boxed sort />
-            <el-input v-model="dataForm[col]" v-else-if="['char','varchar','composite','integer','float','decimal','numeric','timedelta'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
+            <el-input v-model="dataForm[col]" v-else-if="['uuid','char','varchar','composite','integer','float','decimal','numeric','timedelta'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
                 <template #ffix>
                     <el-button type="primary" size="mini" icon="el-icon-monitor" v-if="isCompute(col)"></el-button>
                 </template>
