@@ -26,7 +26,11 @@
         <el-table @selection-change="handleSelectionChange" :data="tableDataDisplay">
             <el-table-column type="selection" width="55">
             </el-table-column>
-            <el-table-column fixed :prop="getProp(col)" :label="colsLabel[col]" v-for="col in cols" :key="col"></el-table-column>
+            <el-table-column fixed :prop="getProp(col)" :label="colsLabel[col]" v-for="col in cols" :key="col">
+              <template v-if="colsType[col] == 'selection'" #default="scope">
+                {{ selOptions[col][scope.row[col]] }}
+              </template>
+            </el-table-column>
         </el-table>
     </el-container>
     <el-pagination v-if="tableData.length > pageSize" background layout="prev, pager, next" @current-change="handleCurrentChange" :page-size="pageSize" :total="tableData.length">
@@ -66,6 +70,7 @@ export default defineComponent({
         const o2mcols = reactive([])
         const colsType = reactive({})
         const colsLabel = reactive({})
+        const selOptions = reactive({})
         const tableData = reactive([])
         const multipleSelection = reactive([])
 
@@ -76,6 +81,12 @@ export default defineComponent({
 
         const handleCurrentChange = val => {
             page.value = val
+        }
+
+        const _get_selections = s => {
+            let r = {}
+            for (let j = 0; j < s.length; j++) r[s[j][0]] = s[j][1]
+            return r
         }
 
         const getProp = col => {
@@ -170,6 +181,7 @@ export default defineComponent({
             ) {
                 colsType[c[i]] = meta[c[i]].type
                 colsLabel[c[i]] = meta[c[i]].label
+                if (colsType[c[i]] == 'selection') selOptions[c[i]] = _get_selections(meta[c[i]].selections)
                 if (colsType[c[i]] == 'one2many') o2mcols.push(c[i])
                 else cols.push(c[i])
             }
@@ -182,6 +194,7 @@ export default defineComponent({
             o2mcols,
             colsType,
             colsLabel,
+            selOptions,
             tableData,
             tableDataDisplay,
             multipleSelection,
