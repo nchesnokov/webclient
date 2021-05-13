@@ -30,6 +30,10 @@
               <template v-if="colsType[col] == 'selection'" #default="scope">
                 {{ selOptions[col][scope.row[col]] }}
               </template>
+              <template v-else-if="colsType[col] == 'boolean'" #default="scope">
+                <el-checkbox v-model="scope.row[col]" disabled></el-checkbox>
+              </template>
+
             </el-table-column>
         </el-table>
     </el-container>
