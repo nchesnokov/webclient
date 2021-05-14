@@ -177,7 +177,7 @@ export default defineComponent({
         };
 
         const do_user_preferences = (event) => {
-            console.log('do_user_preference:', event);
+            //console.log('do_user_preference:', event);
             proxy.$UserPreferences.lang = event.language;
             proxy.$UserPreferences.country = event.country;
             proxy.$UserPreferences.timezone = event.timezone;
@@ -248,7 +248,7 @@ export default defineComponent({
         };
 
         const on_service_login = (msg) => {
-            console.log('on_service_login:  ', msg);
+            //console.log('on_service_login:  ', msg);
             uid.splice(0, uid.length, ...msg);
             if (uid[0]) {
                 proxy.$UserPreferences.langs = msg[2].langs;
@@ -292,7 +292,7 @@ export default defineComponent({
         };
 
         const on_load_meta = (msg) => {
-            console.log('meta:',msg);
+            //console.log('meta:',msg);
             Object.assign(metas, msg[0].model.models);
             model.value = msg[0].model.root;
             tabs.splice(0, tabs.length);

@@ -132,7 +132,7 @@ export default defineComponent({
             const rootContainer = document.createElement("div")
             render(vnode, rootContainer, false);
             document.querySelector('#sv').appendChild(rootContainer);
-            console.log('do-search!', col, vnode, proxy);
+            //console.log('do-search!', col, vnode, proxy);
 
         };
 
@@ -141,7 +141,7 @@ export default defineComponent({
             proxy.$emit('update:search-cancel');
         };
         const onSearch = () => {
-            console.log('search!');
+            //console.log('search!');
             cond.splice(0, cond.length);
             for (let k in dataForm) {
                 switch (colsType[k]) {
@@ -175,7 +175,7 @@ export default defineComponent({
                         });
                 }
             }
-            console.log('cond:', cond);
+            //console.log('cond:', cond);
             proxy.$emit('update:search', {
                 'cond': cond,
                 'offset': offset,

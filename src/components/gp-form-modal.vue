@@ -7,7 +7,7 @@
     </el-pagination>
     <el-form v-if="'__data__' in dataForm && Object.keys(dataForm.__data__).length > 0" :model="dataForm.__data__" label-width="auto">
         <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
-            <el-input v-model="dataForm.__data__[col].name" v-if="['many2one','related'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
+            <el-input v-model="dataForm.__data__[col].name" v-if="['many2one','related'].indexOf(colsType[col]) >= 0" @change="cache(dataForm,col)" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
                 <template #suffix>
                     <el-button type="primary" size="mini" icon="el-icon-search" @click="do_search(col)"></el-button>
                     <el-button type="primary" size="mini" icon="el-icon-document-add" @click="do_add(col)"></el-button>
@@ -16,21 +16,21 @@
                 </template>
             </el-input>
             <json-viewer v-if="colsType[col] == 'json'" :value="dataForm.__data__[col]" copyable boxed sort />
-            <el-input v-model="dataForm.__data__[col]" v-else-if="['uuid','char','varchar','composite','integer','float','decimal','numeric','timedelta'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
+            <el-input v-model="dataForm.__data__[col]" v-else-if="['uuid','char','varchar','composite','integer','float','decimal','numeric','timedelta'].indexOf(colsType[col]) >= 0" @change="cache(dataForm,col)"  :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
                 <template #ffix>
                     <el-button type="primary" size="mini" icon="el-icon-monitor" v-if="isCompute(col)"></el-button>
                 </template>
             </el-input>
-            <el-input v-model="dataForm.__data__[col]" autosize type="textarea" v-else-if="['text','xml'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)"></el-input>
-            <el-date-picker v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'date'" :readonly="readonly(col)"></el-date-picker>
-            <el-time-picker v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'time'" :readonly="readonly(col)"></el-time-picker>
-            <el-date-picker v-model="dataForm.__data__[col]" type="datetime" v-else-if="colsType[col] == 'datetime'" :readonly="readonly(col)"></el-date-picker>
-            <el-select v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'selection'" :disabled="readonly(col)">
+            <el-input v-model="dataForm.__data__[col]" autosize type="textarea" v-else-if="['text','xml'].indexOf(colsType[col]) >= 0" @change="cache(dataForm,col)" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)"></el-input>
+            <el-date-picker v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'date'" @change="cache(dataForm,col)" :readonly="readonly(col)"></el-date-picker>
+            <el-time-picker v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'time'" @change="cache(dataForm,col)" :readonly="readonly(col)"></el-time-picker>
+            <el-date-picker v-model="dataForm.__data__[col]" type="datetime" v-else-if="colsType[col] == 'datetime'" @change="cache(dataForm,col)" :readonly="readonly(col)"></el-date-picker>
+            <el-select v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'selection'" @change="cache(dataForm,col)" :disabled="readonly(col)">
                 <el-option v-for="item in selOptions[col]" :key="item.value" :label="item.label" :value="item.value">
                 </el-option>
             </el-select>
             <gp-m2m-list :metas="metas" :model="metas[model].meta.columns[col].obj" :tableData="dataForm.__o2m_containers__[col]" v-else-if="colsType[col] == 'many2many'">{{ colsLabel[col] }}</gp-m2m-list>
-            <el-checkbox v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'boolean'" :disabled="readonly(col)"></el-checkbox>
+            <el-checkbox v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'boolean'" @change="cache(dataForm,col)" :disabled="readonly(col)"></el-checkbox>
             <el-image v-else-if="colsType[col] == 'binary' && metas[model].meta.columns[col].accept == 'image/*'" style="width: 100px; height: 100px" :src="dataForm.__data__[col]" fit="fit"></el-image>
         </el-form-item>
         <el-tabs type="border-card" v-if="o2mcols.length > 0">
@@ -104,6 +104,7 @@ export default defineComponent({
             proxy
         } = getCurrentInstance()
         const showDialog = ref(true)
+        const guid = ref(null)
         const visible = ref(false)
         const page = ref(1)
         const pageSize = ref(1)
@@ -115,6 +116,56 @@ export default defineComponent({
         const fields = reactive([])
         const cols = reactive([])
         const o2mcols = reactive([])
+
+        const cache = (item,name) => {
+              //console.log('cache:',name,item.__data__[name],item);
+              let value;
+              switch(metas[props.model].meta.columns[name].type){
+                  case 'integer':
+                    value = parseInt(item.__data__[name],10);
+                    break;
+                case 'float':
+                case 'double':
+                    value = parseFloat(item.__data__[name]);
+                    break;
+                case 'real':
+                case 'decimal':
+                case 'numeric':
+                    value = {'__decimal__':item.__data__[name]};
+                    break;
+                case 'datetime':
+                    if (metas[props.model].meta.columns[name].timezone) value = {'__datetime_tz__':item.__data__[name].toJsonString()};
+                    else value = {'__datetime__':item.__data__[name].toJsonString()};
+                    break;
+                case 'date':
+                    value = {'__date__':item.__data__[name]};
+                    break;
+                case 'time':
+                    if (metas[props.model].meta.columns[name].timezone) value = {'__time_tz__':item.__data__[name]};
+                    else value = {'__time__':item.__data__[name]};
+                    break;
+                case 'timedelta':
+                    value = {'__timedelta__':item.__data__[name]};
+                    break;
+                case 'many2one':
+                case 'related':
+                    //console.log('typeof-value:',typeof item[name]);
+                    if ('__data__' in item){
+                    if (typeof item.__data__[name] == 'object') value = item.__data__[name];
+                    else  {value = {'id':item.__data__[name].id,'name':item.__data__[name].name}; item.__data__.id =value.id;item.__data__.name =value.name;}
+                    }
+                    else{
+                    if (typeof item[name] == 'object') value = item[name];
+                    else  {value = {'id':item[name].id,'name':item[name].name};item.__data__.id = value.id;item.__data__.name = value.name;}
+                        }
+                    break;
+                default:
+                    value = item.__data__[name];
+                  }
+              let r = {'path':item.__path__,'key':name,'value':value,'context':{}}
+             //console.log('cache:',r);
+              proxy.$websocket.sendAsync({_msg:[props.cid,'_cache','cache',guid.value,r]}).then((v) => console.log('cache:',v));
+              }
 
         const title = computed(() => {
             return props.mode + ':' + (Object.keys(metas).length > 0 ? metas[props.model].meta.description : ref(''))
@@ -324,7 +375,9 @@ export default defineComponent({
 */
             }
             fields.splice(0, fields.length, ...fieldsBuild(props.model, 'form'))
-            if (props.oid != null && ['edit', 'lookup'].indexOf(props.mode) >= 0)
+            if (props.oid != null && ['edit', 'lookup'].indexOf(props.mode) >= 0) {
+				let ctx = Object.assign({},proxy.$UserPreferences.Context)
+				ctx.cache = guid.value
                 proxy.$websocket.send({
                         _msg: [
                             props.cid,
@@ -333,19 +386,22 @@ export default defineComponent({
                             'readforupdate', {
                                 fields: fields,
                                 ids: typeof props.oid == 'object' ? props.oid[0] : props.oid,
-                                context: proxy.$UserPreferences.Context
+                                context: ctx
                             }
                         ]
                     },
                     on_read
                 )
+            }
         }
 
         const on_read = msg => {        
+            console.log('on_read:', msg)
             if (msg && msg.length > 0) Object.assign(dataForm, msg[0])
         }
 
         onMounted(() => {
+            proxy.$websocket.sendAsync({_msg:[props.cid,'_cache','open',{'mode':props.mode,'context':proxy.$UserPreferences.Context}]}).then((msg) => {guid.value = msg[0]})
             proxy.$websocket.send({
                     _msg: [props.cid, 'uis', 'get_meta_of_models_v2', {
                         model: props.model,
@@ -364,6 +420,8 @@ export default defineComponent({
             pageSize,
             handleCurrentChange,
             metas,
+            guid,
+            cache,
             isCompute,
             colsType,
             colsLabel,

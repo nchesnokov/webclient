@@ -79,7 +79,7 @@ export default defineComponent({
         const multipleSelection = reactive([])
 
         const handleSelectionChange = val => {
-            console.log('selection:', val)
+            //console.log('selection:', val)
             multipleSelection.splice(0, multipleSelection.length, ...val)
         }
 
@@ -101,7 +101,7 @@ export default defineComponent({
         }
 
         const do_search = event => {
-            console.log('select data:', event)
+            //console.log('select data:', event)
             proxy.$websocket.send({
                     _msg: [
                         props.cid,
@@ -140,7 +140,7 @@ export default defineComponent({
         }
 
         const do_action = action => {
-            console.log('action:', action)
+            //console.log('action:', action)
             switch (action) {
                 case 'find':
                     do_select()
@@ -167,7 +167,7 @@ export default defineComponent({
         }
 
         const on_select_data = msg => {
-            console.log('msg:', msg)
+            //console.log('msg:', msg)
             if (msg.length > 0) showSearch.value = false
             tableData.splice(0, tableData.length, ...msg)
         }

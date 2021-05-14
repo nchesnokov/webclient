@@ -191,7 +191,7 @@ export default defineComponent({
         }
 
         const do_action = action => {
-            console.log('action:', action)
+            //console.log('action:', action)
             switch (action) {
                 case 'new':
                     //mode.value = 'new'
