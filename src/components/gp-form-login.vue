@@ -9,7 +9,7 @@
 <el-dialog title="Login" v-model="isVisible">
     <el-form :model="form">
         <el-form-item label="URL" :label-width="formLabelWidth">
-            <el-input v-model="form.url" autocomplete="off" class="input-with-select">
+            <el-input v-model="form.url" class="input-with-select">
                 <template #prepend>
                   <el-select v-model="select" placeholder="Select">
                     <el-option label="ws://" value="ws://"></el-option>
@@ -88,6 +88,6 @@ export default defineComponent({
     width: 110px;
   }
   .input-with-select .el-input-group__prepend {
-    background-color: #3ff;
+    background-color: #fff;
   }
 </style>

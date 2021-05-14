@@ -48,13 +48,12 @@ export default defineComponent({
         const multipleSelection = reactive([])
 
         const handleSelectionChange = val => {
-            console.log('selection:', val)
             multipleSelection.splice(0, multipleSelection.length, ...val)
         }
 
 
         const getProp = col => {
-            return ['many2one', 'related'].indexOf(colsType[col]) >= 0 ? col + '.name' : col
+            return ['many2one', 'related'].indexOf(colsType[col]) >= 0 ? '__data__.' + col + '.name' : '__data__.' + col
         }
 
         const addRow = () => {}
@@ -64,7 +63,6 @@ export default defineComponent({
         }
 
         const tableDataDisplay = computed(() => {
-            //console.log('computed:');
             if (props.cdata === null || props.cdata.length === 0) return reactive([])
             else return props.cdata.slice(pageSize.value * page.value - pageSize.value, pageSize.value * page.value)
         })
