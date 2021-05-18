@@ -21,7 +21,14 @@
                 </el-tabs>
             </template>
         </el-table-column>
-        <el-table-column :prop="getProp(col)" :label="colsLabel[col]" v-for="col in cols" :key="col"></el-table-column>
+        <el-table-column :prop="getProp(col)" :label="colsLabel[col]" v-for="col in cols" :key="col">
+              <template v-if="colsType[col] == 'selection'" #default="scope">
+                {{ selOptions[col][scope.row[col]] }}
+              </template>
+              <template v-else-if="colsType[col] == 'boolean'" #default="scope">
+                <el-checkbox v-model="scope.row[col]" disabled></el-checkbox>
+              </template>        
+        </el-table-column>
     </el-table>
 </el-container>
 <el-pagination v-if="cdata.length > pageSize" background layout="prev, pager, next" @current-change="handleCurrentChange" :page-size="pageSize" :total="cdata.length">
@@ -45,6 +52,7 @@ export default defineComponent({
         const o2mcols = reactive([])
         const colsType = reactive({})
         const colsLabel = reactive({})
+         const selOptions = reactive({})
         const multipleSelection = reactive([])
 
         const handleSelectionChange = val => {
@@ -62,6 +70,15 @@ export default defineComponent({
             page.value = val
         }
 
+        const _get_selections = s => {
+            let r = []
+            for (let j = 0; j < s.length; j++) r.push({
+                label: s[j][1],
+                value: s[j][0]
+            })
+            return r
+        }
+
         const tableDataDisplay = computed(() => {
             if (props.cdata === null || props.cdata.length === 0) return reactive([])
             else return props.cdata.slice(pageSize.value * page.value - pageSize.value, pageSize.value * page.value)
@@ -75,6 +92,7 @@ export default defineComponent({
             ) {
                 colsType[c[i]] = meta[c[i]].type
                 colsLabel[c[i]] = meta[c[i]].label
+                 if (colsType[c[i]] == 'selection') selOptions[c[i]] = _get_selections(meta[c[i]].selections)
                 if (colsType[c[i]] == 'one2many') o2mcols.push(c[i])
                 else cols.push(c[i])
             }
@@ -90,7 +108,8 @@ export default defineComponent({
             cols,
             o2mcols,
             colsType,
-            colsLabel
+            colsLabel,
+            selOptions
         }
     }
 })

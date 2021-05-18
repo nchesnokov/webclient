@@ -29,7 +29,7 @@
                 <el-option v-for="item in selOptions[col]" :key="item.value" :label="item.label" :value="item.value">
                 </el-option>
             </el-select>
-            <gp-m2m-list :metas="metas" :model="metas[model].meta.columns[col].obj" :tableData="dataForm.__o2m_containers__[col]" v-else-if="colsType[col] == 'many2many'">{{ colsLabel[col] }}</gp-m2m-list>
+            <gp-m2m-list :metas="metas" :model="metas[model].meta.columns[col].obj" :tableData="dataForm.__m2m_containers__[col]" v-else-if="colsType[col] == 'many2many'">{{ colsLabel[col] }}</gp-m2m-list>
             <el-checkbox v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'boolean'" @change="cache(dataForm,col)" :disabled="readonly(col)"></el-checkbox>
             <el-image v-else-if="colsType[col] == 'binary' && metas[model].meta.columns[col].accept == 'image/*'" style="width: 100px; height: 100px" :src="dataForm.__data__[col]" fit="fit"></el-image>
         </el-form-item>
@@ -57,7 +57,7 @@
 import {
     defineComponent,
     defineAsyncComponent,
-    onMounted,
+    onBeforeMount,
     reactive,
     ref,
     getCurrentInstance,
@@ -105,7 +105,7 @@ export default defineComponent({
         } = getCurrentInstance()
         const showDialog = ref(true)
         const guid = ref(null)
-        const visible = ref(false)
+        //const visible = ref(false)
         const page = ref(1)
         const pageSize = ref(1)
         const metas = reactive({})
@@ -172,8 +172,19 @@ export default defineComponent({
         })
 
         const readonly = col => {
-            return props.mode == 'lookup' || isCompute(col)
+            return props.mode.value == 'lookup' || dataForm.__meta__.ro[col] || isCompute(col)
         }
+
+        const required = (path,col) => {
+          console.log('required:',path,col)
+          return dataForm.__meta__.rq[col]
+        }
+
+
+         const visible = (path,col) => {
+           console.log('required:',path,col)
+           return !dataForm.__meta__.iv[col]
+         }
 
         const isCompute = col => {
             return (
@@ -183,7 +194,7 @@ export default defineComponent({
         }
 
         const handleCurrentChange = val => {
-            visible.value = true
+            //visible.value = true
             page.value = val
             proxy.$websocket.send({
                     _msg: [
@@ -359,9 +370,14 @@ export default defineComponent({
                         }
                         break
                     case 'one2many':
-                    case 'many2many':
-                        dataForm.__data__[c[i]] = []
+                        dataForm.__o2m_containers__ = {}
+                        dataForm.__o2m_containers__[c[i]] = []
                         break
+                    case 'many2many':
+                        dataForm.__m2m_containers__ = {}
+                        dataForm.__m2m_containers__ [c[i]] = []
+                        break
+
                     case 'selection':
                         selOptions[c[i]] = _get_selections(meta[c[i]].selections)
                         dataForm.__data__[c[i]] = ''
@@ -376,8 +392,8 @@ export default defineComponent({
             }
             fields.splice(0, fields.length, ...fieldsBuild(props.model, 'form'))
             if (props.oid != null && ['edit', 'lookup'].indexOf(props.mode) >= 0) {
-				let ctx = Object.assign({},proxy.$UserPreferences.Context)
-				ctx.cache = guid.value
+                let ctx = Object.assign({},proxy.$UserPreferences.Context)
+                ctx.cache = guid.value
                 proxy.$websocket.send({
                         _msg: [
                             props.cid,
@@ -400,8 +416,14 @@ export default defineComponent({
             if (msg && msg.length > 0) Object.assign(dataForm, msg[0])
         }
 
-        onMounted(() => {
-            proxy.$websocket.sendAsync({_msg:[props.cid,'_cache','open',{'mode':props.mode,'context':proxy.$UserPreferences.Context}]}).then((msg) => {guid.value = msg[0]})
+        onBeforeMount(() => {
+            proxy.$websocket.sendAsync({_msg:[props.cid,'_cache','open',{'mode':props.mode,'context':proxy.$UserPreferences.Context}]}).then((msg) => {
+              if (msg && msg.length > 0) guid.value = msg[0]
+              if (props.mode.value == 'new') proxy.$websocket.sendAsync({_msg:[props.cid,'_cache','initialize',guid.value,{'model':props.model,'view':'form'}]}).then((msg) => {if (msg && msg.length > 0) Object.assign(dataForm, msg[0]);console.log('initialize:',msg)})
+              
+            })
+        
+            //proxy.$websocket.sendAsync({_msg:[props.cid,'_cache','open',{'mode':props.mode,'context':proxy.$UserPreferences.Context}]}).then((msg) => {guid.value = msg[0]})
             proxy.$websocket.send({
                     _msg: [props.cid, 'uis', 'get_meta_of_models_v2', {
                         model: props.model,
@@ -413,9 +435,10 @@ export default defineComponent({
         })
         return {
             showDialog,
-            visible,
             title,
             readonly,
+            required,
+            visible,
             page,
             pageSize,
             handleCurrentChange,
