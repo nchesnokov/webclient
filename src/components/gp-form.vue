@@ -102,6 +102,7 @@ import {
     reactive,
     getCurrentInstance,
     render,
+    h,
     createVNode
 }
 from 'vue'
@@ -398,7 +399,27 @@ export default defineComponent({
         }
 
         const onSubmit = () => {
-            //console.log('submit!')
+            console.log('submit!');
+              
+          ( async () => {
+           if (mode.value == 'new' || mode.value == 'edit') {
+             let msg = await proxy.$websocket.sendAsync({'_msg':[props.cid,'_cache','save',guid.value,{}]});
+             let action = msg[0];
+             console.log('action:', msg)
+             if (action == 'commit') {
+               await proxy.$websocket.sendAsync({'_mag':[props.cid,'_cache','commit',guid.value,{'action':'commit work'}]});
+               if (mode.value == 'new') {
+                 msg = proxy.$websocket.sendAsync({'_msg':[props.cid,'_cache','initialize',guid.value,{'model':props.model,'view':'form'}]});
+                 Object.assign(dataForm, msg[0]);
+               }
+               proxy.$notify({
+                        title: 'Title',
+                        message: h('i', { style: 'color: teal' }, 'Record saved.')
+               });
+             }
+           }
+           })();
+            
         }
 
         const onValidate = () => {

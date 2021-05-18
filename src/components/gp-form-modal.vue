@@ -418,8 +418,8 @@ export default defineComponent({
 
         onBeforeMount(() => {
             proxy.$websocket.sendAsync({_msg:[props.cid,'_cache','open',{'mode':props.mode,'context':proxy.$UserPreferences.Context}]}).then((msg) => {
-              if (msg && msg.length > 0) guid.value = msg[0]
-              if (props.mode.value == 'new') proxy.$websocket.sendAsync({_msg:[props.cid,'_cache','initialize',guid.value,{'model':props.model,'view':'form'}]}).then((msg) => {if (msg && msg.length > 0) Object.assign(dataForm, msg[0]);console.log('initialize:',msg)})
+              if (msg && msg.length > 0) guid.value = msg[0];
+              if (props.mode == 'new') proxy.$websocket.sendAsync({_msg:[props.cid,'_cache','initialize',guid.value,{'model':props.model,'view':'form'}]}).then((msg) => {if (msg && msg.length > 0) Object.assign(dataForm, msg[0]);console.log('initialize:',msg)})
               
             })
         
