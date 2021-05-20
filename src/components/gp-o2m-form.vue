@@ -7,7 +7,7 @@
 
 <el-form v-if="cdata.length > 0" :modelValue="cdata[page-1].__data__" label-width="auto">
     <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
-        <el-input :modelValue="cdata[page-1].__data__[col].name" v-if="['many2one','related'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
+        <el-input :modelValue="cdata[page-1].__data__[col].name" @update:modelValue="cache($event)" v-if="['many2one','related'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
             <template #suffix>
                 <el-button type="primary" size="mini" icon="el-icon-search" @click="do_find(col)"></el-button>
                 <el-button type="primary" size="mini" icon="el-icon-document-add" @click="do_add(col)"></el-button>
@@ -16,20 +16,38 @@
             </template>
         </el-input>
         <json-viewer v-if="colsType[col] == 'json'" :value="cdata[page-1].__data__[col]" copyable boxed sort />
-        <el-input :modelValue="cdata[page-1].__data__[col]" v-else-if="['char','varchar','composite','integer','float','decimal','numeric','timedelta'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
+
+        <el-input :modelValue="cdata[page-1].__data__[col]" @update:modelValue="cache($event)" v-else-if="['char','varchar','composite','decomposite'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
+            <template #prefix>
+                      <el-dropdown v-if="colsTranslate[col]" @command="i18nCommand">
+                          <span class="el-dropdown-link">
+                          {{colsLang[col].toLowerCase()}}<i class="el-icon-arrow-down el-icon--right"></i>
+                        </span>
+                          <template #dropdown>
+                              <el-dropdown-menu>
+                                  <el-dropdown-item v-for="lang in $UserPreferences.langs" :key=lang.code :command="{col:col,lang:lang.code}">{{lang.description}}</el-dropdown-item>
+                              </el-dropdown-menu>
+                          </template>
+          </el-dropdown>
+
+            </template>
+        </el-input>
+
+
+        <el-input :modelValue="cdata[page-1].__data__[col]" @update:modelValue="cache($event)" v-else-if="['integer','float','decimal','numeric','timedelta'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
             <template #prefix>
                 <el-button type="primary" size="mini" icon="el-icon-monitor" v-if="isCompute(col)"></el-button>
             </template>
         </el-input>
-        <el-input :modelValue="cdata[page-1].__data__[col]" autosize type="textarea" v-else-if="['text','xml'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)"></el-input>
-        <el-date-picker :modelValue="cdata[page-1].__data__[col]" v-else-if="colsType[col] == 'date'" :readonly="readonly(col)"></el-date-picker>
-        <el-time-picker :modelValue="cdata[page-1].__data__[col]" v-else-if="colsType[col] == 'time'" :readonly="readonly(col)"></el-time-picker>
-        <el-date-picker :modelValue="cdata[page-1].__data__[col]" type="datetime" v-else-if="colsType[col] == 'datetime'" :readonly="readonly(col)"></el-date-picker>
-        <el-select :modelValue="cdata[page-1].__data__[col]" v-else-if="colsType[col] == 'selection'" :disabled="readonly(col)">
+        <el-input :modelValue="cdata[page-1].__data__[col]" @update:modelValue="cache($event)" autosize type="textarea" v-else-if="['text','xml'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)"></el-input>
+        <el-date-picker :modelValue="cdata[page-1].__data__[col]" @update:modelValue="cache($event)" v-else-if="colsType[col] == 'date'" :readonly="readonly(col)"></el-date-picker>
+        <el-time-picker :modelValue="cdata[page-1].__data__[col]" @update:modelValue="cache($event)" v-else-if="colsType[col] == 'time'" :readonly="readonly(col)"></el-time-picker>
+        <el-date-picker :modelValue="cdata[page-1].__data__[col]" @update:modelValue="cache($event)" type="datetime" v-else-if="colsType[col] == 'datetime'" :readonly="readonly(col)"></el-date-picker>
+        <el-select :modelValue="cdata[page-1].__data__[col]" @update:modelValue="cache($event)" v-else-if="colsType[col] == 'selection'" :disabled="readonly(col)">
             <el-option v-for="item in selOptions[col]" :key="item.value" :label="item.label" :value="item.value"></el-option>
         </el-select>
         <gp-m2m-list :metas="metas" :model="metas[model].meta.columns[col].obj" :tableData="cdata[page-1].__m2m_containers__[col]" v-else-if="colsType[col] == 'many2many'">{{ colsLabel[col] }}</gp-m2m-list>
-        <el-checkbox :value="cdata[page-1].__data__[col]" v-else-if="colsType[col] == 'boolean'" :disabled="readonly(col)"></el-checkbox>
+        <el-checkbox :value="cdata[page-1].__data__[col]" @update:modelValue="cache($event)" v-else-if="colsType[col] == 'boolean'" :disabled="readonly(col)"></el-checkbox>
         <el-image v-else-if="colsType[col] == 'binary' && metas[model].meta.columns[col].accept == 'image/*'" style="width: 100px; height: 100px" src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg" fit="fit"></el-image>
     </el-form-item>
     <el-tabs type="border-card" v-if="o2mcols.length > 0">
@@ -68,6 +86,8 @@ export default defineComponent({
         const showSearch = ref(false)
         const colsType = reactive({})
         const colsLabel = reactive({})
+        const colsTranslate = reactive({})
+        const colsLang = reactive({})
         const selOptions = reactive({})
         const fields = reactive([])
         const cols = reactive([])
@@ -77,6 +97,12 @@ export default defineComponent({
         const readonly = col => {
             return props.mode == 'lookup' || isCompute(col)
         }
+
+      const i18nCommand = command => {
+        //console.log('command-18n:',command)
+        colsLang[command.col] = command.lang
+      }
+
 
         const handleSelectionChange = val => {
             multipleSelection.splice(0, multipleSelection.length, ...val)
@@ -88,6 +114,9 @@ export default defineComponent({
         }
 
 
+       const cache = (event) => {
+         console.log('event-cache:',event)
+       }
 
         const isCompute = col => {
             return (
@@ -115,7 +144,7 @@ export default defineComponent({
                 value.name &&
                 value.name.length > 0
             )
-            ;
+            if (props.cdata[page.value-1].__data__[opts.col].id != value.id || props.cdata[page.value-1].__data__[opts.col].name != value.name) cache({'id':value.id,'name':value.name})
             //props.cdata[opts.col] = value
         }
 
@@ -229,6 +258,8 @@ export default defineComponent({
             ) {
                 colsType[c[i]] = meta[c[i]].type
                 colsLabel[c[i]] = meta[c[i]].label
+                colsTranslate[c[i]] = 'translate' in meta[c[i]] ? meta[c[i]].translate : false
+                colsLang[c[i]] = proxy.$UserPreferences.lang
                 if (colsType[c[i]] == 'selection') selOptions[c[i]] = _get_selections(meta[c[i]].selections)
                 if (colsType[c[i]] == 'one2many') o2mcols.push(c[i])
                 else cols.push(c[i])
@@ -270,17 +301,20 @@ export default defineComponent({
             handleSelectionChange,
             colsType,
             colsLabel,
+            colsTranslate,
             selOptions,
             fields,
             cols,
             o2mcols,
             fieldsBuild,
+            i18nCommand,
             do_action,
             do_find,
             do_add,
             do_edit,
             do_lookup,
             on_find_new,
+            cache
         }
     }
 })

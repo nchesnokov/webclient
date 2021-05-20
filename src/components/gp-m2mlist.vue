@@ -6,11 +6,6 @@
 
 <template>
 
-<el-row>
-    {{ metas[model].meta.description }}</el-row>
-<el-row>
-    <el-button type="primary" @click="addRow">Add</el-button>
-</el-row>
 <el-container>
     <el-table @selection-change="handleSelectionChange" :data="tableData" style="width: 100%">
         <el-table-column type="selection" width="55">
@@ -61,7 +56,6 @@ export default defineComponent({
         const getProp = (col) => {
             return ['many2one', 'related'].indexOf(colsType[col]) >= 0 ? col + '.name' : col
         };
-        const addRow = () => {};
 
         const _get_selections = s => {
             let r = []
@@ -96,8 +90,7 @@ export default defineComponent({
             multipleSelection,
             handleSelectionChange,
             handleCurrentChange,
-            getProp,
-            addRow
+            getProp
         };
     }
 });

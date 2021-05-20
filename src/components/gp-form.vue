@@ -10,17 +10,16 @@
 <slot>
     <el-row>{{ mode +':' + metas[model].meta.description }}</el-row>
     <el-row>
-       <el-dropdown @command="i18nCommand">
-          <span class="el-dropdown-link">
-            {{$UserPreferences.lang.toLowerCase()}}<i class="el-icon-arrow-down el-icon--right"></i>
-          </span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item v-for="lang in $UserPreferences.langs" :key=lang.code :command="{lang:lang.code}">{{lang.description}}</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
+        <el-dropdown @command="i18nCommand">
+            <span class="el-dropdown-link">
+              {{$UserPreferences.lang.toLowerCase()}}<i class="el-icon-arrow-down el-icon--right"></i>
+            </span>
+            <template #dropdown>
+                <el-dropdown-menu>
+                    <el-dropdown-item v-for="lang in $UserPreferences.langs" :key=lang.code :command="{lang:lang.code}">{{lang.description}}</el-dropdown-item>
+                </el-dropdown-menu>
+            </template>
         </el-dropdown>
-    
 
     </el-row>
     <el-row>
@@ -34,7 +33,7 @@
     </el-pagination>
     <el-form v-if="'__data__' in dataForm && Object.keys(dataForm.__data__).length > 0" :model="dataForm.__data__" label-width="auto">
         <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
-            <el-input v-model="dataForm.__data__[col].name" v-if="['many2one','related'].indexOf(colsType[col]) >= 0" @change="cache(dataForm,col)" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
+            <el-input v-model="dataForm.__data__[col].name" v-if="['many2one','related'].indexOf(colsType[col]) >= 0" @change="m2o_cache(dataForm,col)" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
                 <template #suffix>
                     <el-button type="primary" size="mini" icon="el-icon-search" @click="do_find(col)"></el-button>
                     <el-button type="primary" size="mini" icon="el-icon-document-add" @click="do_add(col)"></el-button>
@@ -43,24 +42,25 @@
                 </template>
             </el-input>
 
-            <el-input v-model="dataForm.__data__[col]" :maxlength="colsSize[col]" show-word-limit v-else-if="['char','varchar','composite','decomposite'].indexOf(colsType[col]) >= 0" @change="cache(dataForm,col)" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
+            <el-input v-model="dataForm.__data__[col]" :maxlength="colsSize[col]" show-word-limit v-else-if="['char','varchar','composite','decomposite'].indexOf(colsType[col]) >= 0" @change="cache(dataForm,col)" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''"
+            :readonly="readonly(col)">
                 <template #prefix>
-                   <el-dropdown v-if="colsTranslate[col]" @command="i18nCommand">
-                      <span class="el-dropdown-link">
-                        {{colsLang[col].toLowerCase()}}<i class="el-icon-arrow-down el-icon--right"></i>
-                      </span>
-                      <template #dropdown>
-                        <el-dropdown-menu>
-                          <el-dropdown-item v-for="lang in $UserPreferences.langs" :key=lang.code :command="{col:col,lang:lang.code}">{{lang.description}}</el-dropdown-item>
-                        </el-dropdown-menu>
-                      </template>
+                    <el-dropdown v-if="colsTranslate[col]" @command="i18nCommand">
+                        <span class="el-dropdown-link">
+                          {{colsLang[col].toLowerCase()}}<i class="el-icon-arrow-down el-icon--right"></i>
+                        </span>
+                        <template #dropdown>
+                            <el-dropdown-menu>
+                                <el-dropdown-item v-for="lang in $UserPreferences.langs" :key=lang.code :command="{col:col,lang:lang.code}">{{lang.description}}</el-dropdown-item>
+                            </el-dropdown-menu>
+                        </template>
                     </el-dropdown>
-                 </template>
+                </template>
             </el-input>
 
             <json-viewer v-if="colsType[col] == 'json'" :value="dataForm.__data__[col]" copyable boxed sort />
             <el-input v-model="dataForm.__data__[col]" v-else-if="['uuid','integer','float','decimal','numeric','timedelta'].indexOf(colsType[col]) >= 0" @change="cache(dataForm,col)" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)"></el-input>
-            <el-input v-model="dataForm.__data__[col]" autosize type="textarea" v-else-if="['text','xml'].indexOf(colsType[col]) >= 0" @change="cache(dataForm,col)" :readonly="readonly(col)">            
+            <el-input v-model="dataForm.__data__[col]" autosize type="textarea" v-else-if="['text','xml'].indexOf(colsType[col]) >= 0" @change="cache(dataForm,col)" :readonly="readonly(col)">
             </el-input>
             <el-date-picker v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'date'" @change="cache(dataForm,col)" :readonly="readonly(col)"></el-date-picker>
             <el-time-picker v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'time'" @change="cache(dataForm,col)" :readonly="readonly(col)"></el-time-picker>
@@ -69,13 +69,16 @@
                 <el-option v-for="item in selOptions[col]" :key="item.value" :label="item.label" :value="item.value">
                 </el-option>
             </el-select>
-            <gp-m2m-list :metas="metas" :model="metas[model].meta.columns[col].obj" :tableData="dataForm.__m2m_containers__[col]" v-else-if="colsType[col] == 'many2many'">{{ colsLabel[col] }}</gp-m2m-list>
+            <el-row v-else-if="colsType[col] == 'many2many'">
+                <el-button type="primary" @click="do_find(col,'multiple')">Add</el-button>
+                <gp-m2m-list :metas="metas" :model="metas[model].meta.columns[col].obj" :tableData="dataForm.__m2m_containers__[col]"></gp-m2m-list>
+            </el-row>
             <el-checkbox v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'boolean'" @change="cache(dataForm,col)" :disabled="readonly(col)"></el-checkbox>
             <el-image v-else-if="colsType[col] == 'binary' && metas[model].meta.columns[col].accept == 'image/*'" style="width: 100px; height: 100px" src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg" fit="fit"></el-image>
         </el-form-item>
         <el-tabs type="border-card" v-if="o2mcols.length > 0">
             <el-tab-pane :label="colsLabel[o2mcol]" v-for="o2mcol in o2mcols" :key="o2mcol">
-                <gp-o2m-components :cid="cid" :metas="metas" :model="metas[model].meta.columns[o2mcol].obj" :cdata="dataForm.__o2m_containers__[o2mcol]" :mode="mode" :rel="metas[model].meta.columns[o2mcol].rel"/>
+                <gp-o2m-components :cid="cid" :metas="metas" :model="metas[model].meta.columns[o2mcol].obj" :cdata="dataForm.__o2m_containers__[o2mcol]" :mode="mode" :rel="metas[model].meta.columns[o2mcol].rel" />
             </el-tab-pane>
         </el-tabs>
     </el-form>
@@ -107,6 +110,8 @@ import {
 }
 from 'vue'
 
+//import {on_modify_models} from '../js/nf.js'
+
 export default defineComponent({
     name: 'gp-form',
     props: ['cid', 'metas', 'model'],
@@ -114,6 +119,11 @@ export default defineComponent({
         const {
             proxy
         } = getCurrentInstance()
+        const meta__cache__ = reactive({
+            '__data__': {},
+            '__meta__': {},
+            __containers__: {}
+        })
         const mode = ref('new')
         const guid = ref(null)
         const page = ref(1)
@@ -124,7 +134,9 @@ export default defineComponent({
         const colsSize = reactive({})
         const colsTranslate = reactive({})
         const colsLang = reactive({})
-        const dataForm = reactive({'__data__':{}})
+        const dataForm = reactive({
+            __data__: {}
+        })
         const selOptions = reactive({})
         const fields = reactive([])
         const cols = reactive([])
@@ -135,71 +147,132 @@ export default defineComponent({
             return mode.value == 'lookup' || dataForm.__meta__.ro[col] || isCompute(col)
         }
 
-        const required = (path,col) => {
-          console.log('required:',path,col)
-          return dataForm.__meta__.rq[col]
+        const required = (path, col) => {
+            console.log('required:', path, col)
+            return dataForm.__meta__.rq[col]
         }
 
+        const visible = (path, col) => {
+            console.log('required:', path, col)
+            return !dataForm.__meta__.iv[col]
+        }
 
-         const visible = (path,col) => {
-           console.log('required:',path,col)
-           return !dataForm.__meta__.iv[col]
-         }
+        const addRow = () => {};
 
-        const cache = (item,name) => {
-              console.log('cache-item:',name,item.__data__[name],item);
-              let value;
-              switch(props.metas[props.model].meta.columns[name].type){
-                  case 'integer':
-                    value = parseInt(item.__data__[name],10);
-                    break;
+        const dataRowContainer = (containers, parent) => {
+            for (let k in containers) {
+                if (!(k + '.' + parent in proxy.meta__cache__.__containers__)) meta__cache__.__containers__[k + '.' + parent] = containers[k];
+                for (let i = 0; i < containers[k].length; i++) dataRow(containers[k][i]);
+            }
+        };
+        const dataRow = (row) => {
+            if ('__data__' in row) meta__cache__.__data__[row.__path__] = row.__data__;
+            if ('__meta__' in row) meta__cache__.__meta__[row.__path__] = row.__meta__;
+            if ('__m2m_containers__' in row) dataRowContainer(row['__m2m_containers__'], row['__path__']);
+            if ('__o2m_containers__' in row) dataRowContainer(row['__o2m_containers__'], row['__path__']);
+        };
+
+
+        const cache = (item, name) => {
+            console.log('cache-item:', name, item.__data__[name], item)
+            let value
+            switch (props.metas[props.model].meta.columns[name].type) {
+                case 'integer':
+                    value = parseInt(item.__data__[name], 10)
+                    break
                 case 'float':
                 case 'double':
-                    value = parseFloat(item.__data__[name]);
-                    break;
+                    value = parseFloat(item.__data__[name])
+                    break
                 case 'real':
                 case 'decimal':
                 case 'numeric':
-                    value = {'__decimal__':item.__data__[name]};
-                    break;
+                    value = {
+                        __decimal__: item.__data__[name]
+                    }
+                    break
                 case 'datetime':
-                    if (props.metas[props.model].meta.columns[name].timezone) value = {'__datetime_tz__':item.__data__[name].toJsonString()};
-                    else value = {'__datetime__':item.__data__[name].toJsonString()};
-                    break;
+                    if (props.metas[props.model].meta.columns[name].timezone)
+                        value = {
+                            __datetime_tz__: item.__data__[name].toJsonString()
+                        } 
+                        else
+                        value = {
+                            __datetime__: item.__data__[name].toJsonString()
+                        }
+                    break
                 case 'date':
-                    value = {'__date__':item.__data__[name]};
-                    break;
+                    value = {
+                        __date__: item.__data__[name]
+                    }
+                    break
                 case 'time':
-                    if (props.metas[props.model].meta.columns[name].timezone) value = {'__time_tz__':item.__data__[name]};
-                    else value = {'__time__':item.__data__[name]};
-                    break;
+                    if (props.metas[props.model].meta.columns[name].timezone)
+                        value = {
+                            __time_tz__: item.__data__[name]
+                        } 
+                        else
+                        value = {
+                            __time__: item.__data__[name]
+                        }
+                    break
                 case 'timedelta':
-                    value = {'__timedelta__':item.__data__[name]};
-                    break;
+                    value = {
+                        __timedelta__: item.__data__[name]
+                    }
+                    break
                 case 'many2one':
                 case 'related':
                     //console.log('typeof-value:',typeof item[name]);
-                    if ('__data__' in item){
-                    if (typeof item.__data__[name] == 'object') value = item.__data__[name];
-                    else  {value = {'id':item.__data__[name].id,'name':item.__data__[name].name}; item.__data__.id =value.id;item.__data__.name =value.name;}
-                    }
-                    else{
-                    if (typeof item[name] == 'object') value = item[name];
-                    else  {value = {'id':item[name].id,'name':item[name].name};item.__data__.id = value.id;item.__data__.name = value.name;}
+                    if ('__data__' in item) {
+                        if (typeof item.__data__[name] == 'object') value = item.__data__[name]
+                        else {
+                            value = {
+                                id: item.__data__[name].id,
+                                name: item.__data__[name].name
+                            }
+                            item.__data__.id = value.id
+                            item.__data__.name = value.name
                         }
-                    break;
+                    } else {
+                        if (typeof item[name] == 'object') value = item[name]
+                        else {
+                            value = {
+                                id: item[name].id,
+                                name: item[name].name
+                            }
+                            item.__data__.id = value.id
+                            item.__data__.name = value.name
+                        }
+                    }
+                    break
                 default:
-                    value = item.__data__[name];
-                  }
-              let r = {'path':item.__path__,'key':name,'value':value,'context': proxy.$UserPreferences.Context}
-             console.log('cache:',r);
-              proxy.$websocket.sendAsync({_msg:[props.cid,'_cache','cache',guid.value,r]}).then((v) => console.log('cache:',v));
-              }
+                    value = item.__data__[name]
+            }
+            let r = {
+                path: item.__path__,
+                key: name,
+                value: value,
+                context: proxy.$UserPreferences.Context
+            }
+            console.log('cache:', r)
+            proxy.$websocket
+                .sendAsync({
+                    _msg: [props.cid, '_cache', 'cache', guid.value, r]
+                })
+                .then(v => {console.log('cache:', v);on_modify_models(v[0]);})
+        }
 
-        const i18nCommand = (command) =>{
-          //console.log('command-18n:',command)
-          colsLang[command.col] = command.lang
-        };
+         const m2o_cache = (item,name) => {
+              let r = {'path':item.__path__,'model':item.__model__,'key':name,'value':item.__data__[name],'context':{}}
+              //console.log('cache:',r);
+              proxy.$websocket.sendAsync({'_msg':[props.cid,'_cache','m2ofind',guid.value,r]}).then((v) => {console.log('m2ofind:',v)});
+         }
+
+        const i18nCommand = command => {
+            //console.log('command-18n:',command)
+            colsLang[command.col] = command.lang
+        }
         const handleSelectionChange = val => {
             //console.log('selection:', val)
             multipleSelection.splice(0, multipleSelection.length, ...val)
@@ -207,6 +280,8 @@ export default defineComponent({
 
         const handleCurrentChange = val => {
             page.value = val
+            let ctx = Object.assign({}, proxy.$UserPreferences.Context)
+            ctx.cache = guid.value
             proxy.$websocket.send({
                     _msg: [
                         props.cid,
@@ -215,7 +290,7 @@ export default defineComponent({
                         'readforupdate', {
                             fields: fields,
                             ids: multipleSelection[page.value - 1],
-                            context: proxy.$UserPreferences.Context
+                            context: ctx
                         }
                     ]
                 },
@@ -233,15 +308,16 @@ export default defineComponent({
 
         const _get_selections = s => {
             let r = []
-            for (let j = 0; j < s.length; j++) r.push({
-                label: s[j][1],
-                value: s[j][0]
-            })
+            for (let j = 0; j < s.length; j++)
+                r.push({
+                    label: s[j][1],
+                    value: s[j][0]
+                })
             return r
         }
 
         const on_find_new = (value, opts) => {
-            //console.log('on_find_new:', value, opts)
+            console.log('on_find_new:', value, opts)
             if (
                 ['new', 'edit'].indexOf(mode.value) >= 0 &&
                 value.id &&
@@ -252,20 +328,32 @@ export default defineComponent({
                 dataForm.__data__[opts.col] = value
         }
 
+        const on_find_m2m = (value, opts) => {
+            console.log('on_find_m2m:', value, opts)
+            if (
+                ['new', 'edit'].indexOf(mode.value) >= 0 &&
+                value.length > 0
+            )
+                dataForm.__m2m_containers__[opts.col].splice(dataForm.__m2m_containers__[opts.col].length, 0, ...value)
+        }
+
+
         const fieldsBuild = (model, view) => {
             let fcols = []
-            for (let i = 0, columns = props.metas[model].views[view].columns.map((v) => v.col), k = {}; i < columns.length; i++)
+            for (let i = 0, columns = props.metas[model].views[view].columns.map(v => v.col), k = {}; i < columns.length; i++)
                 switch (props.metas[model].meta.columns[columns[i]].type) {
                     case 'one2many':
                         k = {}
                         if (props.metas[model].meta.columns[columns[i]].obj != model)
                             k[columns[i]] = fieldsBuild(props.metas[model].meta.columns[columns[i]].obj, 'form')
-                        else k[columns[i]] = props.metas[model].views.list.columns.map((v) => v.col)
+                        else k[columns[i]] = props.metas[model].views.list.columns.map(v => v.col)
                         fcols.push(k)
                         break
                     case 'many2many':
                         k = {}
-                        k[columns[i]] = props.metas[props.metas[model].meta.columns[columns[i]].obj].views.m2mlist.columns.map((v) => v.col)
+                        k[columns[i]] = props.metas[props.metas[model].meta.columns[columns[i]].obj].views.m2mlist.columns.map(
+                            v => v.col
+                        )
                         fcols.push(k)
                         break
                     default:
@@ -274,18 +362,18 @@ export default defineComponent({
             return fcols
         }
 
-        const do_find = col => {
+        const do_find = (col, mode = 'single') => {
             const rootComponent = defineAsyncComponent({
                 loader: () =>
                     import ('./gp-find.vue'),
                 suspensible: false
             })
-            
+
             const rootProps = {
                 cid: props.cid,
                 model: props.metas[props.model].meta.columns[col].obj,
-                mode: 'single',
-                callback: on_find_new,
+                mode: mode,
+                callback: mode == 'single' ? on_find_new : on_find_m2m,
                 callbackOpts: {
                     col: col,
                     mode: 'find'
@@ -296,7 +384,7 @@ export default defineComponent({
             const rootContainer = document.createElement('div')
             render(vnode, rootContainer, false)
             document.body.appendChild(rootContainer)
-            //console.log('do-search!', col, vnode, proxy)
+                //console.log('do-search!', col, vnode, proxy)
         }
 
         const do_search = event => {
@@ -307,10 +395,10 @@ export default defineComponent({
                         props.model,
                         'search', {
                             cond: event.cond,
-                            context: proxy.$UserPreferences.Context,                            
+                            context: proxy.$UserPreferences.Context,
                             offset: event.offset.value,
                             limit: event.limit.value
-                            }
+                        }
                     ]
                 },
                 on_search
@@ -323,7 +411,7 @@ export default defineComponent({
                 multipleSelection.splice(0, multipleSelection.length, ...msg)
                 showSearch.value = false
                 mode.value = 'edit'
-                let ctx = Object.assign({},proxy.$UserPreferences.Context)
+                let ctx = Object.assign({}, proxy.$UserPreferences.Context)
                 ctx.cache = guid.value
                 proxy.$websocket.send({
                         _msg: [
@@ -358,7 +446,7 @@ export default defineComponent({
                 rootProps.callbackOpts = {
                     col: col,
                     mode: 'new'
-                }        
+                }
             }
 
             const vnode = createVNode(rootComponent, rootProps)
@@ -383,12 +471,16 @@ export default defineComponent({
                 case 'find':
                     showSearch.value = true
                     break
+                case 'm2mfind':
+                    showSearch.value = true
+                    break
+
             }
         }
 
         const do_add = col => {
             do_modal_form(col, null, 'new')
-        }        
+        }
 
         const do_edit = (col, oid) => {
             do_modal_form(col, oid, 'edit')
@@ -399,27 +491,61 @@ export default defineComponent({
         }
 
         const onSubmit = () => {
-            console.log('submit!');
-              
-          ( async () => {
-           if (mode.value == 'new' || mode.value == 'edit') {
-             let msg = await proxy.$websocket.sendAsync({'_msg':[props.cid,'_cache','save',guid.value,{}]});
-             let action = msg[0];
-             console.log('action:', msg)
-             if (action == 'commit') {
-               await proxy.$websocket.sendAsync({'_mag':[props.cid,'_cache','commit',guid.value,{'action':'commit work'}]});
-               if (mode.value == 'new') {
-                 msg = proxy.$websocket.sendAsync({'_msg':[props.cid,'_cache','initialize',guid.value,{'model':props.model,'view':'form'}]});
-                 Object.assign(dataForm, msg[0]);
-               }
-               proxy.$notify({
-                        title: 'Title',
-                        message: h('i', { style: 'color: teal' }, 'Record saved.')
-               });
-             }
-           }
-           })();
-            
+            (async() => {
+                if (mode.value == 'new' || mode.value == 'edit') {
+                    let msg = await proxy.$websocket.sendAsync({
+                        _msg: [props.cid, '_cache', 'save', guid.value, {}]
+                    })
+                    let action = msg[0]
+                    console.log('action:', msg)
+                    if (action == 'commit') {
+                        await proxy.$websocket.sendAsync({
+                            _msg: [
+                                props.cid,
+                                '_cache',
+                                'commit',
+                                guid.value, {
+                                    action: 'commit work'
+                                }
+                            ]
+                        })
+                        if (mode.value == 'new') {
+                            msg = proxy.$websocket.sendAsync({
+                                _msg: [
+                                    props.cid,
+                                    '_cache',
+                                    'initialize',
+                                    guid.value, {
+                                        model: props.model,
+                                        view: 'form'
+                                    }
+                                ]
+                            })
+                            Object.assign(dataForm, msg[0])
+                        }
+                        proxy.$notify({
+                            title: 'Information',
+                            message: h(
+                                'i', {
+                                    style: 'color: teal'
+                                },
+                                'Record saved.'
+                            )
+                        })
+                    } else {
+                        if (action == 'no chache')
+                            proxy.$notify({
+                                title: 'Information',
+                                message: h(
+                                    'i', {
+                                        style: 'color: teal'
+                                    },
+                                    'No cache!'
+                                )
+                            })
+                    }
+                }
+            })()
         }
 
         const onValidate = () => {
@@ -427,112 +553,290 @@ export default defineComponent({
         }
 
         const onCancel = () => {
-            for (
-                let i = 0,
-                    c = Object.keys(props.metas[props.model].views.form.columns),
-                    meta = props.metas[props.model].meta.columns; i < c.length; i++
-            ) {
-                switch (meta[c[i]].type) {
-                    case 'many2one':
-                    case 'related':
-                        dataForm.__data__[c[i]] = {
-                            id: null,
-                            name: null
+            if (mode.value == 'new')
+                proxy.$websocket
+                .sendAsync({
+                    _msg: [
+                        props.cid,
+                        '_cache',
+                        'initialize',
+                        guid.value, {
+                            model: props.model,
+                            view: 'form'
                         }
-                        break
-                    case 'one2many':
-                    case 'many2many':
-                        dataForm.__data__[c[i]] = []
-                        break
-                    case 'selection':
-                        dataForm.__data__[c[i]] = ''
-                        break
-                    case 'boolean':
-                        dataForm.__data__[c[i]] = false
-                        break
-                    default:
-                        dataForm.__data__[c[i]] = ''
-                }
-            }
+                    ]
+                })
+                .then(msg => {
+                    if (msg && msg.length > 0) Object.assign(dataForm, msg[0])
+                    console.log('initialize:', msg)
+                })
+        }
+        const init_metacache = () => {
+            for (let k in meta__cache__) meta__cache__[k] = {}
         }
 
         const on_read = msg => {
             console.log('on_read:', msg)
-            if (msg && msg.length > 0) Object.assign(dataForm, msg[0])
+            if (msg && msg.length > 0) {
+                init_metacache()
+                Object.assign(dataForm, msg[0])
+                dataRow(dataForm)
+            }
         }
 
-        onBeforeMount(() => {            
-            proxy.$websocket.sendAsync({_msg:[props.cid,'_cache','open',{'mode':mode,'context':proxy.$UserPreferences.Context}]}).then((msg) => {
-              if (msg && msg.length > 0) guid.value = msg[0]
-              if (mode.value == 'new') proxy.$websocket.sendAsync({_msg:[props.cid,'_cache','initialize',guid.value,{'model':props.model,'view':'form'}]}).then((msg) => {if (msg && msg.length > 0) Object.assign(dataForm, msg[0]);console.log('initialize:',msg)})
-              
-            })
+        onBeforeMount(async() => {
+            let msg = await proxy.$websocket
+                .sendAsync({
+                    _msg: [
+                        props.cid,
+                        '_cache',
+                        'open', {
+                            mode: mode,
+                            context: proxy.$UserPreferences.Context
+                        }
+                    ]
+                })
+            if (msg && msg.length > 0) guid.value = msg[0]
+            if (mode.value == 'new')
+                msg = await proxy.$websocket
+                .sendAsync({
+                    _msg: [
+                        props.cid,
+                        '_cache',
+                        'initialize',
+                        guid.value, {
+                            model: props.model,
+                            view: 'form'
+                        }
+                    ]
+                })
+            if (msg && msg.length > 0) {
+                init_metacache()
+                Object.assign(dataForm, msg[0])
+                dataRow(dataForm)
+            }
 
             for (
                 let i = 0,
-                    c = props.metas[props.model].views.form.columns.map((v) => v.col),
+                    c = props.metas[props.model].views.form.columns.map(v => v.col),
                     meta = props.metas[props.model].meta.columns; i < c.length; i++
             ) {
                 colsType[c[i]] = meta[c[i]].type
                 colsLabel[c[i]] = meta[c[i]].label
                 if (meta[c[i]].type == 'selection') selOptions[c[i]] = _get_selections(meta[c[i]].selections)
-                if (['char','varchar','composite','decomposite'].indexOf(colsType[c[i]]) >= 0) colsSize[c[i]] = meta[c[i]].size ? meta[c[i]].size: 32767
-                colsTranslate[c[i]] = 'translate' in meta[c[i]] ? meta[c[i]].translate:false
+                if (['char', 'varchar', 'composite', 'decomposite'].indexOf(colsType[c[i]]) >= 0)
+                    colsSize[c[i]] = meta[c[i]].size ? meta[c[i]].size : 32767
+                colsTranslate[c[i]] = 'translate' in meta[c[i]] ? meta[c[i]].translate : false
                 colsLang[c[i]] = proxy.$UserPreferences.lang
                 if (colsType[c[i]] == 'one2many') o2mcols.push(c[i])
                 else cols.push(c[i])
-/*
-                switch (meta[c[i]].type) {
-                    case 'many2one':
-                    case 'related':
-                        dataForm.__data__[c[i]] = {
-                            id: null,
-                            name: null
-                        }
-                        break
-                    case 'one2many':
-                        dataForm.__data__[c[i]] = []
-                        break
-                    case 'many2many':
-                        dataForm.__data__.__m2m_containers__ = {}
-                        dataForm.__data__.__m2m_containers__[c[i]]  = []
-                        break
-
-                    case 'selection':
-                        selOptions[c[i]] = _get_selections(meta[c[i]].selections)
-                        dataForm.__data__[c[i]] = ''
-                        break
-                    case 'boolean':
-                        dataForm.__data__[c[i]] = false
-                        break
-                    default:
-                        dataForm.__data__[c[i]] = ''
-                }
-            */
             }
-            
+
             //console.log('translate:',colsTranslate,colsType)
             fields.splice(0, fields.length, ...fieldsBuild(props.model, 'form'))
             if (mode.value !== 'new')
                 proxy.$websocket.send({
-                        _msg: [props.cid, 'models', props.model, 'select', {
-                            fields: fields,
-                            context: proxy.$UserPreferences.Context,
-                            limit: 1
-                        }]
+                        _msg: [
+                            props.cid,
+                            'models',
+                            props.model,
+                            'select', {
+                                fields: fields,
+                                context: proxy.$UserPreferences.Context,
+                                limit: 1
+                            }
+                        ]
                     },
                     on_read
                 )
                 //console.log('fields:',fields);
         })
 
+const on_modify_models = (values) =>{
+    function _update(diffs){
+        if ( '__update__' in diffs) 
+            for(let k in diffs.__update__) 
+                for(let v in diffs.__update__[k]) {
+                    if (k in meta__cache__.__data__) meta__cache__.__data__[k][v] = diffs.__update__[k][v];
+                    if (k == dataForm.__path__) dataForm.__data__[v] = diffs.__update__[k][v];
+                }
+                
+        }
+
+    function _insert(diffs){
+        if ( '__insert__' in diffs) 
+            for(let k in diffs.__insert__) 
+                for(let v in diffs.__insert__[k]) {
+                    if (k in meta__cache__.__data__) meta__cache__.__data__[k][v] = diffs.__insert__[k][v];
+                    if (k == dataForm.__path__) dataForm.__data__[v] = diffs.__insert__[k][v];
+                    }
+
+        }
+
+    function _delete(diffs){
+        if ( '__delete__' in diffs) 
+            for(let k in diffs.__delete__) 
+                for(let v in diffs.__insert__[k]) {
+                    if (k in meta__cache__.__data__) delete meta__cache__.__data__[k][v];
+                    if (k == self.item.__path__) delete self.item.__data__[v];
+                    }
+
+        }
+
+    function _meta_update(diffs){
+        if ( '__meta_update__' in diffs) 
+            for(let k in diffs.__meta_update__) 
+                for(let a in diffs.__meta_update__[k])
+                    for(let c in diffs.__meta_update__[k][a])
+                        meta__cache__.__meta__[k][a][c] = diffs.__meta_update__[k][a][c];
+        }
+
+    function _m2m_remove(diffs){
+        let row,c,idx;
+        if ('__m2m_remove__' in diffs) 
+        for(let i = 0; i < diffs.__m2m_remove__.length;i++) {
+            row = diffs.__m2m_remove__[i];
+            c = meta__cache__.__containers__[row.__container__];
+            idx = -1;
+            for(let j = 0; j < c.length;j++) if (c[j].__path__ == row.__path__) idx = j;
+                if (idx >= 0) {
+                    meta__cache__.__containers__[row.__container__].splice(idx,1); 
+                    delete meta__cache__.__data__[row.__path__];
+                }
+
+        }   
+        }     
+
+    function _m2m_recursive_remove(rows){
+        //let row,c,idx;
+        for(let i = 0,row,c,idx; i < rows.length;i++) {
+            row = rows[i];
+            c = meta__cache__.__containers__[row.__container__];
+            idx = -1;
+            for(let j = 0; j < c.length;j++) if (c[j].__path__ == row.__path__) idx = j;
+                if (idx >= 0) {
+                    meta__cache__.__containers__[row.__container__].splice(idx,1); 
+                    delete meta__cache__.__data__[row.__path__];
+                }
+
+        }   
+        }     
+
+
+    function _o2m_remove(diffs){
+        //let row,c,idx;
+        if ('__o2m_remove__' in diffs) 
+        for(let i = 0,row,c,idx; i < diffs.__o2m_remove__.length;i++) {
+            row = diffs.__o2m_remove__[i];
+            c = meta__cache__.__containers__[row.__container__];
+            idx = -1;
+            for(let j = 0; j < c.length;j++) if (c[j].__path__ == row.__path__) idx = j;
+                if (idx >= 0) {
+                    meta__cache__.__containers__[row.__container__].splice(idx,1); 
+                    delete meta__cache__.__data__[row.__path__];
+                    delete meta__cache__.__data__[row.__path__];
+                }
+            if ('__m2m_containers__' in row) for(let k in row.__m2m_containers__) _m2m_recursive_remove(self,row.__m2m_containers__[k]);
+            if ('__o2m_containers__' in row) for(let k in row.__o2m_containers__) _o2m_recursive_remove(self,row.__o2m_containers__[k]);
+
+        }
+    
+        }     
+
+    function _o2m_recursive_remove(rows){
+        //let row,c,idx;
+        for(let i = 0,row,c,idx; i < rows.length;i++) {
+            row = rows[i];
+            c = meta__cache__.__containers__[row.__container__];
+            idx = -1;
+            for(let j = 0; j < c.length;j++) if (c[j].__path__ == row.__path__) idx = j;
+                if (idx >= 0) {
+                    meta__cache__.__containers__[row.__container__].splice(idx,1); 
+                    delete meta__cache__.__data__[row.__path__];
+                    delete meta__cache__.__meta__[row.__path__];
+                }
+                if ('__m2m_containers__' in row) for(let k in row.__m2m_containers__) _m2m_recursive_remove(self,row.__m2m_containers__[k]);
+                if ('__o2m_containers__' in row) for(let k in row.__o2m_containers__) _o2m_recursive_remove(self,row.__o2m_containers__[k]);
+        }
+    
+        }     
+
+
+    function _m2m_append(diffs){
+        if ('__m2m_append__' in diffs)
+            for(let i = 0,row; i < diffs.__m2m_append__.length;i++) {
+                row = diffs.__m2m_append__[i];
+                if (!(row.__container__ in meta__cache__.__containers__)) meta__cache__.__containers__[row.__container__]  = [];
+                meta__cache__.__containers__[row.__container__].push(row);
+        }
+    
+        }     
+
+    function _o2m_append(diffs){
+        if ('__o2m_append__' in diffs)
+            for(let i = 0,row; i < diffs.__o2m_append__.length;i++) {
+                row = diffs.__o2m_append__[i];
+                meta__cache__.__containers__[row.__container__].push(row);
+                dataRow(row);
+        }
+    
+        }     
+
+
+    function _apply_diffs(diffs){
+        _m2m_remove(diffs);
+        _o2m_remove(diffs)
+        _m2m_append(diffs);
+        _o2m_append(diffs)
+        _update(diffs);
+        _insert(diffs);
+        _delete(diffs);
+        _meta_update(diffs);
+        }
+
+
+    console.log('on_modify_models:',values);
+
+      if ( '__data__' in values){
+        let data = values.__data__;
+        _apply_diffs(data);
+      }
+          if ('__m2o_find__' in values) {
+              let __m2o_find__ = values.__m2o_find__
+            if (__m2o_find__.v.length == 1) {
+                meta__cache__.__data__[__m2o_find__.path][__m2o_find__.key]['id'] = __m2o_find__.v[0].id
+                meta__cache__.__data__[__m2o_find__.path][__m2o_find__.key]['name']= __m2o_find__.v[0].name
+                }
+            else{
+                //on_find_many2one_update(this,meta__cache__.__data__[__m2o_find__.path],__m2o_find__.key,__m2o_find__.v);
+                return;                 
+                }
+            }
+
+          if ('__related_find__' in values) {
+              let __related_find__ = values.__related_find__;
+            if (__related_find__.v.length == 1) {
+                meta__cache__.__data__[__related_find__.path][__related_find__.key]['id'] = __related_find__.v[0].id
+                meta__cache__.__data__[__related_find__.path][__related_find__.key]['name']= __related_find__.v[0].name
+                }
+            else{
+                //on_find_related_update(this,meta__cache__.__data__[__related_find__.path],__related_find__.key,__related_find__.v);
+                return;                 
+                }
+            }
+      }
+
+
+
         return {
+            meta__cache__,
             mode,
             guid,
             readonly,
             required,
             visible,
             colsSize,
+            addRow,
             cache,
             i18nCommand,
             isCompute,
@@ -563,7 +867,9 @@ export default defineComponent({
             do_edit,
             do_lookup,
             on_find_new,
-            on_read
+            on_read,
+            m2o_cache,
+            on_modify_models
         }
     }
 })
