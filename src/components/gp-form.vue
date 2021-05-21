@@ -557,6 +557,7 @@ export default defineComponent({
             if (mode === 'new') {
                 rootProps.callback = on_find_new
                 rootProps.callbackOpts = {
+                    item: dataForm,
                     col: col,
                     mode: 'new'
                 }
@@ -609,7 +610,7 @@ export default defineComponent({
                     let msg = await proxy.$websocket.sendAsync({
                         _msg: [props.cid, '_cache', 'save', guid.value, {}]
                     })
-                    let action = msg[0]
+                    let action = msg[0], oid = msg[1];
                     console.log('action:', msg)
                     if (action == 'commit') {
                         await proxy.$websocket.sendAsync({
@@ -622,7 +623,15 @@ export default defineComponent({
                                 }
                             ]
                         })
+                        dataForm.__data__.id = oid;
                         if (mode.value == 'new') {
+            if ('callback' in props.modal && props.modal.callback != null && 'callbackOpts' in props.modal && props.modal.callbackOpts != null && props.modal.callbackOpts.mode == 'new')
+                props.modal.callback({
+                    id: dataForm.__data__.id,
+                    name: dataForm.__data__[props.metas[props.model].meta.names.rec_name]
+                }, props.modal.callbackOpts)
+                proxy.$emit('update:close');
+                            } else {
                             msg = proxy.$websocket.sendAsync({
                                 _msg: [
                                     props.cid,
@@ -708,7 +717,7 @@ export default defineComponent({
                         props.cid,
                         '_cache',
                         'open', {
-                            mode: mode,
+                            mode: mode.value,
                             context: proxy.$UserPreferences.Context
                         }
                     ]
@@ -752,7 +761,9 @@ export default defineComponent({
             //console.log('translate:',colsTranslate,colsType)
             fields.splice(0, fields.length, ...fieldsBuild(props.model, 'form'))
             if (mode.value !== 'new' && 'oid' in props.modal){
-				multipleSelection.splice(0,multipleSelection.length, ...props.modal.oid)
+				if (Array.isArray(props.modal.oid)) multipleSelection.splice(0,multipleSelection.length, ...props.modal.oid)
+				else multipleSelection.splice(0,multipleSelection.length, props.modal.oid)
+                console.log('multipleSelection:',multipleSelection)
                 let ctx = Object.assign({}, proxy.$UserPreferences.Context)
                 ctx.cache = guid.value                
                 proxy.$websocket.send({

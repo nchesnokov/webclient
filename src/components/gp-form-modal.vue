@@ -57,7 +57,7 @@ export default defineComponent({
         } = getCurrentInstance()
         const showDialog = ref(true)
         const metas = reactive({})
-        const title = ref('')
+        const title = ref('Modal Form')
 
         onBeforeMount(() => {
             console.log('props:',props)
