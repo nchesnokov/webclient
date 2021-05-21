@@ -8,7 +8,7 @@
 
 <el-dialog :title="'Find:'+model" v-model="showDialog" width="60%">
     <template v-if="Object.keys(metas).length > 0">
-        <gp-selectable v-if="showSearch" :cid="cid" :columns="metas[model].meta.columns" :names="metas[model].meta.names" @update:search="do_search" @update:search-cancel="showSearch = false" :extcond="extcond"></gp-selectable>
+        <gp-selectable v-if="showSearch || callbackOpts.mode == 'find'" :cid="cid" :columns="metas[model].meta.columns" :names="metas[model].meta.names" @update:search="do_search" @update:search-cancel="showSearch = false" :extcond="extcond"></gp-selectable>
         <el-row>{{ metas[model].meta.description }}</el-row>
         <el-row v-if="!showSearch">
             <el-button type="primary" @click="do_select">Search</el-button>
@@ -34,7 +34,7 @@
             <el-button type="danger" @click="onCancel">Cancel</el-button>
             <el-button v-if="mode == 'single' && currentRow != null || multipleSelection.length > 0" type="primary" @click="onSelect">Select</el-button>
         </el-row>
-        <el-pagination v-if="tableData.length > pageSize" background layout="prev, pager, next" @current-change="handleCurrentChange" :page-size="pageSize" :total="tableData.length">
+        <el-pagination v-if="tableData.length > pageSize" background layout="prev, pager, next" @current-change="handleCurrentPageChange" :page-size="pageSize" :total="tableData.length">
         </el-pagination>
 
     </template>
@@ -64,7 +64,7 @@ export default defineComponent({
             type: String,
             default: 'single',
             validator: function(value) {
-                return ['single', 'multiple'].indexOf(value) !== -1
+                return ['single', 'multiple'].indexOf(value) >= 0
             }
         },
         callback: {
@@ -102,7 +102,7 @@ export default defineComponent({
         }
         const onSelect = () => {
             console.log('onSelect:')
-            if (props.callbackOpts.mode == 'find' && props.callback != null) {
+            if (['find','autofind'].indexOf(props.callbackOpts.mode) >= 0 && props.callback != null) {
                 if (props.mode == 'single')
                     props.callback({
                             id: currentRow.value.id,
@@ -130,7 +130,10 @@ export default defineComponent({
 
         const handleCurrentChange = val => {
             if (props.mode == 'single') currentRow.value = val
-            else page.value = val
+        }
+
+        const handleCurrentPageChange = val => {
+            page.value = val
         }
 
         const getProp = col => {
@@ -142,6 +145,8 @@ export default defineComponent({
         }
         const do_search = event => {
             console.log('select data:', event)
+            if (props.extcond.length > 0)
+                for (let i = 0; i < props.extcond.length; i++) event.cond.push(props.extcond[i]);
             proxy.$websocket.send({
                     _msg: [
                         props.cid,
@@ -183,6 +188,7 @@ export default defineComponent({
                 if (colsType[c[i]] == 'one2many') o2mcols.push(c[i])
                 else cols.push(c[i])
             }
+            if (props.callbackOpts.mode == 'autofind') do_search({'cond':[],'offset':0,'limit':80})
         }
 
         onMounted(() => {
@@ -211,6 +217,7 @@ export default defineComponent({
             multipleSelection,
             handleSelectionChange,
             handleCurrentChange,
+            handleCurrentPageChange,
             getProp,
             onCancel,
             onSelect,

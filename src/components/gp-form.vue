@@ -33,7 +33,15 @@
     </el-pagination>
     <el-form v-if="'__data__' in dataForm && Object.keys(dataForm.__data__).length > 0" :model="dataForm.__data__" label-width="auto">
         <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
-            <el-input v-model="dataForm.__data__[col].name" v-if="['many2one','related'].indexOf(colsType[col]) >= 0" @change="m2o_cache(dataForm,col)" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
+            <el-input v-model="dataForm.__data__[col].name" v-if="colsType[col] == 'many2one'" @change="m2o_cache(dataForm,col)" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
+                <template #suffix>
+                    <el-button type="primary" size="mini" icon="el-icon-search" @click="do_find(col,'single',[],{'item':dataForm})"></el-button>
+                    <el-button type="primary" size="mini" icon="el-icon-document-add" @click="do_add(col)"></el-button>
+                    <el-button v-if="dataForm.__data__[col].id != null" type="primary" size="mini" icon="el-icon-edit" @click="do_edit(col,dataForm.__data__[col].id)"></el-button>
+                    <el-button v-if="dataForm.__data__[col].id != null" type="primary" size="mini" icon="el-icon-view" @click="do_lookup(col,dataForm.__data__[col].id)"></el-button>
+                </template>
+            </el-input>
+            <el-input v-model="dataForm.__data__[col].name" v-if="colsType[col] == 'related'" @change="related_cache(dataForm,col,metas[model].meta.columns[field].relatedy)" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
                 <template #suffix>
                     <el-button type="primary" size="mini" icon="el-icon-search" @click="do_find(col)"></el-button>
                     <el-button type="primary" size="mini" icon="el-icon-document-add" @click="do_add(col)"></el-button>
@@ -63,7 +71,7 @@
             <el-input v-model="dataForm.__data__[col]" autosize type="textarea" v-else-if="['text','xml'].indexOf(colsType[col]) >= 0" @change="cache(dataForm,col)" :readonly="readonly(col)">
             </el-input>
             <el-date-picker v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'date'" @change="cache(dataForm,col)" :readonly="readonly(col)"></el-date-picker>
-            <el-time-picker v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'time'" @change="cache(dataForm,col)" :readonly="readonly(col)"></el-time-picker>
+				<el-time-picker v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'time'" @change="cache(dataForm,col)" :readonly="readonly(col)"></el-time-picker>
             <el-date-picker v-model="dataForm.__data__[col]" type="datetime" v-else-if="colsType[col] == 'datetime'" @change="cache(dataForm,col)" :readonly="readonly(col)"></el-date-picker>
             <el-select v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'selection'" @change="cache(dataForm,col)" :disabled="readonly(col)">
                 <el-option v-for="item in selOptions[col]" :key="item.value" :label="item.label" :value="item.value">
@@ -84,13 +92,19 @@
     </el-form>
 </slot>
 <slot name="footer">
-    <el-popconfirm confirmButtonText='OK' cancelButtonText='No, Thanks' icon="el-icon-info" iconColor="red" title="Are you sure to cancel?" @confirm="onCancel">
+    <el-popconfirm v-if="mode == 'new'" confirmButtonText='OK' cancelButtonText='No, Thanks' icon="el-icon-info" iconColor="red" title="Are you sure to cancel?" @confirm="onCancel">
         <template #reference>
             <el-button type="danger">Cancel</el-button>
         </template>
     </el-popconfirm>
-    <el-button type="success" @click="onValidate">Validate</el-button>
-    <el-button type="primary" @click="onSubmit">Save</el-button>
+    <el-popconfirm v-if="Object.keys(modal).length > 0" confirmButtonText='OK' cancelButtonText='No, Thanks' icon="el-icon-info" iconColor="red" title="Are you sure to close?" @confirm="onClose">
+        <template #reference>
+            <el-button type="danger">Close</el-button>
+        </template>
+    </el-popconfirm>
+
+    <el-button type="success" @click="onValidate" :disabled="mode == 'lookup'">Validate</el-button>
+    <el-button type="primary" @click="onSubmit" :disabled="mode == 'lookup'">Save</el-button>
 </slot>
 
 </template>
@@ -114,7 +128,28 @@ from 'vue'
 
 export default defineComponent({
     name: 'gp-form',
-    props: ['cid', 'metas', 'model'],
+    emits: ['update:close'],
+    props: {
+        cid: {
+            type: String,
+            required: true
+        },
+         metas: {
+            type: Object
+        },
+        model: {
+            type: String,
+            required: true
+        },
+        modal: {
+            type: Object,
+            default: function(){
+              return {}
+            }
+        }
+        
+    },
+    //props: ['cid', 'metas', 'model', 'modal'],
     setup(props) {
         const {
             proxy
@@ -260,14 +295,89 @@ export default defineComponent({
                 .sendAsync({
                     _msg: [props.cid, '_cache', 'cache', guid.value, r]
                 })
-                .then(v => {console.log('cache:', v);on_modify_models(v[0]);})
+                .then(v => {
+                    console.log('cache:', v);
+                    on_modify_models(v[0]);
+                })
         }
 
-         const m2o_cache = (item,name) => {
-              let r = {'path':item.__path__,'model':item.__model__,'key':name,'value':item.__data__[name],'context':{}}
-              //console.log('cache:',r);
-              proxy.$websocket.sendAsync({'_msg':[props.cid,'_cache','m2ofind',guid.value,r]}).then((v) => {console.log('m2ofind:',v)});
-         }
+        const m2o_cache = (item, name) => {
+            let r = {
+                    'path': item.__path__,
+                    'model': item.__model__,
+                    'key': name,
+                    'value': item.__data__[name],
+                    'context': proxy.$UserPreferences.Context
+                }
+                //console.log('cache:',r);
+            proxy.$websocket.sendAsync({
+                '_msg': [props.cid, '_cache', 'm2ofind', guid.value, r]
+            }).then((v) => {
+                console.log('m2ofind:', v);
+                let f = v[0];
+                if (f.__m2o_find__.__data__.v.length == 1) {
+                    dataForm.__data__[name] = f.__m2o_find__.__data__.v[0];
+                    cache(item, name);
+                } else {
+                    let extcond = [];
+                    if ('domain' in props.metas[props.model].meta.columns[name] && props.metas[props.model].meta.columns[name].domain != null)
+                        for (let i = 0, d = props.metas[props.model].meta.columns[name].domain; i < d.length; i++) extcond.push({
+                            '__tuple__': d[i]
+                        });
+                    if (f.__m2o_find__.__data__.v.length > 1) extcond.push({
+                        '__tuple__': ['id', 'in', f.__m2o_find__.__data__.v]
+                    })
+                    do_find(name, 'single', extcond, {
+                        'item': item,
+                        'mode': 'autofind'
+                    })
+                }
+            });
+        }
+
+        const related_cache = (item, name, relatedy) => {
+            let r = {
+                    'path': item.__path__,
+                    'model': item.__model__,
+                    'key': name,
+                    'value': item.__data__[name],
+                    'relatedy': relatedy,
+                    'context': proxy.$UserPreferences.Context
+                }
+                //console.log('cache-related:',r);
+            proxy.$websocket.sendAsync({
+                '_msg': [props.cid, '_cache', 'relatedfind', guid.value, r]
+            }).then((v) => {
+                console.log('relatedfind:', v);
+                let f = v[0];
+                if (f.__related_find__.__data__.v.length == 1) {
+                    dataForm.__data__[name] = f.__related_find__.__data__.v[0];
+                    cache(item, name);
+                } else {
+                    let extcond = [];
+                    if ('domain' in props.metas[props.model].meta.columns[name] && props.metas[props.model].meta.columns[name].domain != null)
+                        for (let i = 0, d = props.metas[props.model].meta.columns[name].domain; i < d.length; i++) extcond.push({
+                            '__tuple__': d[i]
+                        });
+                    if ('relatedy' in props.metas[props.model].meta.columns[name] && props.metas[props.model].meta.columns[name].relatedy != null)
+                        for (let i = 0, relatedy, relatedyd; i < props.metas[props.model].meta.columns[name].relatedy.length; i++) {
+                            relatedy = props.metas[props.model].meta.columns[name].relatedy[i].__tuple__[0];
+                            relatedyd = props.metas[props.model].meta.columns[name].relatedy[i].__tuple__[1];
+                            if (item.__data__[relatedy] != null && item.__data__[relatedy].name != null && item.__data__[relatedy].name.length > 0) extcond.push({
+                                __tuple__: [relatedyd, '=', item.__data__[relatedy].name]
+                            });
+
+                            if (f.__relatedy_find__.__data__.v.length > 1) extcond.push({
+                                '__tuple__': ['id', 'in', f.__related_find__.__data__.v]
+                            })
+                            do_find(name, 'single', extcond, {
+                                'item': item,
+                                'mode': 'autofind'
+                            })
+                        }
+                }
+            });
+        }
 
         const i18nCommand = command => {
             //console.log('command-18n:',command)
@@ -325,7 +435,8 @@ export default defineComponent({
                 value.name &&
                 value.name.length > 0
             )
-                dataForm.__data__[opts.col] = value
+                Object.assign(dataForm.__data__[opts.col], value)
+            cache(opts.item, opts.col);
         }
 
         const on_find_m2m = (value, opts) => {
@@ -362,7 +473,7 @@ export default defineComponent({
             return fcols
         }
 
-        const do_find = (col, mode = 'single') => {
+        const do_find = (col, mode = 'single', extcond = [], callbackopts = {}) => {
             const rootComponent = defineAsyncComponent({
                 loader: () =>
                     import ('./gp-find.vue'),
@@ -374,9 +485,11 @@ export default defineComponent({
                 model: props.metas[props.model].meta.columns[col].obj,
                 mode: mode,
                 callback: mode == 'single' ? on_find_new : on_find_m2m,
+                extcond: extcond,
                 callbackOpts: {
+                    ...callbackopts,
                     col: col,
-                    mode: 'find'
+                        mode: 'mode' in callbackopts ? callbackopts.mode :'find'
                 }
             }
             const vnode = createVNode(rootComponent, rootProps)
@@ -552,6 +665,9 @@ export default defineComponent({
             //console.log('validate')
         }
 
+        const onClose = () => {
+           proxy.$emit('update:close');
+        }
         const onCancel = () => {
             if (mode.value == 'new')
                 proxy.$websocket
@@ -585,6 +701,7 @@ export default defineComponent({
         }
 
         onBeforeMount(async() => {
+            if ('mode' in props.modal) mode.value = props.modal.mode;
             let msg = await proxy.$websocket
                 .sendAsync({
                     _msg: [
@@ -634,197 +751,207 @@ export default defineComponent({
 
             //console.log('translate:',colsTranslate,colsType)
             fields.splice(0, fields.length, ...fieldsBuild(props.model, 'form'))
-            if (mode.value !== 'new')
+            if (mode.value !== 'new' && 'oid' in props.modal){
+				multipleSelection.splice(0,multipleSelection.length, ...props.modal.oid)
+                let ctx = Object.assign({}, proxy.$UserPreferences.Context)
+                ctx.cache = guid.value                
                 proxy.$websocket.send({
                         _msg: [
                             props.cid,
                             'models',
                             props.model,
-                            'select', {
+                            'readforupdate', {
+                                ids: props.modal.oid,
                                 fields: fields,
-                                context: proxy.$UserPreferences.Context,
-                                limit: 1
+                                context: ctx
                             }
                         ]
                     },
                     on_read
                 )
+                }
                 //console.log('fields:',fields);
         })
 
-const on_modify_models = (values) =>{
-    function _update(diffs){
-        if ( '__update__' in diffs) 
-            for(let k in diffs.__update__) 
-                for(let v in diffs.__update__[k]) {
-                    if (k in meta__cache__.__data__) meta__cache__.__data__[k][v] = diffs.__update__[k][v];
-                    if (k == dataForm.__path__) dataForm.__data__[v] = diffs.__update__[k][v];
-                }
-                
-        }
+        const on_modify_models = (values) => {
+            function _update(diffs) {
+                if ('__update__' in diffs)
+                    for (let k in diffs.__update__)
+                        for (let v in diffs.__update__[k]) {
+                            if (k in meta__cache__.__data__) meta__cache__.__data__[k][v] = diffs.__update__[k][v];
+                            if (k == dataForm.__path__) dataForm.__data__[v] = diffs.__update__[k][v];
+                        }
 
-    function _insert(diffs){
-        if ( '__insert__' in diffs) 
-            for(let k in diffs.__insert__) 
-                for(let v in diffs.__insert__[k]) {
-                    if (k in meta__cache__.__data__) meta__cache__.__data__[k][v] = diffs.__insert__[k][v];
-                    if (k == dataForm.__path__) dataForm.__data__[v] = diffs.__insert__[k][v];
+            }
+
+            function _insert(diffs) {
+                if ('__insert__' in diffs)
+                    for (let k in diffs.__insert__)
+                        for (let v in diffs.__insert__[k]) {
+                            if (k in meta__cache__.__data__) meta__cache__.__data__[k][v] = diffs.__insert__[k][v];
+                            if (k == dataForm.__path__) dataForm.__data__[v] = diffs.__insert__[k][v];
+                        }
+
+            }
+
+            function _delete(diffs) {
+                if ('__delete__' in diffs)
+                    for (let k in diffs.__delete__)
+                        for (let v in diffs.__insert__[k]) {
+                            if (k in meta__cache__.__data__) delete meta__cache__.__data__[k][v];
+                            if (k == self.item.__path__) delete self.item.__data__[v];
+                        }
+
+            }
+
+            function _meta_update(diffs) {
+                if ('__meta_update__' in diffs)
+                    for (let k in diffs.__meta_update__)
+                        for (let a in diffs.__meta_update__[k])
+                            for (let c in diffs.__meta_update__[k][a])
+                                meta__cache__.__meta__[k][a][c] = diffs.__meta_update__[k][a][c];
+            }
+
+            function _m2m_remove(diffs) {
+                let row, c, idx;
+                if ('__m2m_remove__' in diffs)
+                    for (let i = 0; i < diffs.__m2m_remove__.length; i++) {
+                        row = diffs.__m2m_remove__[i];
+                        c = meta__cache__.__containers__[row.__container__];
+                        idx = -1;
+                        for (let j = 0; j < c.length; j++)
+                            if (c[j].__path__ == row.__path__) idx = j;
+                        if (idx >= 0) {
+                            meta__cache__.__containers__[row.__container__].splice(idx, 1);
+                            delete meta__cache__.__data__[row.__path__];
+                        }
+
+                    }
+            }
+
+            function _m2m_recursive_remove(rows) {
+                //let row,c,idx;
+                for (let i = 0, row, c, idx; i < rows.length; i++) {
+                    row = rows[i];
+                    c = meta__cache__.__containers__[row.__container__];
+                    idx = -1;
+                    for (let j = 0; j < c.length; j++)
+                        if (c[j].__path__ == row.__path__) idx = j;
+                    if (idx >= 0) {
+                        meta__cache__.__containers__[row.__container__].splice(idx, 1);
+                        delete meta__cache__.__data__[row.__path__];
                     }
 
-        }
-
-    function _delete(diffs){
-        if ( '__delete__' in diffs) 
-            for(let k in diffs.__delete__) 
-                for(let v in diffs.__insert__[k]) {
-                    if (k in meta__cache__.__data__) delete meta__cache__.__data__[k][v];
-                    if (k == self.item.__path__) delete self.item.__data__[v];
-                    }
-
-        }
-
-    function _meta_update(diffs){
-        if ( '__meta_update__' in diffs) 
-            for(let k in diffs.__meta_update__) 
-                for(let a in diffs.__meta_update__[k])
-                    for(let c in diffs.__meta_update__[k][a])
-                        meta__cache__.__meta__[k][a][c] = diffs.__meta_update__[k][a][c];
-        }
-
-    function _m2m_remove(diffs){
-        let row,c,idx;
-        if ('__m2m_remove__' in diffs) 
-        for(let i = 0; i < diffs.__m2m_remove__.length;i++) {
-            row = diffs.__m2m_remove__[i];
-            c = meta__cache__.__containers__[row.__container__];
-            idx = -1;
-            for(let j = 0; j < c.length;j++) if (c[j].__path__ == row.__path__) idx = j;
-                if (idx >= 0) {
-                    meta__cache__.__containers__[row.__container__].splice(idx,1); 
-                    delete meta__cache__.__data__[row.__path__];
-                }
-
-        }   
-        }     
-
-    function _m2m_recursive_remove(rows){
-        //let row,c,idx;
-        for(let i = 0,row,c,idx; i < rows.length;i++) {
-            row = rows[i];
-            c = meta__cache__.__containers__[row.__container__];
-            idx = -1;
-            for(let j = 0; j < c.length;j++) if (c[j].__path__ == row.__path__) idx = j;
-                if (idx >= 0) {
-                    meta__cache__.__containers__[row.__container__].splice(idx,1); 
-                    delete meta__cache__.__data__[row.__path__];
-                }
-
-        }   
-        }     
-
-
-    function _o2m_remove(diffs){
-        //let row,c,idx;
-        if ('__o2m_remove__' in diffs) 
-        for(let i = 0,row,c,idx; i < diffs.__o2m_remove__.length;i++) {
-            row = diffs.__o2m_remove__[i];
-            c = meta__cache__.__containers__[row.__container__];
-            idx = -1;
-            for(let j = 0; j < c.length;j++) if (c[j].__path__ == row.__path__) idx = j;
-                if (idx >= 0) {
-                    meta__cache__.__containers__[row.__container__].splice(idx,1); 
-                    delete meta__cache__.__data__[row.__path__];
-                    delete meta__cache__.__data__[row.__path__];
-                }
-            if ('__m2m_containers__' in row) for(let k in row.__m2m_containers__) _m2m_recursive_remove(self,row.__m2m_containers__[k]);
-            if ('__o2m_containers__' in row) for(let k in row.__o2m_containers__) _o2m_recursive_remove(self,row.__o2m_containers__[k]);
-
-        }
-    
-        }     
-
-    function _o2m_recursive_remove(rows){
-        //let row,c,idx;
-        for(let i = 0,row,c,idx; i < rows.length;i++) {
-            row = rows[i];
-            c = meta__cache__.__containers__[row.__container__];
-            idx = -1;
-            for(let j = 0; j < c.length;j++) if (c[j].__path__ == row.__path__) idx = j;
-                if (idx >= 0) {
-                    meta__cache__.__containers__[row.__container__].splice(idx,1); 
-                    delete meta__cache__.__data__[row.__path__];
-                    delete meta__cache__.__meta__[row.__path__];
-                }
-                if ('__m2m_containers__' in row) for(let k in row.__m2m_containers__) _m2m_recursive_remove(self,row.__m2m_containers__[k]);
-                if ('__o2m_containers__' in row) for(let k in row.__o2m_containers__) _o2m_recursive_remove(self,row.__o2m_containers__[k]);
-        }
-    
-        }     
-
-
-    function _m2m_append(diffs){
-        if ('__m2m_append__' in diffs)
-            for(let i = 0,row; i < diffs.__m2m_append__.length;i++) {
-                row = diffs.__m2m_append__[i];
-                if (!(row.__container__ in meta__cache__.__containers__)) meta__cache__.__containers__[row.__container__]  = [];
-                meta__cache__.__containers__[row.__container__].push(row);
-        }
-    
-        }     
-
-    function _o2m_append(diffs){
-        if ('__o2m_append__' in diffs)
-            for(let i = 0,row; i < diffs.__o2m_append__.length;i++) {
-                row = diffs.__o2m_append__[i];
-                meta__cache__.__containers__[row.__container__].push(row);
-                dataRow(row);
-        }
-    
-        }     
-
-
-    function _apply_diffs(diffs){
-        _m2m_remove(diffs);
-        _o2m_remove(diffs)
-        _m2m_append(diffs);
-        _o2m_append(diffs)
-        _update(diffs);
-        _insert(diffs);
-        _delete(diffs);
-        _meta_update(diffs);
-        }
-
-
-    console.log('on_modify_models:',values);
-
-      if ( '__data__' in values){
-        let data = values.__data__;
-        _apply_diffs(data);
-      }
-          if ('__m2o_find__' in values) {
-              let __m2o_find__ = values.__m2o_find__
-            if (__m2o_find__.v.length == 1) {
-                meta__cache__.__data__[__m2o_find__.path][__m2o_find__.key]['id'] = __m2o_find__.v[0].id
-                meta__cache__.__data__[__m2o_find__.path][__m2o_find__.key]['name']= __m2o_find__.v[0].name
-                }
-            else{
-                //on_find_many2one_update(this,meta__cache__.__data__[__m2o_find__.path],__m2o_find__.key,__m2o_find__.v);
-                return;                 
                 }
             }
 
-          if ('__related_find__' in values) {
-              let __related_find__ = values.__related_find__;
-            if (__related_find__.v.length == 1) {
-                meta__cache__.__data__[__related_find__.path][__related_find__.key]['id'] = __related_find__.v[0].id
-                meta__cache__.__data__[__related_find__.path][__related_find__.key]['name']= __related_find__.v[0].name
+
+            function _o2m_remove(diffs) {
+                //let row,c,idx;
+                if ('__o2m_remove__' in diffs)
+                    for (let i = 0, row, c, idx; i < diffs.__o2m_remove__.length; i++) {
+                        row = diffs.__o2m_remove__[i];
+                        c = meta__cache__.__containers__[row.__container__];
+                        idx = -1;
+                        for (let j = 0; j < c.length; j++)
+                            if (c[j].__path__ == row.__path__) idx = j;
+                        if (idx >= 0) {
+                            meta__cache__.__containers__[row.__container__].splice(idx, 1);
+                            delete meta__cache__.__data__[row.__path__];
+                            delete meta__cache__.__data__[row.__path__];
+                        }
+                        if ('__m2m_containers__' in row)
+                            for (let k in row.__m2m_containers__) _m2m_recursive_remove(self, row.__m2m_containers__[k]);
+                        if ('__o2m_containers__' in row)
+                            for (let k in row.__o2m_containers__) _o2m_recursive_remove(self, row.__o2m_containers__[k]);
+
+                    }
+
+            }
+
+            function _o2m_recursive_remove(rows) {
+                //let row,c,idx;
+                for (let i = 0, row, c, idx; i < rows.length; i++) {
+                    row = rows[i];
+                    c = meta__cache__.__containers__[row.__container__];
+                    idx = -1;
+                    for (let j = 0; j < c.length; j++)
+                        if (c[j].__path__ == row.__path__) idx = j;
+                    if (idx >= 0) {
+                        meta__cache__.__containers__[row.__container__].splice(idx, 1);
+                        delete meta__cache__.__data__[row.__path__];
+                        delete meta__cache__.__meta__[row.__path__];
+                    }
+                    if ('__m2m_containers__' in row)
+                        for (let k in row.__m2m_containers__) _m2m_recursive_remove(self, row.__m2m_containers__[k]);
+                    if ('__o2m_containers__' in row)
+                        for (let k in row.__o2m_containers__) _o2m_recursive_remove(self, row.__o2m_containers__[k]);
                 }
-            else{
-                //on_find_related_update(this,meta__cache__.__data__[__related_find__.path],__related_find__.key,__related_find__.v);
-                return;                 
+
+            }
+
+
+            function _m2m_append(diffs) {
+                if ('__m2m_append__' in diffs)
+                    for (let i = 0, row; i < diffs.__m2m_append__.length; i++) {
+                        row = diffs.__m2m_append__[i];
+                        if (!(row.__container__ in meta__cache__.__containers__)) meta__cache__.__containers__[row.__container__] = [];
+                        meta__cache__.__containers__[row.__container__].push(row);
+                    }
+
+            }
+
+            function _o2m_append(diffs) {
+                if ('__o2m_append__' in diffs)
+                    for (let i = 0, row; i < diffs.__o2m_append__.length; i++) {
+                        row = diffs.__o2m_append__[i];
+                        meta__cache__.__containers__[row.__container__].push(row);
+                        dataRow(row);
+                    }
+
+            }
+
+
+            function _apply_diffs(diffs) {
+                _m2m_remove(diffs);
+                _o2m_remove(diffs)
+                _m2m_append(diffs);
+                _o2m_append(diffs)
+                _update(diffs);
+                _insert(diffs);
+                _delete(diffs);
+                _meta_update(diffs);
+            }
+
+
+            console.log('on_modify_models:', values);
+
+            if ('__data__' in values) {
+                let data = values.__data__;
+                _apply_diffs(data);
+            }
+            if ('__m2o_find__' in values) {
+                let __m2o_find__ = values.__m2o_find__
+                if (__m2o_find__.v.length == 1) {
+                    meta__cache__.__data__[__m2o_find__.path][__m2o_find__.key]['id'] = __m2o_find__.v[0].id
+                    meta__cache__.__data__[__m2o_find__.path][__m2o_find__.key]['name'] = __m2o_find__.v[0].name
+                } else {
+                    //on_find_many2one_update(this,meta__cache__.__data__[__m2o_find__.path],__m2o_find__.key,__m2o_find__.v);
+                    return;
                 }
             }
-      }
+
+            if ('__related_find__' in values) {
+                let __related_find__ = values.__related_find__;
+                if (__related_find__.v.length == 1) {
+                    meta__cache__.__data__[__related_find__.path][__related_find__.key]['id'] = __related_find__.v[0].id
+                    meta__cache__.__data__[__related_find__.path][__related_find__.key]['name'] = __related_find__.v[0].name
+                } else {
+                    //on_find_related_update(this,meta__cache__.__data__[__related_find__.path],__related_find__.key,__related_find__.v);
+                    return;
+                }
+            }
+        }
 
 
 
@@ -858,6 +985,7 @@ const on_modify_models = (values) =>{
             fieldsBuild,
             onSubmit,
             onValidate,
+            onClose,
             onCancel,
             do_search,
             on_search,
@@ -869,6 +997,7 @@ const on_modify_models = (values) =>{
             on_find_new,
             on_read,
             m2o_cache,
+            related_cache,
             on_modify_models
         }
     }
