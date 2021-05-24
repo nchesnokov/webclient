@@ -67,7 +67,7 @@ export default defineComponent({
                         context: proxy.$UserPreferences.Context
                     }]
                 }).then((msg) => {
-                  if (msg && msg.length > 0) Object.assign(metas, msg[0])
+                  if (msg && msg.length > 0) {Object.assign(metas, msg[0]); title.value = metas[props.model].meta.description;}
                 })
         })
         return {

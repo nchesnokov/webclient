@@ -1,5 +1,3 @@
-
-
 <template>
 
 <slot name="search">
@@ -33,7 +31,10 @@
     </el-pagination>
     <el-form v-if="'__data__' in dataForm && Object.keys(dataForm.__data__).length > 0" :model="dataForm.__data__" label-width="auto">
         <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
-            <el-input v-model="dataForm.__data__[col].name" v-if="colsType[col] == 'many2one'" @change="m2o_cache(dataForm,col)" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
+            <el-input v-model="dataForm.__data__[col].name" v-if="colsType[col] == 'many2one'" @change="m2o_cache(dataForm,col)" :readonly="readonly(col)">
+                <template #prefix>
+                  <el-button v-if="isCompute(col)" type="primary" size="mini" icon="el-icon-s-data"/>
+                </template>
                 <template #suffix>
                     <el-button type="primary" size="mini" icon="el-icon-search" @click="do_find(col,'single',[],{'item':dataForm})"></el-button>
                     <el-button type="primary" size="mini" icon="el-icon-document-add" @click="do_add(col)"></el-button>
@@ -41,7 +42,10 @@
                     <el-button v-if="dataForm.__data__[col].id != null" type="primary" size="mini" icon="el-icon-view" @click="do_lookup(col,dataForm.__data__[col].id)"></el-button>
                 </template>
             </el-input>
-            <el-input v-model="dataForm.__data__[col].name" v-if="colsType[col] == 'related'" @change="related_cache(dataForm,col,metas[model].meta.columns[field].relatedy)" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
+            <el-input v-model="dataForm.__data__[col].name" v-if="colsType[col] == 'related'" @change="related_cache(dataForm,col,metas[model].meta.columns[field].relatedy)"  :readonly="readonly(col)">
+                <template #prefix>
+                  <el-button v-if="isCompute(col)" type="primary" size="mini" icon="el-icon-s-data"/>
+                </template>
                 <template #suffix>
                     <el-button type="primary" size="mini" icon="el-icon-search" @click="do_find(col)"></el-button>
                     <el-button type="primary" size="mini" icon="el-icon-document-add" @click="do_add(col)"></el-button>
@@ -50,9 +54,9 @@
                 </template>
             </el-input>
 
-            <el-input v-model="dataForm.__data__[col]" :maxlength="colsSize[col]" show-word-limit v-else-if="['char','varchar','composite','decomposite'].indexOf(colsType[col]) >= 0" @change="cache(dataForm,col)" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''"
-            :readonly="readonly(col)">
-                <template #prefix>
+            <el-input v-model="dataForm.__data__[col]" :maxlength="colsSize[col]" show-word-limit v-else-if="['char','varchar','composite','decomposite','tree'].indexOf(colsType[col]) >= 0" @change="cache(dataForm,col)" :readonly="readonly(col)">
+                <template #prepend>
+                <el-button v-if="isCompute(col)" type="primary" size="mini" icon="el-icon-s-data"/>
                     <el-dropdown v-if="colsTranslate[col]" @command="i18nCommand">
                         <span class="el-dropdown-link">
                           {{colsLang[col].toLowerCase()}}<i class="el-icon-arrow-down el-icon--right"></i>
@@ -67,11 +71,15 @@
             </el-input>
 
             <json-viewer v-if="colsType[col] == 'json'" :value="dataForm.__data__[col]" copyable boxed sort />
-            <el-input v-model="dataForm.__data__[col]" v-else-if="['uuid','integer','float','decimal','numeric','timedelta'].indexOf(colsType[col]) >= 0" @change="cache(dataForm,col)" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)"></el-input>
+            <el-input v-model="dataForm.__data__[col]" v-else-if="['uuid','integer','float','decimal','numeric','timedelta'].indexOf(colsType[col]) >= 0" @change="cache(dataForm,col)"  :readonly="readonly(col)">
+                <template #prefix>
+                  <el-button v-if="isCompute(col)" type="primary" size="mini" icon="el-icon-s-data"/>
+                </template>            
+            </el-input>
             <el-input v-model="dataForm.__data__[col]" autosize type="textarea" v-else-if="['text','xml'].indexOf(colsType[col]) >= 0" @change="cache(dataForm,col)" :readonly="readonly(col)">
             </el-input>
             <el-date-picker v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'date'" @change="cache(dataForm,col)" :readonly="readonly(col)"></el-date-picker>
-				<el-time-picker v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'time'" @change="cache(dataForm,col)" :readonly="readonly(col)"></el-time-picker>
+			<el-time-picker v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'time'" @change="cache(dataForm,col)" :readonly="readonly(col)"></el-time-picker>
             <el-date-picker v-model="dataForm.__data__[col]" type="datetime" v-else-if="colsType[col] == 'datetime'" @change="cache(dataForm,col)" :readonly="readonly(col)"></el-date-picker>
             <el-select v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'selection'" @change="cache(dataForm,col)" :disabled="readonly(col)">
                 <el-option v-for="item in selOptions[col]" :key="item.value" :label="item.label" :value="item.value">
@@ -81,12 +89,12 @@
                 <el-button type="primary" @click="do_find(col,'multiple')">Add</el-button>
                 <gp-m2m-list :metas="metas" :model="metas[model].meta.columns[col].obj" :tableData="dataForm.__m2m_containers__[col]"></gp-m2m-list>
             </el-row>
-            <el-checkbox v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'boolean'" @change="cache(dataForm,col)" :disabled="readonly(col)"></el-checkbox>
+            <el-switch v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'boolean'" @change="cache(dataForm,col)" :disabled="readonly(col)"></el-switch>
             <el-image v-else-if="colsType[col] == 'binary' && metas[model].meta.columns[col].accept == 'image/*'" style="width: 100px; height: 100px" src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg" fit="fit"></el-image>
         </el-form-item>
         <el-tabs type="border-card" v-if="o2mcols.length > 0">
             <el-tab-pane :label="colsLabel[o2mcol]" v-for="o2mcol in o2mcols" :key="o2mcol">
-                <gp-o2m-components :cid="cid" :metas="metas" :model="metas[model].meta.columns[o2mcol].obj" :cdata="dataForm.__o2m_containers__[o2mcol]" :mode="mode" :rel="metas[model].meta.columns[o2mcol].rel" />
+                <gp-o2m-components :cid="cid" :metas="metas" :model="metas[model].meta.columns[o2mcol].obj" v-model:cdata="dataForm.__o2m_containers__[o2mcol]" :mode="mode" :rel="metas[model].meta.columns[o2mcol].rel" />
             </el-tab-pane>
         </el-tabs>
     </el-form>

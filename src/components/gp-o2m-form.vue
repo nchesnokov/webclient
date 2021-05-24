@@ -17,7 +17,7 @@
         </el-input>
         <json-viewer v-if="colsType[col] == 'json'" :value="cdata[page-1].__data__[col]" copyable boxed sort />
 
-        <el-input :modelValue="cdata[page-1].__data__[col]" @update:modelValue="cache($event)" v-else-if="['char','varchar','composite','decomposite'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
+        <el-input :modelValue="cdata[page-1].__data__[col]" @update:modelValue="cache($event)" v-else-if="['char','varchar','composite','decomposite','tree'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
             <template #prefix>
                       <el-dropdown v-if="colsTranslate[col]" @command="i18nCommand">
                           <span class="el-dropdown-link">
@@ -122,7 +122,7 @@ export default defineComponent({
             return (
                 ('compute' in props.metas[props.model].meta.columns[col] &&
                     props.metas[props.model].meta.columns[col].compute != null) ||
-                colsType[col] == 'composite'
+                ['composite','tree'].indexOf(colsType[col]) >= 0
             )
         }
 
