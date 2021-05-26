@@ -15,7 +15,7 @@
         </el-row>
         <el-container>
             <template v-if="mode=='single'">
-                <el-table border highlight-current-row @current-change="handleCurrentChange" :data="tableDataDisplay">
+                <el-table border highlight-current-row @current-change="handleCurrentChange" :data="tableDataDisplay" fit>
                     <el-table-column :type="mode == 'single' ? 'index' : 'selection'" width="55">
                     </el-table-column>
                     <el-table-column :prop="getProp(col)" :label="colsLabel[col]" v-for="col in cols" :key="col"></el-table-column>

@@ -23,7 +23,7 @@
         <el-button type="primary" size="mini" icon="el-icon-setting" @click="do_action('setting')"></el-button>
     </el-row>
     <el-container>
-        <el-table @selection-change="handleSelectionChange" :data="tableDataDisplay">
+        <el-table @selection-change="handleSelectionChange" :data="tableDataDisplay" fit>
             <el-table-column type="selection" width="55">
             </el-table-column>
             <el-table-column fixed :prop="getProp(col)" :label="colsLabel[col]" v-for="col in cols" :key="col">

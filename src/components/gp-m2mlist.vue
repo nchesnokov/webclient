@@ -7,7 +7,7 @@
 <template>
 
 <el-container>
-    <el-table @selection-change="handleSelectionChange" :data="tableData" style="width: 100%">
+    <el-table @selection-change="handleSelectionChange" :data="tableData" style="width: 100%" fit>
         <el-table-column type="selection" width="55">
         </el-table-column>
         <el-table-column :prop="getProp(col)" :label="colsLabel[col]" v-for="col in cols" :key="col">

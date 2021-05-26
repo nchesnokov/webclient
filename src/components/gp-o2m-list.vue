@@ -10,13 +10,13 @@
     <el-button type="primary" @click="addRow">Add</el-button>
 </el-row>
 <el-container>
-    <el-table @selection-change="handleSelectionChange" :data="tableDataDisplay" style="width: 100%">
+    <el-table @selection-change="handleSelectionChange" :data="tableDataDisplay" style="width: 100%" fit>
         <el-table-column type="selection" width="55" />
         <el-table-column type="expand" v-if="o2mcols.length > 0">
             <template #default="props">
                 <el-tabs type="border-card" v-if="o2mcols.length > 0">
                     <el-tab-pane :label="colsLabel[o2mcol]" v-for="o2mcol in o2mcols" :key="o2mcol">
-                        <gp-o2m-components :metas="metas" :model="metas[model].meta.columns[o2mcol].obj" :cdata="props.row[o2mcol]" :mode="mode" :rel="metas[model].meta.columns[o2mcol].rel"/>
+                        <gp-o2m-components :metas="metas" :model="metas[model].meta.columns[o2mcol].obj" v-model:cdata="props.row[o2mcol]" :mode="mode" :rel="metas[model].meta.columns[o2mcol].rel"/>
                     </el-tab-pane>
                 </el-tabs>
             </template>

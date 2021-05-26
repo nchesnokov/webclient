@@ -32,8 +32,8 @@
     <el-form v-if="'__data__' in dataForm && Object.keys(dataForm.__data__).length > 0" :model="dataForm.__data__" label-width="auto">
         <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
             <el-input v-model="dataForm.__data__[col].name" v-if="colsType[col] == 'many2one'" @change="m2o_cache(dataForm,col)" :readonly="readonly(col)">
-                <template #prefix>
-                  <el-button v-if="isCompute(col)" type="primary" size="mini" icon="el-icon-s-data"/>
+                <template v-if="isCompute(col)" #prefix>
+                  <el-button type="primary" size="mini" icon="el-icon-s-data"/>
                 </template>
                 <template #suffix>
                     <el-button type="primary" size="mini" icon="el-icon-search" @click="do_find(col,'single',[],{'item':dataForm})"></el-button>
@@ -43,8 +43,8 @@
                 </template>
             </el-input>
             <el-input v-model="dataForm.__data__[col].name" v-if="colsType[col] == 'related'" @change="related_cache(dataForm,col,metas[model].meta.columns[field].relatedy)"  :readonly="readonly(col)">
-                <template #prefix>
-                  <el-button v-if="isCompute(col)" type="primary" size="mini" icon="el-icon-s-data"/>
+                <template v-if="isCompute(col)" #prefix>
+                  <el-button type="primary" size="mini" icon="el-icon-s-data"/>
                 </template>
                 <template #suffix>
                     <el-button type="primary" size="mini" icon="el-icon-search" @click="do_find(col)"></el-button>
@@ -55,8 +55,8 @@
             </el-input>
 
             <el-input v-model="dataForm.__data__[col]" :maxlength="colsSize[col]" show-word-limit v-else-if="['char','varchar','composite','decomposite','tree'].indexOf(colsType[col]) >= 0" @change="cache(dataForm,col)" :readonly="readonly(col)">
-                <template #prepend>
-                <el-button v-if="isCompute(col)" type="primary" size="mini" icon="el-icon-s-data"/>
+                <template v-if="isCompute(col)" #prepend>
+                <el-button type="primary" size="mini" icon="el-icon-s-data"/>
                     <el-dropdown v-if="colsTranslate[col]" @command="i18nCommand">
                         <span class="el-dropdown-link">
                           {{colsLang[col].toLowerCase()}}<i class="el-icon-arrow-down el-icon--right"></i>
@@ -72,8 +72,8 @@
 
             <json-viewer v-if="colsType[col] == 'json'" :value="dataForm.__data__[col]" copyable boxed sort />
             <el-input v-model="dataForm.__data__[col]" v-else-if="['uuid','integer','float','decimal','numeric','timedelta'].indexOf(colsType[col]) >= 0" @change="cache(dataForm,col)"  :readonly="readonly(col)">
-                <template #prefix>
-                  <el-button v-if="isCompute(col)" type="primary" size="mini" icon="el-icon-s-data"/>
+                <template v-if="isCompute(col)" #prefix>
+                  <el-button type="primary" size="mini" icon="el-icon-s-data"/>
                 </template>            
             </el-input>
             <el-input v-model="dataForm.__data__[col]" autosize type="textarea" v-else-if="['text','xml'].indexOf(colsType[col]) >= 0" @change="cache(dataForm,col)" :readonly="readonly(col)">
@@ -94,7 +94,7 @@
         </el-form-item>
         <el-tabs type="border-card" v-if="o2mcols.length > 0">
             <el-tab-pane :label="colsLabel[o2mcol]" v-for="o2mcol in o2mcols" :key="o2mcol">
-                <gp-o2m-components :cid="cid" :metas="metas" :model="metas[model].meta.columns[o2mcol].obj" v-model:cdata="dataForm.__o2m_containers__[o2mcol]" :mode="mode" :rel="metas[model].meta.columns[o2mcol].rel" />
+                <gp-o2m-components :cid="cid" :metas="metas" :model="metas[model].meta.columns[o2mcol].obj" :cdata="dataForm.__o2m_containers__[o2mcol]" :mode="mode" :rel="metas[model].meta.columns[o2mcol].rel" />
             </el-tab-pane>
         </el-tabs>
     </el-form>
@@ -310,6 +310,12 @@ export default defineComponent({
         }
 
         const m2o_cache = (item, name) => {
+           if (item.__data__[name].name.length ==  0) {
+           item.__data__[name].id = null
+           item.__data__[name].name = null
+            cache(item, name);
+            return
+           }
             let r = {
                     'path': item.__path__,
                     'model': item.__model__,
@@ -344,6 +350,7 @@ export default defineComponent({
         }
 
         const related_cache = (item, name, relatedy) => {
+           if (item.__data__[name].name.length ==  0) item.__data__[name].id = ''
             let r = {
                     'path': item.__path__,
                     'model': item.__model__,

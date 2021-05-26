@@ -16,7 +16,7 @@
     <el-table :data="tableData" row-key="id" border default-expand-all
         lazy :load="load"
         :tree-props="treeProps" style="width: 100%">
-        <el-table-column :prop="getProp(col)" :label="metas[model].meta.columns[col].label" v-for="col in metas[this.model].views.tree.columns.map((v) =>  v.col).filter(col => col != metas[model].meta.names.childs_id)" :key="col"/>
+        <el-table-column :prop="getProp(col)" :label="metas[model].meta.columns[col].label" v-for="col in metas[this.model].views.tree.columns.map((v) =>  v.col).filter(col => col != metas[model].meta.names.childs_id)" :key="col" fit/>
     </el-table>
 </el-container>
 <el-pagination v-if="tableData.length > pageSize" background layout="prev, pager, next" @current-change="handleCurrentChange" :page-size="pageSize" :total="tableData.length">
@@ -80,14 +80,17 @@ export default defineComponent({
         };
 
         const do_search = (event) => {
-            console.log('select data:',event);
+            console.log('tree_select_data_event:',event);
 
             //proxy.$websocket.sendAsync({_msg:[props.cid,'models',props.model,'tree',{fields:fields,context:{}}]}).then(msg=>tableData.splice(0,tableData.length,...msg));
             proxy.$websocket.send({
                 _msg: [props.cid, 'models', props.model, 'select', {
                     fields: fields,
-                    cond: [{__tuple__:[props.metas[props.model].meta.names.parent_id,'?']}],
-                    context: proxy.$UserPreferences.Context
+                    cond: event.cond.length > 0 ? event.cond:[{__tuple__:[props.metas[props.model].meta.names.parent_id,'?']}],
+                    context: proxy.$UserPreferences.Context,
+                    offset: event.offset.value,
+                    limit: event.limit.value
+
                 }]
             }, on_select_data);
         };
