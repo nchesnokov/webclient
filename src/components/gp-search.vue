@@ -13,14 +13,39 @@
 <slot>
     <el-row>{{ metas[model].meta.description }}</el-row>
     <el-row v-if="!showSearch">
-        <el-button type="primary" size="mini" icon="el-icon-search" @click="do_action('find')"></el-button>
-        <el-button v-if="multipleSelection.length == 0" type="primary" size="mini" icon="el-icon-document-add" @click="do_action('new')"></el-button>
-        <el-button v-if="multipleSelection.length > 0" type="primary" size="mini" icon="el-icon-copy-document" @click="do_action('copy')"></el-button>
-        <el-button v-if="multipleSelection.length > 0" type="primary" size="mini" icon="el-icon-edit" @click="do_action('edit')"></el-button>
-        <el-button v-if="multipleSelection.length > 0" type="primary" size="mini" icon="el-icon-view" @click="do_action('lookup')"></el-button>
-        <el-button type="primary" size="mini" icon="el-icon-upload" @click="do_action('upload')"></el-button>
-        <el-button v-if="multipleSelection.length > 0" type="primary" size="mini" icon="el-icon-download" @click="do_action('download')"></el-button>
-        <el-button type="primary" size="mini" icon="el-icon-setting" @click="do_action('setting')"></el-button>
+        <el-tooltip class="item" effect="dark" content="Find record(s)" placement="top">
+          <el-button type="primary" size="mini" icon="el-icon-search" @click="do_action('find')"></el-button>
+        </el-tooltip>
+        <el-tooltip v-if="multipleSelection.length == 0" class="item" effect="dark" content="New record" placement="top">
+          <el-button type="primary" size="mini" icon="el-icon-document-add" @click="do_action('new')"></el-button>
+        </el-tooltip>
+        <el-tooltip v-if="multipleSelection.length > 0" class="item" effect="dark" content="Copy selected record(s)" placement="top">
+          <el-button type="primary" size="mini" icon="el-icon-copy-document" @click="do_action('copy')"></el-button>
+        </el-tooltip>
+        <el-tooltip v-if="multipleSelection.length > 0" class="item" effect="dark" content="Edit selected record(s)" placement="top">
+          <el-button type="primary" size="mini" icon="el-icon-edit" @click="do_action('edit')"></el-button>
+        </el-tooltip>
+        <el-tooltip v-if="multipleSelection.length > 0" class="item" effect="dark" content="Lookup selected record(s)" placement="top">
+          <el-button type="primary" size="mini" icon="el-icon-view" @click="do_action('lookup')"></el-button>
+        </el-tooltip>
+    
+        
+          <el-popconfirm  v-if="multipleSelection.length > 0" confirmButtonText='OK' cancelButtonText='No, Thanks' icon="el-icon-info" iconColor="red" title="Are you sure to delete?" @confirm="do_action('delete')">
+            <template #reference>         
+              <el-button type="primary" size="mini" icon="el-icon-delete"></el-button>
+            </template>
+          </el-popconfirm>
+        
+
+        <el-tooltip class="item" effect="dark" content="Upload records from file" placement="top">
+          <el-button type="primary" size="mini" icon="el-icon-upload" @click="do_action('upload')"></el-button>
+        </el-tooltip>
+        <el-tooltip v-if="multipleSelection.length > 0" class="item" effect="dark" content="Download selected record(s)" placement="top">
+          <el-button type="primary" size="mini" icon="el-icon-download" @click="do_action('download')"></el-button>
+        </el-tooltip>
+        <el-tooltip class="item" effect="dark" content="Setting view" placement="top">
+          <el-button type="primary" size="mini" icon="el-icon-setting" @click="do_action('setting')"></el-button>
+        </el-tooltip>
     </el-row>
     <el-container>
         <el-table @selection-change="handleSelectionChange" :data="tableDataDisplay" fit>
@@ -53,6 +78,7 @@ import {
     render,
     reactive,
     ref,
+    h,
     computed,
     onMounted,
     getCurrentInstance
@@ -140,7 +166,7 @@ export default defineComponent({
         }
 
         const do_action = action => {
-            //console.log('action:', action)
+            console.log('action:', action)
             switch (action) {
                 case 'find':
                     do_select()
@@ -163,6 +189,52 @@ export default defineComponent({
                         'lookup'
                     )
                     break
+                case 'copy':
+                    //proxy.$emit('action:form',{'mode':'edit','oids':multipleSelection});
+                    do_modal_form(
+                        multipleSelection.length == 1 ? multipleSelection[0].id : multipleSelection.map(v => v.id),
+                        'copy'
+                    )
+                    break
+                case 'delete':
+                     proxy.$websocket.sendAsync({
+                        _msg: [
+                            props.cid,
+                            'models',
+                            props.model,
+                            'unlink', {
+                                ids: multipleSelection.length == 1 ? multipleSelection[0].id : multipleSelection.map(v => v.id),
+                                context: proxy.$UserPreferences.Context
+                            }
+                        ]
+                    }
+                ).then((msg) => {
+                    console.log('action:', msg)
+                    if (msg.length > 0) {
+                        proxy.$websocket.sendAsync({
+                            _msg: [
+                                props.cid,
+                                '_commit'
+                            ]
+                        }).then(() =>{
+                        proxy.$notify({
+                            title: 'Information',
+                            message: h(
+                                'i', {
+                                    style: 'color: teal'
+                                },
+                                'Records deleted.'
+                            )
+                        })
+                        
+                        })
+                
+                }
+                }
+                )
+                    
+                    break
+
             }
         }
 

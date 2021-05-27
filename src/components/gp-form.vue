@@ -112,7 +112,7 @@
     </el-popconfirm>
 
     <el-button type="success" @click="onValidate" :disabled="mode == 'lookup'">Validate</el-button>
-    <el-button type="primary" @click="onSubmit" :disabled="mode == 'lookup'">Save</el-button>
+    <el-button type="primary" @click="onSubmit" :disabled="mode == 'lookup'">{{mode == 'copy' ? 'Copy':'Save'}}</el-button>
 </slot>
 
 </template>
@@ -157,7 +157,6 @@ export default defineComponent({
         }
         
     },
-    //props: ['cid', 'metas', 'model', 'modal'],
     setup(props) {
         const {
             proxy
@@ -177,9 +176,7 @@ export default defineComponent({
         const colsSize = reactive({})
         const colsTranslate = reactive({})
         const colsLang = reactive({})
-        const dataForm = reactive({
-            __data__: {}
-        })
+        const dataForm = reactive({})
         const selOptions = reactive({})
         const fields = reactive([])
         const cols = reactive([])
@@ -310,6 +307,7 @@ export default defineComponent({
         }
 
         const m2o_cache = (item, name) => {
+           console.log('m2o_cache:', name, item.__data__[name], item)
            if (item.__data__[name].name.length ==  0) {
            item.__data__[name].id = null
            item.__data__[name].name = null
@@ -350,7 +348,12 @@ export default defineComponent({
         }
 
         const related_cache = (item, name, relatedy) => {
-           if (item.__data__[name].name.length ==  0) item.__data__[name].id = ''
+           if (item.__data__[name].name.length ==  0) {
+           item.__data__[name].id = null
+           item.__data__[name].name = null
+            cache(item, name);
+            return
+           }
             let r = {
                     'path': item.__path__,
                     'model': item.__model__,
@@ -621,9 +624,9 @@ export default defineComponent({
 
         const onSubmit = () => {
             (async() => {
-                if (mode.value == 'new' || mode.value == 'edit') {
+                if (['new','edit','copy'].indexOf(mode.value) >=0 ) {
                     let msg = await proxy.$websocket.sendAsync({
-                        _msg: [props.cid, '_cache', 'save', guid.value, {}]
+                        _msg: [props.cid, '_cache', mode.value == 'copy' ? 'copy':'save', guid.value, {}]
                     })
                     let action = msg[0], oid = msg[1];
                     console.log('action:', msg)
