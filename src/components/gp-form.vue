@@ -31,7 +31,7 @@
     </el-pagination>
     <el-form v-if="'__data__' in dataForm && Object.keys(dataForm.__data__).length > 0" :model="dataForm.__data__" label-width="auto">
         <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
-            <el-input v-model="dataForm.__data__[col].name" v-if="colsType[col] == 'many2one'" @change="m2o_cache(dataForm,col)" :readonly="readonly(col)">
+            <el-input v-model="dataForm.__data__[col].name" v-if="['many2one','referenced'].indexOf(colsType[col]) >= 0" @change="m2o_cache(dataForm,col)" :readonly="readonly(col)">
                 <template v-if="isCompute(col)" #prefix>
                   <el-button type="primary" size="mini" icon="el-icon-s-data"/>
                 </template>

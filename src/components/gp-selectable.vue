@@ -4,12 +4,12 @@
 
 <el-form :model="dataForm" label-width="200px">
     <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
-        <el-input v-model="dataForm[col].name" v-if="['many2one','related'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
+        <el-input v-model="dataForm[col].name" v-if="['many2one','referenced','related'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
             <template #suffix>
                 <el-button type="primary" size="mini" icon="el-icon-search" @click="do_search(col)"></el-button>
             </template>
         </el-input>
-        <el-input v-model="dataForm[col]" v-if="['char','varchar','composite','integer','float','decimal','numeric','timedelta'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
+        <el-input v-model="dataForm[col]" v-if="['char','varchar','composite','i18n','tree','integer','float','decimal','numeric','timedelta'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
             <template #ffix>
                 <el-button type="primary" size="mini" icon="el-icon-monitor" v-if="isCompute(col)"></el-button>
             </template>
@@ -200,12 +200,14 @@ export default defineComponent({
         onMounted(() => {
             for (let i = 0; i < props.extcond.length; i++) relatedcols[props.extcond[i].__tuple__[0]] = props.extcond[i].__tuple__[2];
             for (let i = 0, c = Object.keys(props.columns); i < c.length; i++)
-                if ('selectable' in props.columns[c[i]] && props.columns[c[i]].selectable || props.columns[c[i]].type == 'selection' || props.columns[c[i]].inactive != null && props.columns[c[i]].inactive && props.name.inactive == c[i] || props.names.row_name == c[i]) {
+                if ('selectable' in props.columns[c[i]] && props.columns[c[i]].selectable || props.columns[c[i]].type == 'selection' || props.columns[c[i]].inactive != null && props.columns[c[i]].inactive && props.name.inactive == c[i] || props.names.row_name == c[i]  || props.names.full_name == c[i] || props.names.rec_name == c[i]) {
                     cols.push(c[i]);
                     colsType[c[i]] = props.columns[c[i]].type;
                     colsLabel[c[i]] = props.columns[c[i]].label;
                     switch (colsType[c[i]]) {
                         case 'many2one':
+                        case 'referenced':
+                        case 'related':
                             if (c[i] in relatedcols) dataForm[c[i]] = {
                                 id: null,
                                 name: relatedcols[c[i]]
@@ -229,6 +231,7 @@ export default defineComponent({
                             else dataForm[c[i]] = '';
                     }
                 }
+                console.log('colstype:',colsType)
         });
         return {
             readonly,

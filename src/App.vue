@@ -105,6 +105,7 @@ export default defineComponent({
         });
 
         const handleNodeClick = (data) => {
+            console.log('handleNodeClick:',data)
             if (data.action_id.name !== null) {
                 tabs.splice(0, tabs.length);
                 proxy.$websocket.send({
