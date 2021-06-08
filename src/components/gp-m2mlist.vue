@@ -54,7 +54,7 @@ export default defineComponent({
         };
 
         const getProp = (col) => {
-            return ['many2one', 'related'].indexOf(colsType[col]) >= 0 ? col + '.name' : col
+            return ['many2one', 'referenced', 'related'].indexOf(colsType[col]) >= 0 ? col + '.name' : col
         };
 
         const _get_selections = s => {

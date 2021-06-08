@@ -61,7 +61,7 @@ export default defineComponent({
 
 
         const getProp = col => {
-            return ['many2one', 'related'].indexOf(colsType[col]) >= 0 ? '__data__.' + col + '.name' : '__data__.' + col
+            return ['many2one','referenced', 'related'].indexOf(colsType[col]) >= 0 ? '__data__.' + col + '.name' : '__data__.' + col
         }
 
         const addRow = () => {}
