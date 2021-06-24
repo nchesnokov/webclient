@@ -34,7 +34,7 @@
             <el-button type="danger" @click="onCancel">Cancel</el-button>
             <el-button v-if="mode == 'single' && currentRow != null || multipleSelection.length > 0" type="primary" @click="onSelect">Select</el-button>
         </el-row>
-        <el-pagination v-if="tableData.length > pageSize" background layout="prev, pager, next" @current-change="handleCurrentPageChange" :page-size="pageSize" :total="tableData.length">
+        <el-pagination v-if="tableData.length > pageSize" background layout="total, prev, pager, next, jumper" @current-change="handleCurrentPageChange" :page-size="pageSize" :total="tableData.length">
         </el-pagination>
 
     </template>

@@ -62,7 +62,7 @@
             </el-table-column>
         </el-table>
     </el-container>
-    <el-pagination v-if="tableData.length > pageSize" background layout="prev, pager, next" @current-change="handleCurrentChange" :page-size="pageSize" :total="tableData.length">
+    <el-pagination v-if="tableData.length > pageSize" background layout="total ,prev, pager, next, jumper" @current-change="handleCurrentChange" :page-size="pageSize" :total="tableData.length">
     </el-pagination>
 
 </slot>

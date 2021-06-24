@@ -19,7 +19,7 @@
         <el-table-column :prop="getProp(col)" :label="metas[model].meta.columns[col].label" v-for="col in metas[this.model].views.tree.columns.map((v) =>  v.col).filter(col => col != metas[model].meta.names.childs_id)" :key="col" fit/>
     </el-table>
 </el-container>
-<el-pagination v-if="tableData.length > pageSize" background layout="prev, pager, next" @current-change="handleCurrentChange" :page-size="pageSize" :total="tableData.length">
+<el-pagination v-if="tableData.length > pageSize" background layout="total, prev, pager, next, jumper" @current-change="handleCurrentChange" :page-size="pageSize" :total="tableData.length">
 </el-pagination>
 
 </template>
