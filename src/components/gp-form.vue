@@ -29,7 +29,7 @@
     </el-row>
     <el-pagination v-if="multipleSelection.length > 1" background layout="total, prev, pager, next, jumper" @current-change="handleCurrentChange" :page-size="pageSize" :total="multipleSelection.length">
     </el-pagination>
-    <el-form v-if="'__data__' in dataForm && Object.keys(dataForm.__data__).length > 0" :model="dataForm.__data__" label-width="auto">
+    <el-form v-if="'__data__' in dataForm && Object.keys(dataForm.__data__).length > 0" :model="dataForm.__data__" label-width="auto" status-icon inline-message>
         <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
             <el-input v-model="dataForm.__data__[col].name" v-if="['many2one','referenced'].indexOf(colsType[col]) >= 0" @change="m2o_cache(dataForm,col)" :readonly="readonly(col)">
                 <template v-if="isCompute(col)" #prefix>

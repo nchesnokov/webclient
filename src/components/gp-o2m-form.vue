@@ -2,12 +2,12 @@
 
 <template>
 
-<el-pagination v-if="cdata.length > 1" background layout="prev, pager, next" @current-change="handleCurrentChange" :page-size="pageSize" :total="cdata.length">
+<el-pagination v-if="cdata.length > 1" background layout="total, prev, pager, next, jumper" @current-change="handleCurrentChange" :page-size="pageSize" :total="cdata.length">
 </el-pagination>
 
-<el-form v-if="cdata.length > 0" :modelValue="cdata[page-1].__data__" label-width="auto">
+<el-form v-if="cdata.length > 0" :modelValue="cdata[page-1].__data__" label-width="auto" status-icon inline-message>
     <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
-        <el-input :modelValue="cdata[page-1].__data__[col].name" @update:modelValue="cache($event)" v-if="['many2one','related'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
+        <el-input :modelValue="cdata[page-1].__data__[col].name" @update:modelValue="cache($event)" v-if="['many2one','referenced','related'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
             <template #suffix>
                 <el-button type="primary" size="mini" icon="el-icon-search" @click="do_find(col)"></el-button>
                 <el-button type="primary" size="mini" icon="el-icon-document-add" @click="do_add(col)"></el-button>
