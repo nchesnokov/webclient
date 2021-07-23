@@ -94,7 +94,7 @@
         </el-form-item>
         <el-tabs type="border-card" v-if="o2mcols.length > 0">
             <el-tab-pane :label="colsLabel[o2mcol]" v-for="o2mcol in o2mcols" :key="o2mcol">
-                <gp-o2m-components :cid="cid" :metas="metas" :model="metas[model].meta.columns[o2mcol].obj" :cdata="dataForm.__o2m_containers__[o2mcol]" :mode="mode" :rel="metas[model].meta.columns[o2mcol].rel" />
+                <gp-o2m-components :cid="cid" :guid="guid" :root="proxy" :metas="metas" :model="metas[model].meta.columns[o2mcol].obj" :container="o2mcol + '.' + dataForm.__path__" :cdata="dataForm.__o2m_containers__[o2mcol]" :mode="mode" :rel="metas[model].meta.columns[o2mcol].rel" />
             </el-tab-pane>
         </el-tabs>
     </el-form>
@@ -754,6 +754,7 @@ export default defineComponent({
                         }
                     ]
                 })
+            console.log('onBeforeMount-msg-initialize:',msg);
             if (msg && msg.length > 0) {
                 init_metacache()
                 Object.assign(dataForm, msg[0])
@@ -985,6 +986,7 @@ export default defineComponent({
 
 
         return {
+            proxy,
             meta__cache__,
             mode,
             guid,

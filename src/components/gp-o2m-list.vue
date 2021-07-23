@@ -7,7 +7,7 @@
 <template>
 
 <el-row>
-    <el-button type="primary" @click="addRow">Add</el-button>
+    <el-button type="primary" @click="add_row(model,container,'list')" v-if="mode != 'readonly'">Add</el-button>
 </el-row>
 <el-container>
     <el-table @selection-change="handleSelectionChange" :data="tableDataDisplay" style="width: 100%" fit>
@@ -16,7 +16,7 @@
             <template #default="props">
                 <el-tabs type="border-card" v-if="o2mcols.length > 0">
                     <el-tab-pane :label="colsLabel[o2mcol]" v-for="o2mcol in o2mcols" :key="o2mcol">
-                        <gp-o2m-components :metas="metas" :model="metas[model].meta.columns[o2mcol].obj" v-model:cdata="props.row[o2mcol]" :mode="mode" :rel="metas[model].meta.columns[o2mcol].rel"/>
+                        <gp-o2m-components :cid="cid" :guid="guid" :root="root" :metas="metas" :model="metas[model].meta.columns[o2mcol].obj" :container="container" :cdata="props.row[o2mcol]" :mode="mode" :rel="metas[model].meta.columns[o2mcol].rel"/>
                     </el-tab-pane>
                 </el-tabs>
             </template>
@@ -39,20 +39,23 @@
 <script>
 
 import {
-    defineComponent, ref, reactive, onMounted, computed
+    defineComponent, ref, reactive, onMounted, computed, getCurrentInstance
 }
 from 'vue'
 export default defineComponent({
     name: 'gp-o2m-list',
-    props: ['cid', 'metas', 'model', 'cdata', 'mode','rel'],
+    props: ['cid', 'guid', 'root', 'metas', 'model', 'container', 'cdata', 'mode','rel'],
     setup(props) {
+        const {
+            proxy
+        } = getCurrentInstance()
         const page = ref(1)
         const pageSize = ref(15)
         const cols = reactive([])
         const o2mcols = reactive([])
         const colsType = reactive({})
         const colsLabel = reactive({})
-         const selOptions = reactive({})
+        const selOptions = reactive({})
         const multipleSelection = reactive([])
 
         const handleSelectionChange = val => {
@@ -64,7 +67,11 @@ export default defineComponent({
             return ['many2one','referenced', 'related'].indexOf(colsType[col]) >= 0 ? '__data__.' + col + '.name' : '__data__.' + col
         }
 
-        const addRow = () => {}
+        //const addRow = () => {}
+        const add_row = (model,container,view) => {
+            proxy.$websocket.sendAsync({_msg:[props.cid,'_cache','add',props.guid,{'model':props.model,'container':props.container,'context':{},'view':view}]}).then((msg) => props.root.on_modify_models(msg[0]));
+        }
+
 
         const handleCurrentChange = val => {
             page.value = val
@@ -100,7 +107,8 @@ export default defineComponent({
         return {
             page,
             pageSize,
-            addRow,
+            //addRow,
+            add_row,
             handleCurrentChange,
             handleSelectionChange,
             tableDataDisplay,

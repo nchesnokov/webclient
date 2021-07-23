@@ -75,7 +75,7 @@ from 'vue'
 
 export default defineComponent({
     name: 'gp-o2m-form',
-    props: ['cid', 'metas', 'model', 'cdata', 'mode','rel'],
+    props: ['cid', 'guid', 'root', 'metas', 'model', 'container', 'cdata', 'mode','rel'],
     setup(props) {
         const {
             proxy

@@ -5,7 +5,7 @@
 <el-row>
     <el-button v-for="tab in tabs" :key="tab" :class="['tab-button', { active: currentTab === tab }]" @click="on_clicktab(tab)">{{ tab.split('-')[2] }}</el-button>
 </el-row>
-<component :is="currentTab" :cid="cid" :metas="metas" :model="model" :cdata="cdata" :mode="mode" :rel="rel"/>
+<component :is="currentTab" :cid="cid" :guid="guid" :root="root" :metas="metas" :model="model" :container="container" :cdata="cdata" :mode="mode" :rel="rel"/>
 
 </template>
 
@@ -22,11 +22,21 @@ export default defineComponent({
         'cid': {
             type: String
         },
+        'guid': {
+            type: String
+        },
+
+        'root': {
+            type:Object
+        },
         'metas': {
             type: Object
         },
         'model': {
             type: String
+        },
+        'container':{
+            type:String
         },
         'cdata': {
             type: Array
