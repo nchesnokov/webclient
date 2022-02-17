@@ -11,7 +11,7 @@
 </el-row>
 <el-container>
     <el-table @selection-change="handleSelectionChange" :data="tableDataDisplay" style="width: 100%" fit>
-        <el-table-column type="selection" width="55" />
+        <el-table-column type="selection" width="55"></el-table-column>
         <el-table-column type="expand" v-if="o2mcols.length > 0">
             <template #default="props">
                 <el-tabs type="border-card" v-if="o2mcols.length > 0">
@@ -103,6 +103,7 @@ export default defineComponent({
                 if (colsType[c[i]] == 'one2many') o2mcols.push(c[i])
                 else cols.push(c[i])
             }
+            console.log('COLS:',colsType,colsLabel,cols,o2mcols);
         })
         return {
             page,

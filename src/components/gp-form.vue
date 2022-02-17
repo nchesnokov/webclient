@@ -21,10 +21,10 @@
 
     </el-row>
     <el-row>
-        <el-button type="primary" size="mini" icon="el-icon-search" @click="do_action('find')"></el-button>
-        <el-button v-if="multipleSelection.length == 0" type="primary" size="mini" icon="el-icon-document-add" @click="do_action('new')"></el-button>
-        <el-button v-if="multipleSelection.length > 0" type="primary" size="mini" icon="el-icon-edit" @click="do_action('edit')"></el-button>
-        <el-button v-if="multipleSelection.length > 0" type="primary" size="mini" icon="el-icon-view" @click="do_action('lookup')"></el-button>
+        <el-button v-if="!showSearch" type="primary" size="small" :icon="Search" @click="do_action('find')"></el-button>
+        <el-button v-if="multipleSelection.length == 0" type="primary" size="small" :icon="DocumentAdd" @click="do_action('new')"></el-button>
+        <el-button v-if="multipleSelection.length > 0 && mode =='lookup'" type="primary" size="small" :icon="Edit" @click="do_action('edit')"></el-button>
+        <el-button v-if="multipleSelection.length > 0 && mode =='edit'" type="primary" size="small" :icon="View" @click="do_action('lookup')"></el-button>
 
     </el-row>
     <el-pagination v-if="multipleSelection.length > 1" background layout="total, prev, pager, next, jumper" @current-change="handleCurrentChange" :page-size="pageSize" :total="multipleSelection.length">
@@ -36,10 +36,10 @@
                   <el-button type="primary" size="mini" icon="el-icon-s-data"/>
                 </template>
                 <template #suffix>
-                    <el-button type="primary" size="mini" icon="el-icon-search" @click="do_find(col,'single',[],{'item':dataForm})"></el-button>
-                    <el-button type="primary" size="mini" icon="el-icon-document-add" @click="do_add(col)"></el-button>
-                    <el-button v-if="dataForm.__data__[col].id != null" type="primary" size="mini" icon="el-icon-edit" @click="do_edit(col,dataForm.__data__[col].id)"></el-button>
-                    <el-button v-if="dataForm.__data__[col].id != null" type="primary" size="mini" icon="el-icon-view" @click="do_lookup(col,dataForm.__data__[col].id)"></el-button>
+                    <el-button type="primary" size="small" :icon="Search" @click="do_find(col,'single',[],{'item':dataForm})"></el-button>
+                    <el-button type="primary" size="small" :icon="DocumentAdd" @click="do_add(col)"></el-button>
+                    <el-button v-if="dataForm.__data__[col].id != null" type="primary" size="small" :icon="Edit" @click="do_edit(col,dataForm.__data__[col].id)"></el-button>
+                    <el-button v-if="dataForm.__data__[col].id != null" type="primary" size="small" :icon="View" @click="do_lookup(col,dataForm.__data__[col].id)"></el-button>
                 </template>
             </el-input>
             <el-input v-model="dataForm.__data__[col].name" v-if="colsType[col] == 'related'" @change="related_cache(dataForm,col,metas[model].meta.columns[field].relatedy)"  :readonly="readonly(col)">
@@ -47,10 +47,10 @@
                   <el-button type="primary" size="mini" icon="el-icon-s-data"/>
                 </template>
                 <template #suffix>
-                    <el-button type="primary" size="mini" icon="el-icon-search" @click="do_find(col)"></el-button>
-                    <el-button type="primary" size="mini" icon="el-icon-document-add" @click="do_add(col)"></el-button>
-                    <el-button v-if="dataForm.__data__[col].id != null" type="primary" size="mini" icon="el-icon-edit" @click="do_edit(col,dataForm.__data__[col].id)"></el-button>
-                    <el-button v-if="dataForm.__data__[col].id != null" type="primary" size="mini" icon="el-icon-view" @click="do_lookup(col,dataForm.__data__[col].id)"></el-button>
+                    <el-button type="primary" size="small" :icon="Search" @click="do_find(col)"></el-button>
+                    <el-button type="primary" size="small" :icon="DocumentAdd" @click="do_add(col)"></el-button>
+                    <el-button v-if="dataForm.__data__[col].id != null" type="primary" size="small" :icon="Edit" @click="do_edit(col,dataForm.__data__[col].id)"></el-button>
+                    <el-button v-if="dataForm.__data__[col].id != null" type="primary" size="small" :icon="View" @click="do_lookup(col,dataForm.__data__[col].id)"></el-button>
                 </template>
             </el-input>
 
@@ -133,6 +133,8 @@ import {
 from 'vue'
 
 //import {on_modify_models} from '../js/nf.js'
+
+import { Monitor, Search, DocumentAdd, Edit, View } from '@element-plus/icons-vue'
 
 export default defineComponent({
     name: 'gp-form',
@@ -1029,7 +1031,12 @@ export default defineComponent({
             on_read,
             m2o_cache,
             related_cache,
-            on_modify_models
+            on_modify_models,
+            Search,
+            Monitor,
+            DocumentAdd,
+            Edit,
+            View
         }
     }
 })

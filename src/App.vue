@@ -1,5 +1,4 @@
 <style>
-
 #app {
     font-family: Avenir, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -9,18 +8,19 @@
     margin-top: 0px;
 }
 
-.el-header {
-    background-color: #B3C0D1;
-    color: #333;
-    text-align: center;
-    line-height: 60px;
+.el-header
+{
+  background-color: #b3c0d1;
+  color: var(--el-text-color-primary);
+  text-align: center;
+  line-height: 30px;
 }
 
 .el-footer {
     background-color: #B3C0D1;
     color: #333;
     text-align: center;
-    line-height: 60px;
+    line-height: 30px;
     position: fixed;
     /* Фиксированное положение */
     left: 0;
@@ -31,7 +31,6 @@
     width: 100%;
     /* Ширина слоя */
 }
-
 button.active {
     background-color: Aqua;
 }
@@ -43,10 +42,10 @@ button.active {
 <el-drawer v-if="isLogged" append-to-body v-model="drawer" direction='ltr' size="20%" title="Root Menu">
     <el-tree :data="menuData" :props="defaultProps" @node-click="handleNodeClick"/>
 </el-drawer>
-<el-container style="height: 880px; border: 1px solid #eee">
+<el-container>
     <el-header style="text-align: right; font-size: 12px">
-        <el-button v-if="isLogged" type="primary" icon="el-icon-menu" @click="drawer=!drawer"></el-button>
-        <el-button v-if="!isLogged" type="primary" icon="el-icon-user" @click="on_login"></el-button>
+        <el-button v-if="isLogged" type="primary" :icon="Menu" @click="drawer=!drawer"></el-button>
+        <el-button v-if="!isLogged" type="primary" :icon="User" @click="on_login"></el-button>
         <el-dropdown v-else split-button type="primary" @command="handleUserMenuCommand">
             Admin
             <template #dropdown>
@@ -67,23 +66,28 @@ button.active {
         </template>
     </el-main>
     <div id="sv"></div>
-    <el-footer style="text-align: bottom; font-size: 12px">{{isLogged ? '&copy; GSRP5 2021 Slot: ' + cinfo.slot + ' User: '+cinfo.user + ' ' + timestampLogged: '&copy; GSRP5 2021'}}</el-footer>
+    <el-footer>{{isLogged ? '&copy; GSRP5 2022 Slot: ' + cinfo.slot + ' User: '+cinfo.user + ' ' + timestampLogged: '&copy; GSRP5 2022'}}</el-footer>
 </el-container>
-
 </template>
 
 <script>
 
-import {
-    defineComponent, reactive, ref, getCurrentInstance
-}
-from 'vue'
+import { defineComponent } from 'vue'
 
-//import { loadModule } from 'vue3-sfc-loader'
+import { loadModule } from 'vue3-sfc-loader'
 
 export default defineComponent({
     name: 'App',
-    setup() {
+});
+
+</script>
+
+<script setup>
+
+import { User, Menu } from '@element-plus/icons-vue'
+
+import {reactive, ref, getCurrentInstance } from 'vue'
+
         const {
             proxy
         } = getCurrentInstance();
@@ -300,42 +304,5 @@ export default defineComponent({
             for (let i = 0; i < metas[model.value].allow.length; i++)
                 if (['search', 'form', 'tree', 'graph', 'calendar', 'geo', 'kanban'].indexOf(metas[model.value].allow[i]) >= 0) tabs.push('gp-' + metas[model.value].allow[i]);
         };
-
-
-        return {
-            cid,
-            uid,
-            cinfo,
-            drawer,
-            isLogged,
-            timestampLogged,
-            isLoginFormShow,
-            isUserPreferencesFormShow,
-            tabs,
-            currentTab,
-            menuData,
-            metas,
-            model,
-            defaultProps,
-            handleNodeClick,
-            handleUserMenuCommand,
-            on_clicktab,
-            on_login,
-            do_login,
-            do_user_preferences,
-            on_except,
-            on_close_websocket,
-            on_connect,
-            on_service_login,
-            on_menu_load,
-            on_load_meta
-        };
-    }
-    /*
-    methods: {
-
-    },
-*/
-});
 
 </script>

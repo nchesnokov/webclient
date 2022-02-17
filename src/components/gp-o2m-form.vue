@@ -1,5 +1,3 @@
-
-
 <template>
 
 <el-pagination v-if="cdata.length > 1" background layout="total, prev, pager, next, jumper" @current-change="handleCurrentChange" :page-size="pageSize" :total="cdata.length">
@@ -9,10 +7,10 @@
     <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
         <el-input :modelValue="cdata[page-1].__data__[col].name" @update:modelValue="cache($event)" v-if="['many2one','referenced','related'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
             <template #suffix>
-                <el-button type="primary" size="mini" icon="el-icon-search" @click="do_find(col)"></el-button>
-                <el-button type="primary" size="mini" icon="el-icon-document-add" @click="do_add(col)"></el-button>
-                <el-button v-if="cdata[page-1].__data__[col].id != null" type="primary" size="mini" icon="el-icon-edit" @click="do_edit(col,cdata[page-1].__data__[col].id)"></el-button>
-                <el-button v-if="cdata[page-1].__data__[col].id != null" type="primary" size="mini" icon="el-icon-view" @click="do_lookup(col,cdata[page-1].__data__[col].id)"></el-button>
+                <el-button type="primary" size="small" :icon="Search" @click="do_find(col)"></el-button>
+                <el-button type="primary" size="small" :icon="DocumentAdd" @click="do_add(col)"></el-button>
+                <el-button v-if="cdata[page-1].__data__[col].id != null" type="primary" size="small" :icon="Edit" @click="do_edit(col,cdata[page-1].__data__[col].id)"></el-button>
+                <el-button v-if="cdata[page-1].__data__[col].id != null" type="primary" size="small" :icon="View" @click="do_lookup(col,cdata[page-1].__data__[col].id)"></el-button>
             </template>
         </el-input>
         <json-viewer v-if="colsType[col] == 'json'" :value="cdata[page-1].__data__[col]" copyable boxed sort />
@@ -72,6 +70,8 @@ import {
     createVNode
 }
 from 'vue'
+
+import { Monitor, Search, DocumentAdd, Edit, View } from '@element-plus/icons-vue'
 
 export default defineComponent({
     name: 'gp-o2m-form',
@@ -314,7 +314,12 @@ export default defineComponent({
             do_edit,
             do_lookup,
             on_find_new,
-            cache
+            cache,
+            Search,
+            Monitor,
+            DocumentAdd,
+            Edit,
+            View
         }
     }
 })

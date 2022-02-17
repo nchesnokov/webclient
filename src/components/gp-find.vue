@@ -172,7 +172,7 @@ export default defineComponent({
         }
 
         const tableDataDisplay = computed(() => {
-            //console.log('computed:');
+            console.log('computed:', tableData === null || tableData.length === 0 ? reactive([]):tableData.slice(pageSize.value * page.value - pageSize.value, pageSize.value * page.value));
             if (tableData === null || tableData.length === 0) return reactive([])
             else return tableData.slice(pageSize.value * page.value - pageSize.value, pageSize.value * page.value)
         })

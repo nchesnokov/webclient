@@ -1,12 +1,13 @@
 import { createApp,defineAsyncComponent,reactive } from 'vue'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
+
 import App from './App.vue'
-import installElementPlus from './plugins/element'
-//import 'element-plus/lib/theme-chalk/index.css';
 
 import VueApexCharts from "vue3-apexcharts";
 
 import WebSocketVue from './js/vue3-async-websocket';
-import uuidv4 from 'uuid/v4'
+import {v4 as uuidv4} from 'uuid'
 
 const url = 'ws://localhost:8100/ws';
 
@@ -24,7 +25,8 @@ const emitter = mitt();
 
 const app = createApp(App)
 
-installElementPlus(app)
+app.use(ElementPlus)
+//installElementPlus(app)
 
 app.use( WebSocketVue, url, defOptions );
 

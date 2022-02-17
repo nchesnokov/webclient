@@ -6,12 +6,12 @@
     <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
         <el-input v-model="dataForm[col].name" v-if="['many2one','referenced','related'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
             <template #suffix>
-                <el-button type="primary" size="mini" icon="el-icon-search" @click="do_search(col)"></el-button>
+                <el-button type="primary" size="small" :icon="Search" @click="do_search(col)"></el-button>
             </template>
         </el-input>
         <el-input v-model="dataForm[col]" v-if="['char','varchar','composite','i18n','tree','integer','float','decimal','numeric','timedelta'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
             <template #ffix>
-                <el-button type="primary" size="mini" icon="el-icon-monitor" v-if="isCompute(col)"></el-button>
+                <el-button type="primary" size="small" :icon="Monitor" v-if="isCompute(col)"></el-button>
             </template>
         </el-input>
         <el-input v-model="dataForm[col]" type="textarea" v-if="['text','xml'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)"></el-input>
@@ -46,6 +46,8 @@ import {
     defineComponent, defineAsyncComponent, createVNode, render, ref, reactive, onMounted, getCurrentInstance
 }
 from 'vue';
+
+import { Monitor, Search } from '@element-plus/icons-vue'
 
 export default defineComponent({
     name: 'gp-selectable',
@@ -246,7 +248,9 @@ export default defineComponent({
             do_search,
             onSearch,
             onCancel,
-            isCompute
+            isCompute,
+            Search,
+            Monitor
         };
     }
 });
