@@ -1,28 +1,39 @@
 <style>
-
-
-
 </style>
 
 <template>
-
-<el-container>
-    <el-table @selection-change="handleSelectionChange" :data="tableData" style="width: 100%" fit>
-        <el-table-column type="selection" width="55">
-        </el-table-column>
-        <el-table-column :prop="getProp(col)" :label="colsLabel[col]" v-for="col in cols" :key="col">
-              <template v-if="colsType[col] == 'selection'" #default="scope">
-                {{ selOptions[col][scope.row[col]] }}
-              </template>
-              <template v-else-if="colsType[col] == 'boolean'" #default="scope">
-                <el-checkbox v-model="scope.row[col]" disabled></el-checkbox>
-              </template>        
-        </el-table-column>
-    </el-table>
-</el-container>
-<el-pagination v-if="tableData.length > pageSize" background layout="prev, pager, next" @current-change="handleCurrentChange" :page-size="pageSize" :total="tableData.length">
-</el-pagination>
-
+    <el-container>
+        <el-table
+            @selection-change="handleSelectionChange"
+            :data="tableData"
+            style="width: 100%"
+            fit
+        >
+            <el-table-column type="selection" width="55"></el-table-column>
+            <el-table-column
+                :prop="getProp(col)"
+                :label="colsLabel[col]"
+                v-for="col in cols"
+                :key="col"
+            >
+                <template
+                    v-if="colsType[col] == 'selection'"
+                    #default="scope"
+                >{{ selOptions[col][scope.row[col]] }}</template>
+                <template v-else-if="colsType[col] == 'boolean'" #default="scope">
+                    <el-checkbox v-model="scope.row[col]" disabled></el-checkbox>
+                </template>
+            </el-table-column>
+        </el-table>
+    </el-container>
+    <el-pagination
+        v-if="tableData.length > pageSize"
+        background
+        layout="prev, pager, next"
+        @current-change="handleCurrentChange"
+        :page-size="pageSize"
+        :total="tableData.length"
+    ></el-pagination>
 </template>
 
 <script>
@@ -30,7 +41,7 @@
 import {
     defineComponent, ref, reactive, onBeforeMount
 }
-from 'vue'
+    from 'vue'
 export default defineComponent({
     name: 'gp-m2m-list',
     props: ['metas', 'model', 'tableData'],
@@ -70,8 +81,8 @@ export default defineComponent({
         onBeforeMount(() => {
             for (
                 let i = 0,
-                    c = props.metas[props.model].views.m2mlist.columns.map((v) => v.col),
-                    meta = props.metas[props.model].meta.columns; i < c.length; i++
+                c = props.metas[props.model].views.m2mlist.columns.map((v) => v.col),
+                meta = props.metas[props.model].meta.columns; i < c.length; i++
             ) {
                 colsType[c[i]] = meta[c[i]].type
                 colsLabel[c[i]] = meta[c[i]].label

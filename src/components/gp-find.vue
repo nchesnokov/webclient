@@ -1,45 +1,80 @@
 <style>
-
-
-
 </style>
 
 <template>
-
-<el-dialog :title="'Find:'+model" v-model="showDialog" width="60%">
-    <template v-if="Object.keys(metas).length > 0">
-        <gp-selectable v-if="showSearch || callbackOpts.mode == 'find'" :cid="cid" :columns="metas[model].meta.columns" :names="metas[model].meta.names" @update:search="do_search" @update:search-cancel="showSearch = false" :extcond="extcond"></gp-selectable>
-        <el-row>{{ metas[model].meta.description }}</el-row>
-        <el-row v-if="!showSearch">
-            <el-button type="primary" @click="do_select">Search</el-button>
-        </el-row>
-        <el-container>
-            <template v-if="mode=='single'">
-                <el-table border highlight-current-row @current-change="handleCurrentChange" :data="tableDataDisplay" fit>
-                    <el-table-column :type="mode == 'single' ? 'index' : 'selection'" width="55">
-                    </el-table-column>
-                    <el-table-column :prop="getProp(col)" :label="colsLabel[col]" v-for="col in cols" :key="col"></el-table-column>
-                </el-table>
-            </template>
-            <template v-else-if="mode=='multiple'">
-                <el-table border @selection-change="handleSelectionChange" :data="tableDataDisplay">
-                    <el-table-column :type="mode == 'single' ? 'index' : 'selection'" width="55">
-                    </el-table-column>
-                    <el-table-column :prop="getProp(col)" :label="colsLabel[col]" v-for="col in cols" :key="col"></el-table-column>
-                </el-table>
-            </template>
-
-        </el-container>
-        <el-row>
-            <el-button type="danger" @click="onCancel">Cancel</el-button>
-            <el-button v-if="mode == 'single' && currentRow != null || multipleSelection.length > 0" type="primary" @click="onSelect">Select</el-button>
-        </el-row>
-        <el-pagination v-if="tableData.length > pageSize" background layout="total, prev, pager, next, jumper" @current-change="handleCurrentPageChange" :page-size="pageSize" :total="tableData.length">
-        </el-pagination>
-
-    </template>
-</el-dialog>
-
+    <el-dialog :title="'Find:' + model" v-model="showDialog" width="60%">
+        <template v-if="Object.keys(metas).length > 0">
+            <gp-selectable
+                v-if="showSearch || callbackOpts.mode == 'find'"
+                :cid="cid"
+                :columns="metas[model].meta.columns"
+                :names="metas[model].meta.names"
+                @update:search="do_search"
+                @update:search-cancel="showSearch = false"
+                :extcond="extcond"
+            ></gp-selectable>
+            <el-row>{{ metas[model].meta.description }}</el-row>
+            <el-row v-if="!showSearch">
+                <el-button type="primary" @click="do_select">Search</el-button>
+            </el-row>
+            <el-container>
+                <template v-if="mode == 'single'">
+                    <el-table
+                        border
+                        highlight-current-row
+                        @current-change="handleCurrentChange"
+                        :data="tableDataDisplay"
+                        fit
+                    >
+                        <el-table-column
+                            :type="mode == 'single' ? 'index' : 'selection'"
+                            width="55"
+                        ></el-table-column>
+                        <el-table-column
+                            :prop="getProp(col)"
+                            :label="colsLabel[col]"
+                            v-for="col in cols"
+                            :key="col"
+                        ></el-table-column>
+                    </el-table>
+                </template>
+                <template v-else-if="mode == 'multiple'">
+                    <el-table
+                        border
+                        @selection-change="handleSelectionChange"
+                        :data="tableDataDisplay"
+                    >
+                        <el-table-column
+                            :type="mode == 'single' ? 'index' : 'selection'"
+                            width="55"
+                        ></el-table-column>
+                        <el-table-column
+                            :prop="getProp(col)"
+                            :label="colsLabel[col]"
+                            v-for="col in cols"
+                            :key="col"
+                        ></el-table-column>
+                    </el-table>
+                </template>
+            </el-container>
+            <el-row>
+                <el-button type="danger" @click="onCancel">Cancel</el-button>
+                <el-button
+                    v-if="mode == 'single' && currentRow != null || multipleSelection.length > 0"
+                    type="primary"
+                    @click="onSelect"
+                >Select</el-button>
+            </el-row>
+            <el-pagination
+                v-if="tableData.length > pageSize"
+                background
+                layout="total, prev, pager, next, jumper"
+                @current-change="handleCurrentPageChange"
+                :page-size="pageSize"
+                :total="tableData.length"
+            ></el-pagination>
+        </template>
+    </el-dialog>
 </template>
 
 <script>
@@ -47,7 +82,7 @@
 import {
     defineComponent, reactive, ref, computed, onMounted, getCurrentInstance
 }
-from 'vue'
+    from 'vue'
 
 export default defineComponent({
     name: 'gp-find',
@@ -63,7 +98,7 @@ export default defineComponent({
         mode: {
             type: String,
             default: 'single',
-            validator: function(value) {
+            validator: function (value) {
                 return ['single', 'multiple'].indexOf(value) >= 0
             }
         },
@@ -75,7 +110,7 @@ export default defineComponent({
         },
         extcond: {
             type: Array,
-            default: function() {
+            default: function () {
                 return []
             }
         }
@@ -102,12 +137,12 @@ export default defineComponent({
         }
         const onSelect = () => {
             console.log('onSelect:')
-            if (['find','autofind'].indexOf(props.callbackOpts.mode) >= 0 && props.callback != null) {
+            if (['find', 'autofind'].indexOf(props.callbackOpts.mode) >= 0 && props.callback != null) {
                 if (props.mode == 'single')
                     props.callback({
-                            id: currentRow.value.id,
-                            name: currentRow.value[metas[props.model].meta.names.rec_name]
-                        },
+                        id: currentRow.value.id,
+                        name: currentRow.value[metas[props.model].meta.names.rec_name]
+                    },
                         props.callbackOpts
                     )
                 else {
@@ -137,7 +172,7 @@ export default defineComponent({
         }
 
         const getProp = col => {
-            return ['many2one','referenced', 'related'].indexOf(colsType[col]) >= 0 ? col + '.name' : col
+            return ['many2one', 'referenced', 'related'].indexOf(colsType[col]) >= 0 ? col + '.name' : col
         }
 
         const do_select = () => {
@@ -148,19 +183,19 @@ export default defineComponent({
             if (props.extcond.length > 0)
                 for (let i = 0; i < props.extcond.length; i++) event.cond.push(props.extcond[i]);
             proxy.$websocket.send({
-                    _msg: [
-                        props.cid,
-                        'models',
-                        props.model,
-                        'select', {
-                            fields: metas[props.model].views.find.columns.map((v) => v.col),
-                            cond: event.cond,
-                            context: proxy.$UserPreferences.Context,
-                            offset: event.offset.value,
-                            limit: event.limit.value
-                        }
-                    ]
-                },
+                _msg: [
+                    props.cid,
+                    'models',
+                    props.model,
+                    'select', {
+                        fields: metas[props.model].views.find.columns.map((v) => v.col),
+                        cond: event.cond,
+                        context: proxy.$UserPreferences.Context,
+                        offset: event.offset.value,
+                        limit: event.limit.value
+                    }
+                ]
+            },
                 on_select_data
             )
         }
@@ -172,7 +207,7 @@ export default defineComponent({
         }
 
         const tableDataDisplay = computed(() => {
-            console.log('computed:', tableData === null || tableData.length === 0 ? reactive([]):tableData.slice(pageSize.value * page.value - pageSize.value, pageSize.value * page.value));
+            console.log('computed:', tableData === null || tableData.length === 0 ? reactive([]) : tableData.slice(pageSize.value * page.value - pageSize.value, pageSize.value * page.value));
             if (tableData === null || tableData.length === 0) return reactive([])
             else return tableData.slice(pageSize.value * page.value - pageSize.value, pageSize.value * page.value)
         })
@@ -188,16 +223,16 @@ export default defineComponent({
                 if (colsType[c[i]] == 'one2many') o2mcols.push(c[i])
                 else cols.push(c[i])
             }
-            if (props.callbackOpts.mode == 'autofind') do_search({'cond':[],'offset':0,'limit':80})
+            if (props.callbackOpts.mode == 'autofind') do_search({ 'cond': [], 'offset': 0, 'limit': 80 })
         }
 
         onMounted(() => {
             proxy.$websocket.send({
-                    _msg: [props.cid, 'uis', 'get_meta_of_models_v2', {
-                        model: props.model,
-                        context: proxy.$UserPreferences.Context
-                    }]
-                },
+                _msg: [props.cid, 'uis', 'get_meta_of_models_v2', {
+                    model: props.model,
+                    context: proxy.$UserPreferences.Context
+                }]
+            },
                 on_load_meta
             )
         })
