@@ -1,6 +1,7 @@
 {
   "name": "webclient",
   "version": "1.0.1",
+  "license": "CPL-1.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

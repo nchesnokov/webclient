@@ -1,60 +1,170 @@
 <template>
+    <el-pagination
+        v-if="cdata.length > 1"
+        background
+        layout="total, prev, pager, next, jumper"
+        @current-change="handleCurrentChange"
+        :page-size="pageSize"
+        :total="cdata.length"
+    ></el-pagination>
 
-<el-pagination v-if="cdata.length > 1" background layout="total, prev, pager, next, jumper" @current-change="handleCurrentChange" :page-size="pageSize" :total="cdata.length">
-</el-pagination>
+    <el-form
+        v-if="cdata.length > 0"
+        :modelValue="cdata[page - 1].__data__"
+        label-width="auto"
+        status-icon
+        inline-message
+    >
+        <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
+            <el-input
+            v-model="cdata[page-1].__data__[col].name"
+                @change="cache(cdata[page-1], col)"
+                v-if="['many2one', 'referenced', 'related'].indexOf(colsType[col]) >= 0"
+                :prefix-icon="isCompute(col) ? 'el-icon-s-data' : ''"
+                :readonly="readonly(col)"
+            >
+                <template #suffix>
+                    <el-button type="primary" size="small" :icon="Search" @click="do_find(col, 'single', [], { 'item': cdata[page - 1] })"></el-button>
+                    <el-button type="primary" size="small" :icon="DocumentAdd" @click="do_add(col)"></el-button>
+                    <el-button
+                        v-if="cdata[page - 1].__data__[col].id != null"
+                        type="primary"
+                        size="small"
+                        :icon="Edit"
+                        @click="do_edit(col, cdata[page - 1].__data__[col].id)"
+                    ></el-button>
+                    <el-button
+                        v-if="cdata[page - 1].__data__[col].id != null"
+                        type="primary"
+                        size="small"
+                        :icon="View"
+                        @click="do_lookup(col, cdata[page - 1].__data__[col].id)"
+                    ></el-button>
+                </template>
+            </el-input>
+            <json-viewer
+                v-if="colsType[col] == 'json'"
+                :value="cdata[page - 1].__data__[col]"
+                copyable
+                boxed
+                sort
+            />
 
-<el-form v-if="cdata.length > 0" :modelValue="cdata[page-1].__data__" label-width="auto" status-icon inline-message>
-    <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
-        <el-input :modelValue="cdata[page-1].__data__[col].name" @update:modelValue="cache($event)" v-if="['many2one','referenced','related'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
-            <template #suffix>
-                <el-button type="primary" size="small" :icon="Search" @click="do_find(col)"></el-button>
-                <el-button type="primary" size="small" :icon="DocumentAdd" @click="do_add(col)"></el-button>
-                <el-button v-if="cdata[page-1].__data__[col].id != null" type="primary" size="small" :icon="Edit" @click="do_edit(col,cdata[page-1].__data__[col].id)"></el-button>
-                <el-button v-if="cdata[page-1].__data__[col].id != null" type="primary" size="small" :icon="View" @click="do_lookup(col,cdata[page-1].__data__[col].id)"></el-button>
-            </template>
-        </el-input>
-        <json-viewer v-if="colsType[col] == 'json'" :value="cdata[page-1].__data__[col]" copyable boxed sort />
-
-        <el-input :modelValue="cdata[page-1].__data__[col]" @update:modelValue="cache($event)" v-else-if="['char','varchar','composite','decomposite','tree'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
-            <template #prefix>
-                      <el-dropdown v-if="colsTranslate[col]" @command="i18nCommand">
-                          <span class="el-dropdown-link">
-                          {{colsLang[col].toLowerCase()}}<i class="el-icon-arrow-down el-icon--right"></i>
+            <el-input
+            v-model="cdata[page-1].__data__[col]"
+                @change="cache(cdata[page-1], col)"
+                v-else-if="['char', 'varchar', 'composite', 'decomposite', 'tree'].indexOf(colsType[col]) >= 0"
+                :prefix-icon="isCompute(col) ? 'el-icon-s-data' : ''"
+                :readonly="readonly(col)"
+            >
+                <template #prefix>
+                    <el-dropdown v-if="colsTranslate[col]" @command="i18nCommand">
+                        <span class="el-dropdown-link">
+                            {{ colsLang[col].toLowerCase() }}
+                            <i class="el-icon-arrow-down el-icon--right"></i>
                         </span>
-                          <template #dropdown>
-                              <el-dropdown-menu>
-                                  <el-dropdown-item v-for="lang in $UserPreferences.langs" :key=lang.code :command="{col:col,lang:lang.code}">{{lang.description}}</el-dropdown-item>
-                              </el-dropdown-menu>
-                          </template>
-          </el-dropdown>
+                        <template #dropdown>
+                            <el-dropdown-menu>
+                                <el-dropdown-item
+                                    v-for="lang in $UserPreferences.langs"
+                                    :key="lang.code"
+                                    :command="{ col: col, lang: lang.code }"
+                                >{{ lang.description }}</el-dropdown-item>
+                            </el-dropdown-menu>
+                        </template>
+                    </el-dropdown>
+                </template>
+            </el-input>
 
-            </template>
-        </el-input>
-
-
-        <el-input :modelValue="cdata[page-1].__data__[col]" @update:modelValue="cache($event)" v-else-if="['integer','float','decimal','numeric','timedelta'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
-            <template #prefix>
-                <el-button type="primary" size="mini" icon="el-icon-monitor" v-if="isCompute(col)"></el-button>
-            </template>
-        </el-input>
-        <el-input :modelValue="cdata[page-1].__data__[col]" @update:modelValue="cache($event)" autosize type="textarea" v-else-if="['text','xml'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)"></el-input>
-        <el-date-picker :modelValue="cdata[page-1].__data__[col]" @update:modelValue="cache($event)" v-else-if="colsType[col] == 'date'" :readonly="readonly(col)"></el-date-picker>
-        <el-time-picker :modelValue="cdata[page-1].__data__[col]" @update:modelValue="cache($event)" v-else-if="colsType[col] == 'time'" :readonly="readonly(col)"></el-time-picker>
-        <el-date-picker :modelValue="cdata[page-1].__data__[col]" @update:modelValue="cache($event)" type="datetime" v-else-if="colsType[col] == 'datetime'" :readonly="readonly(col)"></el-date-picker>
-        <el-select :modelValue="cdata[page-1].__data__[col]" @update:modelValue="cache($event)" v-else-if="colsType[col] == 'selection'" :disabled="readonly(col)">
-            <el-option v-for="item in selOptions[col]" :key="item.value" :label="item.label" :value="item.value"></el-option>
-        </el-select>
-        <gp-m2m-list :metas="metas" :model="metas[model].meta.columns[col].obj" :tableData="cdata[page-1].__m2m_containers__[col]" v-else-if="colsType[col] == 'many2many'">{{ colsLabel[col] }}</gp-m2m-list>
-        <el-checkbox :value="cdata[page-1].__data__[col]" @update:modelValue="cache($event)" v-else-if="colsType[col] == 'boolean'" :disabled="readonly(col)"></el-checkbox>
-        <el-image v-else-if="colsType[col] == 'binary' && metas[model].meta.columns[col].accept == 'image/*'" style="width: 100px; height: 100px" src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg" fit="fit"></el-image>
-    </el-form-item>
-    <el-tabs type="border-card" v-if="o2mcols.length > 0">
-        <el-tab-pane :label="colsLabel[o2mcol]" v-for="o2mcol in o2mcols" :key="o2mcol">
-            <gp-o2m-components :cid="cid" :metas="metas" :model="metas[model].meta.columns[o2mcol].obj" :cdata="cdata[page-1].__o2m_containers__[o2mcol]" :mode="mode" :rel="metas[model].meta.columns[o2mcol].rel"/>
-        </el-tab-pane>
-    </el-tabs>
-</el-form>
-
+            <el-input
+            v-model="cdata[page-1].__data__[col]"
+                @change="cache(cdata[page-1], col)"
+                v-else-if="['integer', 'float', 'decimal', 'numeric', 'timedelta'].indexOf(colsType[col]) >= 0"
+                :prefix-icon="isCompute(col) ? 'el-icon-s-data' : ''"
+                :readonly="readonly(col)"
+            >
+                <template #prefix>
+                    <el-button
+                        type="primary"
+                        size="small"
+                        icon="el-icon-monitor"
+                        v-if="isCompute(col)"
+                    ></el-button>
+                </template>
+            </el-input>
+            <el-input
+                v-model="cdata[page-1].__data__[col]"
+                @change="cache(cdata[page-1], col)"
+                autosize
+                type="textarea"
+                v-else-if="['text', 'xml'].indexOf(colsType[col]) >= 0"
+                :prefix-icon="isCompute(col) ? 'el-icon-s-data' : ''"
+                :readonly="readonly(col)"
+            ></el-input>
+            <el-date-picker
+                :modelValue="cdata[page - 1].__data__[col]"
+                @update:modelValue="cache($event)"
+                v-else-if="colsType[col] == 'date'"
+                :readonly="readonly(col)"
+            ></el-date-picker>
+            <el-time-picker
+                :modelValue="cdata[page - 1].__data__[col]"
+                @update:modelValue="cache($event)"
+                v-else-if="colsType[col] == 'time'"
+                :readonly="readonly(col)"
+            ></el-time-picker>
+            <el-date-picker
+                :modelValue="cdata[page - 1].__data__[col]"
+                @update:modelValue="cache($event)"
+                type="datetime"
+                v-else-if="colsType[col] == 'datetime'"
+                :readonly="readonly(col)"
+            ></el-date-picker>
+            <el-select
+                :modelValue="cdata[page - 1].__data__[col]"
+                @update:modelValue="cache($event)"
+                v-else-if="colsType[col] == 'selection'"
+                :disabled="readonly(col)"
+            >
+                <el-option
+                    v-for="item in selOptions[col]"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                ></el-option>
+            </el-select>
+            <gp-m2m-list
+                :metas="metas"
+                :model="metas[model].meta.columns[col].obj"
+                :tableData="cdata[page - 1].__m2m_containers__[col]"
+                v-else-if="colsType[col] == 'many2many'"
+            >{{ colsLabel[col] }}</gp-m2m-list>
+            <el-checkbox
+                :value="cdata[page - 1].__data__[col]"
+                @update:modelValue="cache($event)"
+                v-else-if="colsType[col] == 'boolean'"
+                :disabled="readonly(col)"
+            ></el-checkbox>
+            <el-image
+                v-else-if="colsType[col] == 'binary' && metas[model].meta.columns[col].accept == 'image/*'"
+                style="width: 100px; height: 100px"
+                src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+                fit="fit"
+            ></el-image>
+        </el-form-item>
+        <el-tabs type="border-card" v-if="o2mcols.length > 0">
+            <el-tab-pane :label="colsLabel[o2mcol]" v-for="o2mcol in o2mcols" :key="o2mcol">
+                <gp-o2m-components
+                    :cid="cid"
+                    :metas="metas"
+                    :model="metas[model].meta.columns[o2mcol].obj"
+                    :cdata="cdata[page - 1].__o2m_containers__[o2mcol]"
+                    :mode="mode"
+                    :rel="metas[model].meta.columns[o2mcol].rel"
+                />
+            </el-tab-pane>
+        </el-tabs>
+    </el-form>
 </template>
 
 <script>
@@ -69,18 +179,19 @@ import {
     render,
     createVNode
 }
-from 'vue'
+    from 'vue'
 
 import { Monitor, Search, DocumentAdd, Edit, View } from '@element-plus/icons-vue'
+import on_modify_models from '../js/nf.js'
 
 export default defineComponent({
     name: 'gp-o2m-form',
-    props: ['cid', 'guid', 'root', 'metas', 'model', 'container', 'cdata', 'mode','rel'],
+    props: ['cid', 'guid', 'root', 'metas', 'model', 'container', 'cdata', 'mode', 'rel'],
     setup(props) {
         const {
             proxy
         } = getCurrentInstance()
-            //const mode = ref('new')
+        //const mode = ref('new')
         const page = ref(1)
         const pageSize = ref(1)
         const showSearch = ref(false)
@@ -90,6 +201,7 @@ export default defineComponent({
         const colsLang = reactive({})
         const selOptions = reactive({})
         const fields = reactive([])
+        //const dataForm = reactive({})
         const cols = reactive([])
         const o2mcols = reactive([])
         const multipleSelection = reactive([])
@@ -98,10 +210,10 @@ export default defineComponent({
             return props.mode == 'lookup' || isCompute(col)
         }
 
-      const i18nCommand = command => {
-        //console.log('command-18n:',command)
-        colsLang[command.col] = command.lang
-      }
+        const i18nCommand = command => {
+            //console.log('command-18n:',command)
+            colsLang[command.col] = command.lang
+        }
 
 
         const handleSelectionChange = val => {
@@ -114,15 +226,108 @@ export default defineComponent({
         }
 
 
-       const cache = (event) => {
-         console.log('event-cache:',event)
-       }
+        const cache = (item, name) => {
+            console.log('cache-item:', name, item.__data__[name], item)
+            let value
+            switch (props.metas[props.model].meta.columns[name].type) {
+                case 'integer':
+                    value = parseInt(item.__data__[name], 10)
+                    break
+                case 'float':
+                case 'double':
+                    value = parseFloat(item.__data__[name])
+                    break
+                case 'real':
+                case 'decimal':
+                case 'numeric':
+                    value = {
+                        __decimal__: item.__data__[name]
+                    }
+                    break
+                case 'datetime':
+                    if (props.metas[props.model].meta.columns[name].timezone)
+                        value = {
+                            __datetime_tz__: item.__data__[name].toJsonString()
+                        }
+                    else
+                        value = {
+                            __datetime__: item.__data__[name].toJsonString()
+                        }
+                    break
+                case 'date':
+                    value = {
+                        __date__: item.__data__[name]
+                    }
+                    break
+                case 'time':
+                    if (props.metas[props.model].meta.columns[name].timezone)
+                        value = {
+                            __time_tz__: item.__data__[name]
+                        }
+                    else
+                        value = {
+                            __time__: item.__data__[name]
+                        }
+                    break
+                case 'timedelta':
+                    value = {
+                        __timedelta__: item.__data__[name]
+                    }
+                    break
+                case 'many2one':
+                case 'related':
+                    //console.log('typeof-value:',typeof item[name]);
+                    if ('__data__' in item) {
+                        if (typeof item.__data__[name] == 'object') value = item.__data__[name]
+                        else {
+                            value = {
+                                id: item.__data__[name].id,
+                                name: item.__data__[name].name
+                            }
+                            item.__data__.id = value.id
+                            item.__data__.name = value.name
+                        }
+                    } else {
+                        if (typeof item[name] == 'object') value = item[name]
+                        else {
+                            value = {
+                                id: item[name].id,
+                                name: item[name].name
+                            }
+                            item.__data__.id = value.id
+                            item.__data__.name = value.name
+                        }
+                    }
+                    break
+                default:
+                    value = item.__data__[name]
+            }
+            let r = {
+                path: item.__path__,
+                key: name,
+                value: value,
+                context: proxy.$UserPreferences.Context
+            }
+            console.log('cache:', r)
+            proxy.$websocket
+                .sendAsync({
+                    _msg: [props.cid, '_cache', 'cache', props.guid, r]
+                })
+                .then(v => {
+                    console.log('cache:', v);
+                    on_modify_models(props.root.meta__cache__,props.root.dataForm,v[0]);
+                })
+        }
+
+        const cache1 = (event) => {
+            console.log('event-cache:', event)
+        }
 
         const isCompute = col => {
             return (
                 ('compute' in props.metas[props.model].meta.columns[col] &&
                     props.metas[props.model].meta.columns[col].compute != null) ||
-                ['composite','tree'].indexOf(colsType[col]) >= 0
+                ['composite', 'tree'].indexOf(colsType[col]) >= 0
             )
         }
 
@@ -138,14 +343,23 @@ export default defineComponent({
         const on_find_new = (value, opts) => {
             console.log('on_find_new:', value, opts)
             if (
-                ['new', 'edit'].indexOf(props.mode) >= 0 &&
+                ['new', 'edit'].indexOf(opts.mode.value) >= 0 &&
                 value.id &&
                 value.id.length > 0 &&
                 value.name &&
                 value.name.length > 0
             )
-            if (props.cdata[page.value-1].__data__[opts.col].id != value.id || props.cdata[page.value-1].__data__[opts.col].name != value.name) cache({'id':value.id,'name':value.name})
-            //props.cdata[opts.col] = value
+                Object.assign(dataForm.__data__[opts.col], value)
+            cache(opts.item, opts.col);
+        }
+
+        const on_find_m2m = (value, opts) => {
+            console.log('on_find_m2m:', value, opts)
+            if (
+                ['new', 'edit'].indexOf(mode.value) >= 0 &&
+                value.length > 0
+            )
+                dataForm.__m2m_containers__[opts.col].splice(dataForm.__m2m_containers__[opts.col].length, 0, ...value)
         }
 
         const fieldsBuild = (model, view) => {
@@ -170,20 +384,22 @@ export default defineComponent({
             return fcols
         }
 
-        const do_find = col => {
+        const do_find = (col, mode = 'single', extcond = [], callbackopts = {}) => {
             const rootComponent = defineAsyncComponent({
                 loader: () =>
-                    import ('./gp-find.vue'),
+                    import('./gp-find.vue'),
                 suspensible: false
             })
             const rootProps = {
                 cid: props.cid,
                 model: props.metas[props.model].meta.columns[col].obj,
-                mode: 'single',
-                callback: on_find_new,
+                mode: mode,
+                callback: mode == 'single' ? on_find_new : on_find_m2m,
+                extcond: extcond,
                 callbackOpts: {
+                    ...callbackopts,
                     col: col,
-                    mode: 'find'
+                    mode: 'mode' in callbackopts ? callbackopts.mode : 'find'
                 }
             }
             const vnode = createVNode(rootComponent, rootProps)
@@ -196,7 +412,7 @@ export default defineComponent({
         const do_modal_form = (col, oid, mode) => {
             const rootComponent = defineAsyncComponent({
                 loader: () =>
-                    import ('./gp-form-modal.vue'),
+                    import('./gp-form-modal.vue'),
                 suspensible: false
             })
             const rootProps = {
@@ -253,8 +469,8 @@ export default defineComponent({
         onMounted(() => {
             for (
                 let i = 0,
-                    c = props.metas[props.model].views.form.columns.map((v) => v.col).filter((c) => c != props.rel),
-                    meta = props.metas[props.model].meta.columns; i < c.length; i++
+                c = props.metas[props.model].views.form.columns.map((v) => v.col).filter((c) => c != props.rel),
+                meta = props.metas[props.model].meta.columns; i < c.length; i++
             ) {
                 colsType[c[i]] = meta[c[i]].type
                 colsLabel[c[i]] = meta[c[i]].label
@@ -289,6 +505,9 @@ export default defineComponent({
                 */
             }
             fields.splice(0, fields.length, ...fieldsBuild(props.model, 'form'))
+            //Object.assign(dataForm,props.cdata[page.value-1])
+            //console.log('o2mdataform',dataForm)
+
         })
         return {
             readonly,
@@ -303,6 +522,7 @@ export default defineComponent({
             colsLabel,
             colsTranslate,
             selOptions,
+            //dataForm,
             fields,
             cols,
             o2mcols,
@@ -315,6 +535,7 @@ export default defineComponent({
             do_lookup,
             on_find_new,
             cache,
+            on_modify_models,
             Search,
             Monitor,
             DocumentAdd,

@@ -42,6 +42,9 @@ import {
     defineComponent, ref, reactive, onMounted, computed, getCurrentInstance
 }
 from 'vue'
+
+import on_modify_models from '../js/nf'
+
 export default defineComponent({
     name: 'gp-o2m-list',
     props: ['cid', 'guid', 'root', 'metas', 'model', 'container', 'cdata', 'mode','rel'],
@@ -69,7 +72,8 @@ export default defineComponent({
 
         //const addRow = () => {}
         const add_row = (model,container,view) => {
-            proxy.$websocket.sendAsync({_msg:[props.cid,'_cache','add',props.guid,{'model':props.model,'container':props.container,'context':{},'view':view}]}).then((msg) => props.root.on_modify_models(msg[0]));
+            proxy.$websocket.sendAsync({_msg:[props.cid,'_cache','add',props.guid,{'model':props.model,'container':props.container,'context':{},'view':view}]}).then((msg) => 
+            on_modify_models(props.root.meta__cache__, props.cdata[page-1],msg[0]));
         }
 
 
