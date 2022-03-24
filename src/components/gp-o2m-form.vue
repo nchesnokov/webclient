@@ -18,7 +18,7 @@
         <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
             <el-input
             v-model="cdata[page-1].__data__[col].name"
-                @change="cache(cdata[page-1], col)"
+                @change="m2o_cache(cdata[page-1], col)"
                 v-if="['many2one', 'referenced', 'related'].indexOf(colsType[col]) >= 0"
                 :prefix-icon="isCompute(col) ? 'el-icon-s-data' : ''"
                 :readonly="readonly(col)"
@@ -182,7 +182,7 @@ import {
     from 'vue'
 
 import { Monitor, Search, DocumentAdd, Edit, View } from '@element-plus/icons-vue'
-import on_modify_models from '../js/nf.js'
+import { on_modify_models } from '../js/nf.js'
 
 export default defineComponent({
     name: 'gp-o2m-form',
@@ -223,6 +223,97 @@ export default defineComponent({
         const handleCurrentChange = val => {
             page.value = val
 
+        }
+
+        const m2o_cache = (item, name) => {
+            console.log('m2o_cache:', name, item.__data__[name], item)
+            if (item.__data__[name].name.length == 0) {
+                item.__data__[name].id = null
+                item.__data__[name].name = null
+                cache(item, name);
+                return
+            }
+            let r = {
+                'path': item.__path__,
+                'model': item.__model__,
+                'key': name,
+                'value': item.__data__[name],
+                'context': proxy.$UserPreferences.Context
+            }
+            //console.log('cache:',r);
+            proxy.$websocket.sendAsync({
+                '_msg': [props.cid, '_cache', 'm2ofind', guid.value, r]
+            }).then((v) => {
+                console.log('m2ofind:', v);
+                let f = v[0];
+                if (f.__m2o_find__.__data__.v.length == 1) {
+                    dataForm.__data__[name] = f.__m2o_find__.__data__.v[0];
+                    cache(item, name);
+                } else {
+                    let extcond = [];
+                    if ('domain' in props.metas[props.model].meta.columns[name] && props.metas[props.model].meta.columns[name].domain != null)
+                        for (let i = 0, d = props.metas[props.model].meta.columns[name].domain; i < d.length; i++) extcond.push({
+                            '__tuple__': d[i]
+                        });
+                    if (f.__m2o_find__.__data__.v.length > 1) extcond.push({
+                        '__tuple__': ['id', 'in', f.__m2o_find__.__data__.v]
+                    })
+                    do_find(name, 'single', extcond, {
+                        'item': item,
+                        'mode': 'autofind'
+                    })
+                }
+            });
+        }
+
+        const related_cache = (item, name, relatedy) => {
+            if (item.__data__[name].name.length == 0) {
+                item.__data__[name].id = null
+                item.__data__[name].name = null
+                cache(item, name);
+                return
+            }
+            let r = {
+                'path': item.__path__,
+                'model': item.__model__,
+                'key': name,
+                'value': item.__data__[name],
+                'relatedy': relatedy,
+                'context': proxy.$UserPreferences.Context
+            }
+            //console.log('cache-related:',r);
+            proxy.$websocket.sendAsync({
+                '_msg': [props.cid, '_cache', 'relatedfind', guid.value, r]
+            }).then((v) => {
+                console.log('relatedfind:', v);
+                let f = v[0];
+                if (f.__related_find__.__data__.v.length == 1) {
+                    dataForm.__data__[name] = f.__related_find__.__data__.v[0];
+                    cache(item, name);
+                } else {
+                    let extcond = [];
+                    if ('domain' in props.metas[props.model].meta.columns[name] && props.metas[props.model].meta.columns[name].domain != null)
+                        for (let i = 0, d = props.metas[props.model].meta.columns[name].domain; i < d.length; i++) extcond.push({
+                            '__tuple__': d[i]
+                        });
+                    if ('relatedy' in props.metas[props.model].meta.columns[name] && props.metas[props.model].meta.columns[name].relatedy != null)
+                        for (let i = 0, relatedy, relatedyd; i < props.metas[props.model].meta.columns[name].relatedy.length; i++) {
+                            relatedy = props.metas[props.model].meta.columns[name].relatedy[i].__tuple__[0];
+                            relatedyd = props.metas[props.model].meta.columns[name].relatedy[i].__tuple__[1];
+                            if (item.__data__[relatedy] != null && item.__data__[relatedy].name != null && item.__data__[relatedy].name.length > 0) extcond.push({
+                                __tuple__: [relatedyd, '=', item.__data__[relatedy].name]
+                            });
+
+                            if (f.__relatedy_find__.__data__.v.length > 1) extcond.push({
+                                '__tuple__': ['id', 'in', f.__related_find__.__data__.v]
+                            })
+                            do_find(name, 'single', extcond, {
+                                'item': item,
+                                'mode': 'autofind'
+                            })
+                        }
+                }
+            });
         }
 
 
@@ -315,7 +406,7 @@ export default defineComponent({
                 })
                 .then(v => {
                     console.log('cache:', v);
-                    on_modify_models(props.root.meta__cache__,props.root.dataForm,v[0]);
+                    on_modify_models(props.root.dataForm,v[0]);
                 })
         }
 
@@ -349,7 +440,8 @@ export default defineComponent({
                 value.name &&
                 value.name.length > 0
             )
-                Object.assign(dataForm.__data__[opts.col], value)
+                dataForm.__data__[opts.col] = value
+                opts.item.__data__[opts.col] = value
             cache(opts.item, opts.col);
         }
 
@@ -535,6 +627,8 @@ export default defineComponent({
             do_lookup,
             on_find_new,
             cache,
+            m2o_cache,
+            related_cache,
             on_modify_models,
             Search,
             Monitor,

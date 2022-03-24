@@ -263,7 +263,7 @@
                         :metas="metas"
                         :model="metas[model].meta.columns[o2mcol].obj"
                         :container="o2mcol + '.' + dataForm.__path__"
-                        :cdata="dataForm.__o2m_containers__[o2mcol]"
+                        :cdata="dataForm.__containers__[o2mcol + '.' + dataForm.__path__]"
                         :mode="mode"
                         :rel="metas[model].meta.columns[o2mcol].rel"
                     />
@@ -323,7 +323,7 @@ import {
 }
     from 'vue'
 
-import on_modify_models from '../js/nf.js'
+import { on_modify_models } from '../js/nf.js'
 
 import { Monitor, Search, DocumentAdd, Edit, View } from '@element-plus/icons-vue'
 
@@ -354,11 +354,11 @@ export default defineComponent({
         const {
             proxy
         } = getCurrentInstance()
-        const meta__cache__ = reactive({
-            '__data__': {},
-            '__meta__': {},
-            '__containers__': {}
-        })
+//        const meta__cache__ = reactive({
+//           '__data__': {},
+//            '__meta__': {},
+//            '__containers__': {}
+//        })
         const mode = ref('new')
         const guid = ref(null)
         const page = ref(1)
@@ -369,7 +369,11 @@ export default defineComponent({
         const colsSize = reactive({})
         const colsTranslate = reactive({})
         const colsLang = reactive({})
-        const dataForm = reactive({})
+        const dataForm = reactive({
+            '__data__': {},
+            '__meta__': {},
+            '__containers__': {}
+        })
         const selOptions = reactive({})
         const fields = reactive([])
         const cols = reactive([])
@@ -394,17 +398,27 @@ export default defineComponent({
 
         const dataRowContainer = (containers, parent) => {
             for (let k in containers) {
-                if (!(k + '.' + parent in proxy.meta__cache__.__containers__)) meta__cache__.__containers__[k + '.' + parent] = containers[k];
+                if (!(k + '.' + parent in proxy.dataForm.__containers__))dataForm.__containers__[k + '.' + parent] = containers[k];
                 for (let i = 0; i < containers[k].length; i++) dataRow(containers[k][i]);
             }
         };
         const dataRow = (row) => {
-            if ('__data__' in row) meta__cache__.__data__[row.__path__] = row.__data__;
-            if ('__meta__' in row) meta__cache__.__meta__[row.__path__] = row.__meta__;
+            if ('__data__' in row) dataForm.__data__[row.__path__] = row.__data__;
+            if ('__meta__' in row) dataForm.__meta__[row.__path__] = row.__meta__;
             if ('__m2m_containers__' in row) dataRowContainer(row['__m2m_containers__'], row['__path__']);
             if ('__o2m_containers__' in row) dataRowContainer(row['__o2m_containers__'], row['__path__']);
         };
 
+        const dataRowForm = (row) => {
+            let value = reactive({})
+            if ('__data__' in row) value.__data__ = row.__data__;
+            if ('__meta__' in row) value.__meta__ = row.__meta__;
+            if ('__path__' in row) value.__path__ = row.__path__;
+            if ('__m2m_containers__' in row || '__o2m_containers__' in row) value.__containers__ = reactive({})
+            if ('__m2m_containers__' in row) for(let m2mkey in row['__m2m_containers__']) value.__containers__[m2mkey+'.'+row['__path__']] = row['__m2m_containers__'][m2mkey].map(dataRowForm);
+            if ('__o2m_containers__' in row) for(let o2mkey in row['__o2m_containers__']) value.__containers__[o2mkey+'.'+row['__path__']] = row['__o2m_containers__'][o2mkey].map(dataRowForm);
+            return value
+        };
 
         const cache = (item, name) => {
             console.log('cache-item:', name, item.__data__[name], item)
@@ -495,7 +509,7 @@ export default defineComponent({
                 })
                 .then(v => {
                     console.log('cache:', v);
-                    on_modify_models(meta__cache__,dataForm,v[0]);
+                    on_modify_models(dataForm,v[0]);
                 })
         }
 
@@ -908,7 +922,7 @@ export default defineComponent({
                     })
         }
         const init_metacache = () => {
-            for (let k in meta__cache__) meta__cache__[k] = {}
+            for (let k in dataForm) dataForm[k] = {}
         }
 
         const on_read = msg => {
@@ -917,7 +931,8 @@ export default defineComponent({
                 init_metacache()
                 //Object.assign(dataForm, msg[0])
                 //dataRow(dataForm)
-                dataRow(msg[0])
+                Object.assign(dataForm, dataRowForm(msg[0]))
+                console.log('dataForm:',dataForm)
             }
         }
 
@@ -935,7 +950,7 @@ export default defineComponent({
                     ]
                 })
             if (msg && msg.length > 0) guid.value = msg[0]
-            if (mode.value == 'new')
+            if (mode.value == 'new') {
                 msg = await proxy.$websocket
                     .sendAsync({
                         _msg: [
@@ -951,8 +966,10 @@ export default defineComponent({
             console.log('onBeforeMount-msg-initialize:', msg);
             if (msg && msg.length > 0) {
                 init_metacache()
-                Object.assign(dataForm, msg[0])
-                dataRow(dataForm)
+                Object.assign(dataForm,dataRowForm(msg[0]))
+                //Object.assign(dataForm, msg[0])
+                //dataRow(dataForm)
+            }
             }
 
             for (
@@ -1000,7 +1017,7 @@ export default defineComponent({
  
         return {
             proxy,
-            meta__cache__,
+//            meta__cache__,
             mode,
             guid,
             readonly,

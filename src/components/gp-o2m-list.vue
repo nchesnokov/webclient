@@ -43,7 +43,7 @@ import {
 }
 from 'vue'
 
-import on_modify_models from '../js/nf'
+import { on_modify_models } from '../js/nf'
 
 export default defineComponent({
     name: 'gp-o2m-list',
@@ -73,7 +73,7 @@ export default defineComponent({
         //const addRow = () => {}
         const add_row = (model,container,view) => {
             proxy.$websocket.sendAsync({_msg:[props.cid,'_cache','add',props.guid,{'model':props.model,'container':props.container,'context':{},'view':view}]}).then((msg) => 
-            on_modify_models(props.root.meta__cache__, props.cdata[page-1],msg[0]));
+            on_modify_models(props.root.dataForm,msg[0]));
         }
 
 
@@ -107,7 +107,7 @@ export default defineComponent({
                 if (colsType[c[i]] == 'one2many') o2mcols.push(c[i])
                 else cols.push(c[i])
             }
-            console.log('COLS:',colsType,colsLabel,cols,o2mcols);
+            //console.log('COLS:',colsType,colsLabel,cols,o2mcols,props.cdata);
         })
         return {
             page,
