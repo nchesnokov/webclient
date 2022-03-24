@@ -254,7 +254,7 @@
                 <el-image
                     v-else-if="colsType[col] == 'binary' && metas[model].meta.columns[col].accept == 'image/*'"
                     style="width: 100px; height: 100px"
-                    src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+                    :src="'data:image/jpeg;base64,'+dataForm.__data__[col]"
                     fit="fit"
                 ></el-image>
             </el-form-item>

@@ -280,12 +280,12 @@ export default defineComponent({
             }
             //console.log('cache:',r);
             proxy.$websocket.sendAsync({
-                '_msg': [props.cid, '_cache', 'm2ofind', guid.value, r]
+                '_msg': [props.cid, '_cache', 'm2ofind', props.guid, r]
             }).then((v) => {
                 console.log('m2ofind:', v);
                 let f = v[0];
                 if (f.__m2o_find__.__data__.v.length == 1) {
-                    dataForm.__data__[name] = f.__m2o_find__.__data__.v[0];
+                    props.cdata[page.value - 1].__data__[name] = f.__m2o_find__.__data__.v[0];
                     cache(item, name);
                 } else {
                     let extcond = [];
@@ -321,12 +321,12 @@ export default defineComponent({
             }
             //console.log('cache-related:',r);
             proxy.$websocket.sendAsync({
-                '_msg': [props.cid, '_cache', 'relatedfind', guid.value, r]
+                '_msg': [props.cid, '_cache', 'relatedfind', props.guid, r]
             }).then((v) => {
                 console.log('relatedfind:', v);
                 let f = v[0];
                 if (f.__related_find__.__data__.v.length == 1) {
-                    dataForm.__data__[name] = f.__related_find__.__data__.v[0];
+                    props.cdata[page.value - 1].__data__[name] = f.__related_find__.__data__.v[0];
                     cache(item, name);
                 } else {
                     let extcond = [];
