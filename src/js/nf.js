@@ -1,35 +1,35 @@
-const on_modify_models = (dataForm,values) => {
-    function _update(dataForm,diffs) {
+const on_modify_models = (dataForm, values) => {
+    function _update(dataForm, diffs) {
         if ('__update__' in diffs)
             for (let k in diffs.__update__)
                 for (let v in diffs.__update__[k]) {
                     if (k in dataForm.__data__) dataForm.__data__[k][v] = diffs.__update__[k][v];
-//                    if (k == dataForm.__path__) dataForm.__data__[v] = diffs.__update__[k][v];
+                    //                    if (k == dataForm.__path__) dataForm.__data__[v] = diffs.__update__[k][v];
                 }
 
     }
 
-    function _insert(dataForm,diffs) {
+    function _insert(dataForm, diffs) {
         if ('__insert__' in diffs)
             for (let k in diffs.__insert__)
                 for (let v in diffs.__insert__[k]) {
                     if (k in dataForm.__data__) dataForm.__data__[k][v] = diffs.__insert__[k][v];
- //                   if (k == dataForm.__path__) dataForm.__data__[v] = diffs.__insert__[k][v];
+                    //                   if (k == dataForm.__path__) dataForm.__data__[v] = diffs.__insert__[k][v];
                 }
 
     }
 
-    function _delete(dataForm,diffs) {
+    function _delete(dataForm, diffs) {
         if ('__delete__' in diffs)
             for (let k in diffs.__delete__)
                 for (let v in diffs.__insert__[k]) {
                     if (k in dataForm.__data__) delete dataForm.__data__[k][v];
-//                    if (k == self.item.__path__) delete self.item.__data__[v];
+                    //                    if (k == self.item.__path__) delete self.item.__data__[v];
                 }
 
     }
 
-    function _meta_update(dataForm,diffs) {
+    function _meta_update(dataForm, diffs) {
         if ('__meta_update__' in diffs)
             for (let k in diffs.__meta_update__)
                 for (let a in diffs.__meta_update__[k])
@@ -37,7 +37,7 @@ const on_modify_models = (dataForm,values) => {
                         dataForm.__meta__[k][a][c] = diffs.__meta_update__[k][a][c];
     }
 
-    function _m2m_remove(dataForm,diffs) {
+    function _m2m_remove(dataForm, diffs) {
         let row, c, idx;
         if ('__m2m_remove__' in diffs)
             for (let i = 0; i < diffs.__m2m_remove__.length; i++) {
@@ -54,7 +54,7 @@ const on_modify_models = (dataForm,values) => {
             }
     }
 
-    function _m2m_recursive_remove(dataForm,rows) {
+    function _m2m_recursive_remove(dataForm, rows) {
         //let row,c,idx;
         for (let i = 0, row, c, idx; i < rows.length; i++) {
             row = rows[i];
@@ -71,7 +71,7 @@ const on_modify_models = (dataForm,values) => {
     }
 
 
-    function _o2m_remove(dataForm,diffs) {
+    function _o2m_remove(dataForm, diffs) {
         //let row,c,idx;
         if ('__o2m_remove__' in diffs)
             for (let i = 0, row, c, idx; i < diffs.__o2m_remove__.length; i++) {
@@ -94,7 +94,7 @@ const on_modify_models = (dataForm,values) => {
 
     }
 
-    function _o2m_recursive_remove(dataForm,rows) {
+    function _o2m_recursive_remove(dataForm, rows) {
         //let row,c,idx;
         for (let i = 0, row, c, idx; i < rows.length; i++) {
             row = rows[i];
@@ -116,7 +116,7 @@ const on_modify_models = (dataForm,values) => {
     }
 
 
-    function _m2m_append(dataForm,diffs) {
+    function _m2m_append(dataForm, diffs) {
         if ('__m2m_append__' in diffs)
             for (let i = 0, row; i < diffs.__m2m_append__.length; i++) {
                 row = diffs.__m2m_append__[i];
@@ -126,7 +126,7 @@ const on_modify_models = (dataForm,values) => {
 
     }
 
-    function _o2m_append(dataForm,diffs) {
+    function _o2m_append(dataForm, diffs) {
         if ('__o2m_append__' in diffs)
             for (let i = 0, row; i < diffs.__o2m_append__.length; i++) {
                 row = diffs.__o2m_append__[i];
@@ -136,23 +136,23 @@ const on_modify_models = (dataForm,values) => {
     }
 
 
-    function _apply_diffs(dataForm,diffs) {
-        _m2m_remove(dataForm,diffs);
-        _o2m_remove(dataForm,diffs)
-        _m2m_append(dataForm,diffs);
-        _o2m_append(dataForm,diffs)
-        _update(dataForm,diffs);
-        _insert(dataForm,diffs);
-        _delete(dataForm,diffs);
-        _meta_update(dataForm,diffs);
+    function _apply_diffs(dataForm, diffs) {
+        _m2m_remove(dataForm, diffs);
+        _o2m_remove(dataForm, diffs)
+        _m2m_append(dataForm, diffs);
+        _o2m_append(dataForm, diffs)
+        _update(dataForm, diffs);
+        _insert(dataForm, diffs);
+        _delete(dataForm, diffs);
+        _meta_update(dataForm, diffs);
     }
 
 
-    console.log('on_modify_models:', dataForm,values);
+    console.log('on_modify_models:', dataForm, values);
 
     if ('__data__' in values) {
         let data = values.__data__;
-        _apply_diffs(dataForm,data);
+        _apply_diffs(dataForm, data);
     }
     if ('__m2o_find__' in values) {
         let __m2o_find__ = values.__m2o_find__

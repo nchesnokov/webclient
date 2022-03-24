@@ -17,14 +17,50 @@
     >
         <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
             <el-input
-            v-model="cdata[page-1].__data__[col].name"
-                @change="m2o_cache(cdata[page-1], col)"
-                v-if="['many2one', 'referenced', 'related'].indexOf(colsType[col]) >= 0"
+                v-model="cdata[page - 1].__data__[col].name"
+                @change="m2o_cache(cdata[page - 1], col)"
+                v-if="['many2one', 'referenced'].indexOf(colsType[col]) >= 0"
                 :prefix-icon="isCompute(col) ? 'el-icon-s-data' : ''"
                 :readonly="readonly(col)"
             >
                 <template #suffix>
-                    <el-button type="primary" size="small" :icon="Search" @click="do_find(col, 'single', [], { 'item': cdata[page - 1] })"></el-button>
+                    <el-button
+                        type="primary"
+                        size="small"
+                        :icon="Search"
+                        @click="do_find(col, 'single', [], { 'item': cdata[page - 1] })"
+                    ></el-button>
+                    <el-button type="primary" size="small" :icon="DocumentAdd" @click="do_add(col)"></el-button>
+                    <el-button
+                        v-if="cdata[page - 1].__data__[col].id != null"
+                        type="primary"
+                        size="small"
+                        :icon="Edit"
+                        @click="do_edit(col, cdata[page - 1].__data__[col].id)"
+                    ></el-button>
+                    <el-button
+                        v-if="cdata[page - 1].__data__[col].id != null"
+                        type="primary"
+                        size="small"
+                        :icon="View"
+                        @click="do_lookup(col, cdata[page - 1].__data__[col].id)"
+                    ></el-button>
+                </template>
+            </el-input>
+            <el-input
+                v-model="cdata[page - 1].__data__[col].name"
+                @change="related_cache(cdata[page - 1], col)"
+                v-if="['related'].indexOf(colsType[col]) >= 0"
+                :prefix-icon="isCompute(col) ? 'el-icon-s-data' : ''"
+                :readonly="readonly(col)"
+            >
+                <template #suffix>
+                    <el-button
+                        type="primary"
+                        size="small"
+                        :icon="Search"
+                        @click="do_find(col, 'single', [], { 'item': cdata[page - 1] })"
+                    ></el-button>
                     <el-button type="primary" size="small" :icon="DocumentAdd" @click="do_add(col)"></el-button>
                     <el-button
                         v-if="cdata[page - 1].__data__[col].id != null"
@@ -51,8 +87,8 @@
             />
 
             <el-input
-            v-model="cdata[page-1].__data__[col]"
-                @change="cache(cdata[page-1], col)"
+                v-model="cdata[page - 1].__data__[col]"
+                @change="cache(cdata[page - 1], col)"
                 v-else-if="['char', 'varchar', 'composite', 'decomposite', 'tree'].indexOf(colsType[col]) >= 0"
                 :prefix-icon="isCompute(col) ? 'el-icon-s-data' : ''"
                 :readonly="readonly(col)"
@@ -61,7 +97,9 @@
                     <el-dropdown v-if="colsTranslate[col]" @command="i18nCommand">
                         <span class="el-dropdown-link">
                             {{ colsLang[col].toLowerCase() }}
-                            <i class="el-icon-arrow-down el-icon--right"></i>
+                            <i
+                                class="el-icon-arrow-down el-icon--right"
+                            ></i>
                         </span>
                         <template #dropdown>
                             <el-dropdown-menu>
@@ -77,8 +115,8 @@
             </el-input>
 
             <el-input
-            v-model="cdata[page-1].__data__[col]"
-                @change="cache(cdata[page-1], col)"
+                v-model="cdata[page - 1].__data__[col]"
+                @change="cache(cdata[page - 1], col)"
                 v-else-if="['integer', 'float', 'decimal', 'numeric', 'timedelta'].indexOf(colsType[col]) >= 0"
                 :prefix-icon="isCompute(col) ? 'el-icon-s-data' : ''"
                 :readonly="readonly(col)"
@@ -93,8 +131,8 @@
                 </template>
             </el-input>
             <el-input
-                v-model="cdata[page-1].__data__[col]"
-                @change="cache(cdata[page-1], col)"
+                v-model="cdata[page - 1].__data__[col]"
+                @change="cache(cdata[page - 1], col)"
                 autosize
                 type="textarea"
                 v-else-if="['text', 'xml'].indexOf(colsType[col]) >= 0"
@@ -406,7 +444,7 @@ export default defineComponent({
                 })
                 .then(v => {
                     console.log('cache:', v);
-                    on_modify_models(props.root.dataForm,v[0]);
+                    on_modify_models(props.root.dataForm, v[0]);
                 })
         }
 
@@ -441,7 +479,7 @@ export default defineComponent({
                 value.name.length > 0
             )
                 dataForm.__data__[opts.col] = value
-                opts.item.__data__[opts.col] = value
+            opts.item.__data__[opts.col] = value
             cache(opts.item, opts.col);
         }
 

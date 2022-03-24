@@ -17,7 +17,9 @@
             <el-dropdown @command="i18nCommand">
                 <span class="el-dropdown-link">
                     {{ $UserPreferences.lang.toLowerCase() }}
-                    <i class="el-icon-arrow-down el-icon--right"></i>
+                    <i
+                        class="el-icon-arrow-down el-icon--right"
+                    ></i>
                 </span>
                 <template #dropdown>
                     <el-dropdown-menu>
@@ -161,7 +163,9 @@
                         <el-dropdown v-if="colsTranslate[col]" @command="i18nCommand">
                             <span class="el-dropdown-link">
                                 {{ colsLang[col].toLowerCase() }}
-                                <i class="el-icon-arrow-down el-icon--right"></i>
+                                <i
+                                    class="el-icon-arrow-down el-icon--right"
+                                ></i>
                             </span>
                             <template #dropdown>
                                 <el-dropdown-menu>
@@ -354,11 +358,11 @@ export default defineComponent({
         const {
             proxy
         } = getCurrentInstance()
-//        const meta__cache__ = reactive({
-//           '__data__': {},
-//            '__meta__': {},
-//            '__containers__': {}
-//        })
+        //        const meta__cache__ = reactive({
+        //           '__data__': {},
+        //            '__meta__': {},
+        //            '__containers__': {}
+        //        })
         const mode = ref('new')
         const guid = ref(null)
         const page = ref(1)
@@ -398,7 +402,7 @@ export default defineComponent({
 
         const dataRowContainer = (containers, parent) => {
             for (let k in containers) {
-                if (!(k + '.' + parent in proxy.dataForm.__containers__))dataForm.__containers__[k + '.' + parent] = containers[k];
+                if (!(k + '.' + parent in proxy.dataForm.__containers__)) dataForm.__containers__[k + '.' + parent] = containers[k];
                 for (let i = 0; i < containers[k].length; i++) dataRow(containers[k][i]);
             }
         };
@@ -415,8 +419,8 @@ export default defineComponent({
             if ('__meta__' in row) value.__meta__ = row.__meta__;
             if ('__path__' in row) value.__path__ = row.__path__;
             if ('__m2m_containers__' in row || '__o2m_containers__' in row) value.__containers__ = reactive({})
-            if ('__m2m_containers__' in row) for(let m2mkey in row['__m2m_containers__']) value.__containers__[m2mkey+'.'+row['__path__']] = row['__m2m_containers__'][m2mkey].map(dataRowForm);
-            if ('__o2m_containers__' in row) for(let o2mkey in row['__o2m_containers__']) value.__containers__[o2mkey+'.'+row['__path__']] = row['__o2m_containers__'][o2mkey].map(dataRowForm);
+            if ('__m2m_containers__' in row) for (let m2mkey in row['__m2m_containers__']) value.__containers__[m2mkey + '.' + row['__path__']] = row['__m2m_containers__'][m2mkey].map(dataRowForm);
+            if ('__o2m_containers__' in row) for (let o2mkey in row['__o2m_containers__']) value.__containers__[o2mkey + '.' + row['__path__']] = row['__o2m_containers__'][o2mkey].map(dataRowForm);
             return value
         };
 
@@ -509,7 +513,7 @@ export default defineComponent({
                 })
                 .then(v => {
                     console.log('cache:', v);
-                    on_modify_models(dataForm,v[0]);
+                    on_modify_models(dataForm, v[0]);
                 })
         }
 
@@ -932,7 +936,7 @@ export default defineComponent({
                 //Object.assign(dataForm, msg[0])
                 //dataRow(dataForm)
                 Object.assign(dataForm, dataRowForm(msg[0]))
-                console.log('dataForm:',dataForm)
+                console.log('dataForm:', dataForm)
             }
         }
 
@@ -963,13 +967,13 @@ export default defineComponent({
                             }
                         ]
                     })
-            console.log('onBeforeMount-msg-initialize:', msg);
-            if (msg && msg.length > 0) {
-                init_metacache()
-                Object.assign(dataForm,dataRowForm(msg[0]))
-                //Object.assign(dataForm, msg[0])
-                //dataRow(dataForm)
-            }
+                console.log('onBeforeMount-msg-initialize:', msg);
+                if (msg && msg.length > 0) {
+                    init_metacache()
+                    Object.assign(dataForm, dataRowForm(msg[0]))
+                    //Object.assign(dataForm, msg[0])
+                    //dataRow(dataForm)
+                }
             }
 
             for (
@@ -1014,10 +1018,10 @@ export default defineComponent({
             //console.log('fields:',fields);
         })
 
- 
+
         return {
             proxy,
-//            meta__cache__,
+            //            meta__cache__,
             mode,
             guid,
             readonly,
