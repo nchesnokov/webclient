@@ -7,7 +7,8 @@
 <template>
 
 <el-row>
-    <el-button type="primary" @click="add_row(model,container,'list')" v-if="mode != 'readonly'">Add</el-button>
+    <el-button type="primary" @click="add_row(model,container,'list')" v-if="mode != 'lookup'">Add</el-button>
+    <el-button type="primary" @click="remove_rows()" v-if="mode != 'lookup' && multipleSelection.length > 0">Remove</el-button>
 </el-row>
 <el-container>
     <el-table @selection-change="handleSelectionChange" :data="tableDataDisplay" style="width: 100%" fit>
@@ -29,7 +30,13 @@
                 <el-checkbox v-model="scope.row[col]" disabled></el-checkbox>
               </template>        
         </el-table-column>
-    </el-table>
+    <el-table-column fixed="right" label="Operations" width="120" v-if="mode != 'lookup'">
+      <template #default="scope">
+        <el-button type="danger" :icon="Delete" size="small" @click="remove_row(scope.row.__path__)"
+          ></el-button
+        >
+      </template>
+    </el-table-column>    </el-table>
 </el-container>
 <el-pagination v-if="cdata.length > pageSize" background layout="prev, pager, next" @current-change="handleCurrentChange" :page-size="pageSize" :total="cdata.length">
 </el-pagination>
@@ -44,6 +51,8 @@ import {
 from 'vue'
 
 import { on_modify_models } from '../js/nf'
+
+import { Delete } from '@element-plus/icons-vue'
 
 export default defineComponent({
     name: 'gp-o2m-list',
@@ -74,6 +83,20 @@ export default defineComponent({
         const add_row = (model,container,view) => {
             proxy.$websocket.sendAsync({_msg:[props.cid,'_cache','add',props.guid,{'model':props.model,'container':props.container,'context':{},'view':view}]}).then((msg) => 
             on_modify_models(props.root.dataForm,msg[0]));
+        }
+
+        const remove_row = (path) => {
+            console.log('remove_row:',path,props.container)
+            proxy.$websocket.sendAsync({_msg:[props.cid,'_cache','remove',props.guid,{'path':path,'container':props.container,'context':{}}]}).then((msg) => 
+            on_modify_models(props.root.dataForm,msg[0]));
+        }
+
+        const remove_rows = () => {
+        if (confirm('Are you sure you want to delete this items?')) {       
+            proxy.$websocket.sendAsync({_msg:[props.cid,'_cache','removes',props.guid,{'rows':multipleSelection.map(function(v) { return {'path':v['__path__'],'container':props.container}}),'context':{}}]}).then((msg) => 
+            //console.log('on_removes:',msg[0]))
+            on_modify_models(props.root.dataForm,msg[0]));
+        }
         }
 
 
@@ -114,15 +137,20 @@ export default defineComponent({
             pageSize,
             //addRow,
             add_row,
+            remove_row,
+            remove_rows,
+            on_modify_models,
             handleCurrentChange,
             handleSelectionChange,
             tableDataDisplay,
+            multipleSelection,
             getProp,
             cols,
             o2mcols,
             colsType,
             colsLabel,
-            selOptions
+            selOptions,
+            Delete
         }
     }
 })
