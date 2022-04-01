@@ -90,7 +90,7 @@
                 v-model="cdata[page - 1].__data__[col]"
                 @change="cache(cdata[page - 1], col)"
                 v-else-if="['char', 'varchar', 'composite', 'decomposite', 'tree'].indexOf(colsType[col]) >= 0"
-                :prefix-icon="isCompute(col) ? 'el-icon-s-data' : ''"
+                :prefix-icon="isCompute(col) ? Monitor : ''"
                 :readonly="readonly(col)"
             >
                 <template #prefix>
@@ -118,17 +118,9 @@
                 v-model="cdata[page - 1].__data__[col]"
                 @change="cache(cdata[page - 1], col)"
                 v-else-if="['integer', 'float', 'decimal', 'numeric', 'timedelta'].indexOf(colsType[col]) >= 0"
-                :prefix-icon="isCompute(col) ? 'el-icon-s-data' : ''"
+                :prefix-icon="isCompute(col) ? Monitor : ''"
                 :readonly="readonly(col)"
             >
-                <template #prefix>
-                    <el-button
-                        type="primary"
-                        size="small"
-                        icon="el-icon-monitor"
-                        v-if="isCompute(col)"
-                    ></el-button>
-                </template>
             </el-input>
             <el-input
                 v-model="cdata[page - 1].__data__[col]"
@@ -136,7 +128,7 @@
                 autosize
                 type="textarea"
                 v-else-if="['text', 'xml'].indexOf(colsType[col]) >= 0"
-                :prefix-icon="isCompute(col) ? 'el-icon-s-data' : ''"
+                :prefix-icon="isCompute(col) ? Monitor : ''"
                 :readonly="readonly(col)"
             ></el-input>
             <el-date-picker
