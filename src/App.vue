@@ -73,74 +73,88 @@ button.active {
                     :key="tab"
                     :class="['tab-button', { active: currentTab === tab }]"
                     @click="on_clicktab(tab)"
-                >{{ tab.split('-')[1] }}</el-button>
+                >{{ tab.split("-")[1] }}</el-button>
                 <component :is="currentTab" :cid="cid" :metas="metas" :model="model" />
             </template>
         </el-main>
         <div id="sv"></div>
-        <el-footer>{{ isLogged ? '&copy; GSRP5 2022 Slot: ' + cinfo.slot + ' User: ' + cinfo.user + ' ' + timestampLogged : '&copy; GSRP5 2022' }}</el-footer>
+        <el-footer>
+            {{
+                isLogged
+                    ? "&copy; GSRP5 2022 Slot: " +
+                    cinfo.slot +
+                    " User: " +
+                    cinfo.user +
+                    " " +
+                    timestampLogged
+                    : "&copy; GSRP5 2022"
+            }}
+        </el-footer>
     </el-container>
 </template>
 
 <script>
+import { defineComponent, defineAsyncComponent } from "vue";
 
-import { defineComponent } from 'vue'
-
-import { loadModule } from 'vue3-sfc-loader'
+import { loadModule } from "vue3-sfc-loader";
 
 export default defineComponent({
-    name: 'App',
+    name: "App",
 });
-
 </script>
 
 <script setup>
+import { User, Menu } from "@element-plus/icons-vue";
 
-import { User, Menu } from '@element-plus/icons-vue'
+import { reactive, ref, getCurrentInstance } from "vue";
 
-import { reactive, ref, getCurrentInstance } from 'vue'
-
-const {
-    proxy
-} = getCurrentInstance();
+const { proxy } = getCurrentInstance();
 const cid = ref(null);
 const uid = reactive([]);
 const cinfo = reactive({});
 const drawer = ref(true);
 const isLogged = ref(false);
-const timestampLogged = ref('');
+const timestampLogged = ref("");
 const isLoginFormShow = ref(false);
 const isUserPreferencesFormShow = ref(false);
 const tabs = reactive([]);
-const currentTab = ref('gp-search');
+const currentTab = ref("gp-search");
 const menuData = reactive([]);
 const metas = reactive({});
 const model = ref(null);
 const defaultProps = reactive({
-    children: 'childs_id'
+    children: "childs_id",
 });
 
 const handleNodeClick = (data) => {
-    console.log('handleNodeClick:', data)
+    console.log("handleNodeClick:", data);
     if (data.action_id.name !== null) {
         tabs.splice(0, tabs.length);
-        proxy.$websocket.send({
-            _msg: [cid.value, 'uis', 'action', {
-                'action_id': data.action_id.name,
-                'context': proxy.$UserPreferences.Context
-            }]
-        }, on_load_meta);
+        proxy.$websocket.send(
+            {
+                _msg: [
+                    cid.value,
+                    "uis",
+                    "action",
+                    {
+                        action_id: data.action_id.name,
+                        context: proxy.$UserPreferences.Context,
+                    },
+                ],
+            },
+            on_load_meta
+        );
     }
 };
 
 const handleUserMenuCommand = (command) => {
     switch (command) {
-        case 'preferences':
+        case "preferences":
             isUserPreferencesFormShow.value = true;
             break;
-        case 'logout':
+        case "logout":
             proxy.$websocket.send({
-                _msg: [cid.value, 'logout', {}]
+                _msg: [cid.value, "logout", {}],
             });
             isLogged.value = false;
             tabs.splice(0, tabs.length);
@@ -157,26 +171,38 @@ const on_login = () => {
 };
 
 const do_login = (event) => {
-    if (event === 'cancel') isLoginFormShow.value = false;
+    if (event === "cancel") isLoginFormShow.value = false;
     else {
         Object.assign(cinfo, event);
         proxy.$websocket.webSocket = null;
-        proxy.$websocket.setURL(cinfo.url)
+        proxy.$websocket.setURL(cinfo.url);
         proxy.$websocket.open();
-        proxy.$websocket.addEventListener('onclose', on_close_websocket);
-        proxy.$websocket.addStaticCallback('_exception', on_except);
+        proxy.$websocket.addEventListener("onclose", on_close_websocket);
+        proxy.$websocket.addStaticCallback("_exception", on_except);
         setTimeout(() => {
-            proxy.$websocket.send({
-                _msg: ['00000000000000000000000000000000', '_open', 'gsrp5.user', {
-                    'profile': cinfo.slot
-                }]
-            }, on_connect);
+            proxy.$websocket.send(
+                {
+                    _msg: [
+                        "00000000000000000000000000000000",
+                        "_open",
+                        "gsrp5.user",
+                        {
+                            profile: cinfo.slot,
+                        },
+                    ],
+                },
+                on_connect
+            );
         }, 500);
     }
 };
 
 const getFrameworkID = (framework) => {
-    for (let i = 0, frameworks = proxy.$UserPreferences.franeworks; i < frameworks.length; i++)
+    for (
+        let i = 0, frameworks = proxy.$UserPreferences.franeworks;
+        i < frameworks.length;
+        i++
+    )
         if (frameworks[i].code == framework) return frameworks[i].id;
     return null;
 };
@@ -199,69 +225,98 @@ const do_user_preferences = (event) => {
     proxy.$UserPreferences.country = event.country;
     proxy.$UserPreferences.timezone = event.timezone;
     let records = {
-        'user_id': 'user_id' in proxy.$UserPreferences ? proxy.$UserPreferences.user_id : uid[1],
-        'framework': getFrameworkID(event.frameworr),
-        'lang': getLanguageID(event.language),
-        'country': proxy.$UserPreferences.country_names[event.country],
-        'timezone': event.timezone,
+        user_id:
+            "user_id" in proxy.$UserPreferences
+                ? proxy.$UserPreferences.user_id
+                : uid[1],
+        framework: getFrameworkID(event.frameworr),
+        lang: getLanguageID(event.language),
+        country: proxy.$UserPreferences.country_names[event.country],
+        timezone: event.timezone,
     };
     //if ('lang_id' in proxy.$UserPreferences) records.lang = proxy.$UserPreferences.lang_id;
     //else records.lang = getLanguageID(event.language);
-    if ('preferences_id' in proxy.$UserPreferences) records.id = proxy.$UserPreferences.preferences_id;
+    if ("preferences_id" in proxy.$UserPreferences)
+        records.id = proxy.$UserPreferences.preferences_id;
 
-
-    proxy.$websocket.send({
-        _msg: [cid.value, 'models', 'bc.user.preferences', 'modify', {
-            'records': records,
-            'context': proxy.$UserPreferences.Context
-        }]
-    }, console.log);
-    proxy.$websocket.send({
-        _msg: [cid.value, '_commit', {}]
-    }, console.log);
+    proxy.$websocket.send(
+        {
+            _msg: [
+                cid.value,
+                "models",
+                "bc.user.preferences",
+                "modify",
+                {
+                    records: records,
+                    context: proxy.$UserPreferences.Context,
+                },
+            ],
+        },
+        console.log
+    );
+    proxy.$websocket.send(
+        {
+            _msg: [cid.value, "_commit", {}],
+        },
+        console.log
+    );
 
     isUserPreferencesFormShow.value = false;
-
 };
 const on_except = (event) => {
-    console.error('except:', event);
+    console.error("except:", event);
     //proxy.$websocket.addEStaticventListener('_exception','except',on_except);
 };
 
 const on_close_websocket = (event) => {
-    console.log('event:', event);
+    console.log("event:", event);
     isLogged.value = false;
     menuData.splice(0, menuData.length);
     tabs.splice(0, tabs.length);
-    document.querySelector('#sv').childNodes.forEach((e) => {
+    document.querySelector("#sv").childNodes.forEach((e) => {
         e.remove();
     });
     proxy.$websocket.close();
-    proxy.$message('Relogin');
+    proxy.$message("Relogin");
     setTimeout(() => {
         proxy.$websocket.webSocket = null;
     }, 1500);
-    proxy.$websocket.setURL(cinfo.url)
+    proxy.$websocket.setURL(cinfo.url);
     proxy.$websocket.open();
-    proxy.$websocket.addStaticCallback('_exception', on_except);
+    proxy.$websocket.addStaticCallback("_exception", on_except);
     setTimeout(() => {
-        proxy.$websocket.send({
-            _msg: ['00000000000000000000000000000000', '_open', 'gsrp5.user', {
-                'profile': cinfo.slot
-            }]
-        }, on_connect);
+        proxy.$websocket.send(
+            {
+                _msg: [
+                    "00000000000000000000000000000000",
+                    "_open",
+                    "gsrp5.user",
+                    {
+                        profile: cinfo.slot,
+                    },
+                ],
+            },
+            on_connect
+        );
     }, 1500);
 };
 
 const on_connect = (msg) => {
     cid.value = msg[0];
-    proxy.$websocket.send({
-        _msg: [cid.value, 'login', {
-            'user': cinfo.user,
-            'password': cinfo.password
-        }],
-        _type: 'main'
-    }, on_service_login);
+    proxy.$websocket.send(
+        {
+            _msg: [
+                cid.value,
+                "login",
+                {
+                    user: cinfo.user,
+                    password: cinfo.password,
+                },
+            ],
+            _type: "main",
+        },
+        on_service_login
+    );
 };
 
 const on_service_login = (msg) => {
@@ -277,35 +332,121 @@ const on_service_login = (msg) => {
             proxy.$UserPreferences.framework_id = msg[2].preferences[0].framework.id;
             proxy.$UserPreferences.lang_id = msg[2].preferences[0].lang.id;
             proxy.$UserPreferences.lang = msg[2].preferences[0].lang.name;
-            proxy.$UserPreferences.country = getCountryID(msg[2].preferences[0].country);
+            proxy.$UserPreferences.country = getCountryID(
+                msg[2].preferences[0].country
+            );
             proxy.$UserPreferences.timezone = msg[2].preferences[0].timezone;
         } else {
-            proxy.$UserPreferences.user_id = uid[1]
-            proxy.$UserPreferences.framework = 'element-plus'
-            proxy.$UserPreferences.frameworks = msg[2].frameworks
-            proxy.$UserPreferences.lang = 'EN'
-            proxy.$UserPreferences.country = 'EN'
-            proxy.$UserPreferences.timezone = 'UTC'
+            proxy.$UserPreferences.user_id = uid[1];
+            proxy.$UserPreferences.framework = "element-plus";
+            proxy.$UserPreferences.frameworks = msg[2].frameworks;
+            proxy.$UserPreferences.lang = "EN";
+            proxy.$UserPreferences.country = "EN";
+            proxy.$UserPreferences.timezone = "UTC";
         }
         proxy.$UserPreferences.Context = {
-            'user': proxy.$UserPreferences.user_id,
-            'framework': proxy.$UserPreferences.framework,
-            'lang': proxy.$UserPreferences.lang,
-            'tz': proxy.$UserPreferences.timezone
-        }
+            user: proxy.$UserPreferences.user_id,
+            framework: proxy.$UserPreferences.framework,
+            lang: proxy.$UserPreferences.lang,
+            tz: proxy.$UserPreferences.timezone,
+        };
         isLoginFormShow.value = false;
         timestampLogged.value = Date(); //.toLocaleDateString();
-        proxy.$websocket.send({
-            _msg: [cid.value, 'uis', 'menu', {
-                'context': proxy.$UserPreferences.Context
-            }]
-        }, on_menu_load);
-    } else proxy.$message('Invalid login. Please check Slot User or Password');
+        proxy.$websocket.send(
+            {
+                _msg: [
+                    cid.value,
+                    "uis",
+                    "menu",
+                    {
+                        context: proxy.$UserPreferences.Context,
+                    },
+                ],
+            },
+            on_menu_load
+        );
+    } else proxy.$message("Invalid login. Please check Slot User or Password");
 };
 
 const on_menu_load = (msg) => {
     menuData.splice(0, menuData.length, ...msg);
+    registerViews(proxy.$UserPreferences.Context.framework);
     isLogged.value = true;
+};
+
+const registerViews = async (framework) => {
+    const options = {
+        additionalBabelParserPlugins: ['@babel/parser'],
+        moduleCache: {
+            vue: proxy.$appcontext.app
+        },
+        async getFile(url) {
+            console.log('URL:', url)
+            //console.log('URL-PARMS:', url, url.split(':')[1].replace('.vue', ''), url.split(':')[0])
+            if (url in options['my-parms']){
+            const view = await proxy.$websocket.sendAsync({
+                _msg: [
+                    cid.value,
+                    "models",
+                    "bc.ui.model.views",
+                    "getSFC",
+                    {
+                        model: options['my-parms'][url]['model'],
+                        vtype: options['my-parms'][url]['vtype'],
+                        context: proxy.$UserPreferences.Context,
+                    },
+                ],
+            });
+            //console.log('SFC:', view[0].sfc)
+            //const res = await fetch(url);
+            //if ( !res.ok )
+            //throw Object.assign(new Error(res.statusText + ' ' + url), { res });
+            return Promise.resolve(view[0].sfc)
+            }
+        },
+        addStyle(textContent) {
+
+            const style = Object.assign(document.createElement('style'), { textContent });
+            const ref = document.head.getElementsByTagName('style')[0] || null;
+            document.head.insertBefore(style, ref);
+        },
+        handleModule(type, source, path, options) {
+        
+        console.log('HANDLE-MOULE:',type,'\n', source, '\n', path, '\n', options)
+        if ( type === '.json' )
+          return JSON.parse(source);
+      }
+    }
+
+    console.log('appcontext:', proxy.$appcontext)
+
+    let views = await proxy.$websocket.sendAsync({
+        _msg: [
+            cid.value,
+            "models",
+            "bc.ui.model.views",
+            "select",
+            {
+                fields: ['model', 'vtype'],
+                cond: [{ __tuple__: ['vtype', '=', 'element-plus/form'] }],
+                context: proxy.$UserPreferences.Context,
+            },
+        ],
+    });
+    //console.log('views:', views)
+    options['my-parms'] = {}
+    for (let i = 0, n ; i < views.length; i++) {
+        n = views[i]["vtype"]["name"].split('/')[1] + '-' + views[i]["model"]["name"].replaceAll('.', '-')
+        options['my-parms']['./gp-' + n + '.vue'] = {'model':views[i]["model"]["name"],'vtype':views[i]["vtype"]["name"]}
+    }
+    for (let i = 0, n ; i < views.length; i++) {
+       n = views[i]["vtype"]["name"].split('/')[1] + '-' + views[i]["model"]["name"].replaceAll('.', '-')
+ 
+        proxy.$appcontext.app.component('gp-' + n,
+            defineAsyncComponent(() => loadModule('./gp-' + n + '.vue', options)))
+    }
+
+
 };
 
 const on_load_meta = (msg) => {
@@ -314,7 +455,13 @@ const on_load_meta = (msg) => {
     model.value = msg[0].model.root;
     tabs.splice(0, tabs.length);
     for (let i = 0; i < metas[model.value].allow.length; i++)
-        if (['search', 'form', 'tree', 'graph', 'calendar', 'geo', 'kanban'].indexOf(metas[model.value].allow[i]) >= 0) tabs.push('gp-' + metas[model.value].allow[i]);
+        if (
+            ["search", "form", "tree", "graph", "calendar", "geo", "kanban"].indexOf(
+                metas[model.value].allow[i]
+            ) >= 0
+        )
+            if (metas[model.value].allow[i] == 'form') tabs.push("gp-" + metas[model.value].allow[i] + '-' + model.value.replaceAll(".", "-"))
+            else
+                tabs.push("gp-" + metas[model.value].allow[i]);
 };
-
 </script>
