@@ -8,9 +8,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@babel/core": "^7.17.9",
+    "@babel/traverse": "^7.17.9",
     "@element-plus/icons-vue": "^0.2.6",
     "@types/leaflet": "^1.7.9",
     "@vue-leaflet/vue-leaflet": "^0.6.1",
+    "@vue/compiler-sfc": "^3.2.31",
     "apexcharts": "^3.33.0",
     "clipboard": "^2.0.8",
     "element-plus": "^2.0.1",
@@ -18,13 +21,19 @@
     "mitt": "^3.0.0",
     "uuid": "^8.3.2",
     "vue": "^3.2.25",
+    "vue-sfc2esm": "^0.1.6",
     "vue3-apexcharts": "^1.4.1",
+    "vue3-i18n": "^1.1.5",
     "vue3-json-viewer": "^1.0.4",
     "vue3-sfc-loader": "^0.8.4",
     "xstate": "^4.28.1"
   },
   "devDependencies": {
+    "@intlify/vite-plugin-vue-i18n": "^3.4.0",
     "@vitejs/plugin-vue": "^2.0.0",
-    "vite": "^2.7.2"
+    "js-yaml": "^4.1.0",
+    "vite": "^2.7.2",
+    "vue-i18n": "^9.1.9",
+    "vue-i18n-service": "^0.1.0"
   }
 }

@@ -1,8 +1,14 @@
 <template>
     <slot name="search">
         <el-row>
-            <gp-selectable v-if="showSearch" :columns="metas[model].meta.columns" :names="metas[model].meta.names"
-                :cid="cid" @update:search="do_search" @update:search-cancel="showSearch = false"></gp-selectable>
+            <gp-selectable
+                v-if="showSearch"
+                :columns="metas[model].meta.columns"
+                :names="metas[model].meta.names"
+                :cid="cid"
+                @update:search="do_search"
+                @update:search-cancel="showSearch = false"
+            ></gp-selectable>
         </el-row>
     </slot>
     <slot>
@@ -11,161 +17,263 @@
             <el-dropdown @command="i18nCommand">
                 <span class="el-dropdown-link">
                     {{ $UserPreferences.lang.toLowerCase() }}
-                    <i class="el-icon-arrow-down el-icon--right"></i>
+                    <i
+                        class="el-icon-arrow-down el-icon--right"
+                    ></i>
                 </span>
                 <template #dropdown>
                     <el-dropdown-menu>
-                        <el-dropdown-item v-for="lang in $UserPreferences.langs" :key="lang.code"
-                            :command="{ lang: lang.code }">{{ lang.description }}</el-dropdown-item>
+                        <el-dropdown-item
+                            v-for="lang in $UserPreferences.langs"
+                            :key="lang.code"
+                            :command="{ lang: lang.code }"
+                        >{{ lang.description }}</el-dropdown-item>
                     </el-dropdown-menu>
                 </template>
             </el-dropdown>
         </el-row>
         <el-row>
-            <el-button v-if="!showSearch" type="primary" size="small" :icon="Search" @click="do_action('find')">
-            </el-button>
-            <el-button v-if="multipleSelection.length == 0" type="primary" size="small" :icon="DocumentAdd"
-                @click="do_action('new')"></el-button>
-            <el-button v-if="multipleSelection.length > 0 && mode == 'lookup'" type="primary" size="small" :icon="Edit"
-                @click="do_action('edit')"></el-button>
-            <el-button v-if="multipleSelection.length > 0 && mode == 'edit'" type="primary" size="small" :icon="View"
-                @click="do_action('lookup')"></el-button>
+            <el-button
+                v-if="!showSearch"
+                type="primary"
+                size="small"
+                :icon="Search"
+                @click="do_action('find')"
+            ></el-button>
+            <el-button
+                v-if="multipleSelection.length == 0"
+                type="primary"
+                size="small"
+                :icon="DocumentAdd"
+                @click="do_action('new')"
+            ></el-button>
+            <el-button
+                v-if="multipleSelection.length > 0 && mode == 'lookup'"
+                type="primary"
+                size="small"
+                :icon="Edit"
+                @click="do_action('edit')"
+            ></el-button>
+            <el-button
+                v-if="multipleSelection.length > 0 && mode == 'edit'"
+                type="primary"
+                size="small"
+                :icon="View"
+                @click="do_action('lookup')"
+            ></el-button>
         </el-row>
-        <el-pagination v-if="multipleSelection.length > 1" background layout="total, prev, pager, next, jumper"
-            @current-change="handleCurrentChange" :page-size="pageSize" :total="multipleSelection.length">
-        </el-pagination>
-        <el-form v-if="'__data__' in dataForm && Object.keys(dataForm.__data__).length > 0" :model="dataForm.__data__"
-            label-width="auto" status-icon inline-message>
-            <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
-                <el-input v-model="dataForm.__data__[col].name"
-                    v-if="['many2one', 'referenced'].indexOf(colsType[col]) >= 0" @change="m2o_cache(dataForm, col)"
-                    :readonly="readonly(col)">
-                    <template v-if="isCompute(col)" #prefix>
-                        <el-button type="primary" size="mini" icon="el-icon-s-data" />
-                    </template>
-                    <template #suffix>
-                        <el-button type="primary" size="small" :icon="Search"
-                            @click="do_find(col, 'single', [], { 'item': dataForm })"></el-button>
-                        <el-button type="primary" size="small" :icon="DocumentAdd" @click="do_add(col)"></el-button>
-                        <el-button v-if="dataForm.__data__[col].id != null" type="primary" size="small" :icon="Edit"
-                            @click="do_edit(col, dataForm.__data__[col].id)"></el-button>
-                        <el-button v-if="dataForm.__data__[col].id != null" type="primary" size="small" :icon="View"
-                            @click="do_lookup(col, dataForm.__data__[col].id)"></el-button>
-                    </template>
-                </el-input>
-                <el-input v-model="dataForm.__data__[col].name" v-if="colsType[col] == 'related'"
-                    @change="related_cache(dataForm, col, metas[model].meta.columns[col].relatedy)"
-                    :readonly="readonly(col)">
-                    <template v-if="isCompute(col)" #prefix>
-                        <el-button type="primary" size="small" :icon="Monitor" />
-                    </template>
-                    <template #suffix>
-                        <el-button type="primary" size="small" :icon="Search" @click="do_find(col)"></el-button>
-                        <el-button type="primary" size="small" :icon="DocumentAdd" @click="do_add(col)"></el-button>
-                        <el-button v-if="dataForm.__data__[col].id != null" type="primary" size="small" :icon="Edit"
-                            @click="do_edit(col, dataForm.__data__[col].id)"></el-button>
-                        <el-button v-if="dataForm.__data__[col].id != null" type="primary" size="small" :icon="View"
-                            @click="do_lookup(col, dataForm.__data__[col].id)"></el-button>
-                    </template>
-                </el-input>
+        <el-pagination
+            v-if="multipleSelection.length > 1"
+            background
+            layout="total, prev, pager, next, jumper"
+            @current-change="handleCurrentChange"
+            :page-size="pageSize"
+            :total="multipleSelection.length"
+        ></el-pagination>
+        <el-form
+            v-if="'__data__' in dataForm && Object.keys(dataForm.__data__).length > 0"
+            :model="dataForm.__data__"
+            label-width="auto"
+            status-icon
+            inline-message
+        >
 
-                <el-input v-model="dataForm.__data__[col]" :maxlength="colsSize[col]" show-word-limit
-                    v-else-if="['char', 'varchar', 'composite', 'decomposite', 'tree'].indexOf(colsType[col]) >= 0"
-                    @change="cache(dataForm, col)" :readonly="readonly(col)">
-                    <template v-if="isCompute(col)" #prepend>
+
+		<el-form-item :label="colsLabel['login']">
+                <el-input
+                    v-model="dataForm.__data__['login']"
+                    :maxlength="colsSize['login']"
+                    show-word-limit
+                    @change="cache(dataForm, 'login')"
+                    :readonly="readonly('login')"
+                >
+                    <template v-if="isCompute('login')" #prepend>
                         <el-button type="primary" size="small" :icon="Monitor" />
-                        <el-dropdown v-if="colsTranslate[col]" @command="i18nCommand">
+                        <el-dropdown v-if="colsTranslate['login']" @command="i18nCommand">
                             <span class="el-dropdown-link">
-                                {{ colsLang[col].toLowerCase() }}
-                                <i class="el-icon-arrow-down el-icon--right"></i>
+                                {{ colsLang['login'].toLowerCase() }}
+                                <i
+                                    class="el-icon-arrow-down el-icon--right"
+                                ></i>
                             </span>
                             <template #dropdown>
                                 <el-dropdown-menu>
-                                    <el-dropdown-item v-for="lang in $UserPreferences.langs" :key="lang.code"
-                                        :command="{ col: col, lang: lang.code }">{{ lang.description }}
-                                    </el-dropdown-item>
+                                    <el-dropdown-item
+                                        v-for="lang in $UserPreferences.langs"
+                                        :key="lang.code"
+                                        :command="{ col: 'login', lang: lang.code }"
+                                    >{{ lang.description }}</el-dropdown-item>
                                 </el-dropdown-menu>
                             </template>
                         </el-dropdown>
                     </template>
-                </el-input>
+                </el-input>		
 
-                <json-viewer v-if="colsType[col] == 'json'" :value="dataForm.__data__[col]" copyable boxed sort />
-                <el-input v-model="dataForm.__data__[col]"
-                    v-else-if="['uuid', 'integer', 'float', 'decimal', 'numeric', 'timedelta'].indexOf(colsType[col]) >= 0"
-                    @change="cache(dataForm, col)" :readonly="readonly(col)">
-                    <template v-if="isCompute(col)" #prefix>
+		</el-form-item>
+		<el-form-item :label="colsLabel['password']">
+                <el-input
+                    v-model="dataForm.__data__['password']"
+                    :maxlength="colsSize['password']"
+                    show-word-limit
+                    @change="cache(dataForm, 'password')"
+                    :readonly="readonly('password')"
+                >
+                    <template v-if="isCompute('password')" #prepend>
                         <el-button type="primary" size="small" :icon="Monitor" />
+                        <el-dropdown v-if="colsTranslate['password']" @command="i18nCommand">
+                            <span class="el-dropdown-link">
+                                {{ colsLang['password'].toLowerCase() }}
+                                <i
+                                    class="el-icon-arrow-down el-icon--right"
+                                ></i>
+                            </span>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item
+                                        v-for="lang in $UserPreferences.langs"
+                                        :key="lang.code"
+                                        :command="{ col: 'password', lang: lang.code }"
+                                    >{{ lang.description }}</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
                     </template>
-                </el-input>
-                <el-input v-model="dataForm.__data__[col]" autosize type="textarea"
-                    v-else-if="['text', 'xml'].indexOf(colsType[col]) >= 0" @change="cache(dataForm, col)"
-                    :readonly="readonly(col)"></el-input>
-                <el-date-picker v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'date'"
-                    @change="cache(dataForm, col)" :readonly="readonly(col)"></el-date-picker>
-                <el-time-picker v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'time'"
-                    @change="cache(dataForm, col)" :readonly="readonly(col)"></el-time-picker>
-                <el-date-picker v-model="dataForm.__data__[col]" type="datetime" v-else-if="colsType[col] == 'datetime'"
-                    @change="cache(dataForm, col)" :readonly="readonly(col)"></el-date-picker>
-                <el-select v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'selection'"
-                    @change="cache(dataForm, col)" :disabled="readonly(col)">
-                    <el-option v-for="item in selOptions[col]" :key="item.value" :label="item.label"
-                        :value="item.value"></el-option>
-                </el-select>
-                <el-row v-else-if="colsType[col] == 'many2many'">
-                    <el-button type="primary" @click="do_find(col, 'multiple')">Add</el-button>
-                    <gp-m2m-list :metas="metas" :model="metas[model].meta.columns[col].obj"
-                        :tableData="dataForm.__m2m_containers__[col]"></gp-m2m-list>
-                </el-row>
-                <el-switch v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'boolean'"
-                    @change="cache(dataForm, col)" :disabled="readonly(col)"></el-switch>
-                <el-image v-else-if="colsType[col] == 'binary' && metas[model].meta.columns[col].accept == 'image/*'"
-                    style="width: 100px; height: 100px" :src="'data:image/jpeg;base64,' + dataForm.__data__[col]"
-                    fit="fit"></el-image>
-            </el-form-item>
+                </el-input>		
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['firstname']">
+                <el-input
+                    v-model="dataForm.__data__['firstname']"
+                    :maxlength="colsSize['firstname']"
+                    show-word-limit
+                    @change="cache(dataForm, 'firstname')"
+                    :readonly="readonly('firstname')"
+                >
+                    <template v-if="isCompute('firstname')" #prepend>
+                        <el-button type="primary" size="small" :icon="Monitor" />
+                        <el-dropdown v-if="colsTranslate['firstname']" @command="i18nCommand">
+                            <span class="el-dropdown-link">
+                                {{ colsLang['firstname'].toLowerCase() }}
+                                <i
+                                    class="el-icon-arrow-down el-icon--right"
+                                ></i>
+                            </span>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item
+                                        v-for="lang in $UserPreferences.langs"
+                                        :key="lang.code"
+                                        :command="{ col: 'firstname', lang: lang.code }"
+                                    >{{ lang.description }}</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                    </template>
+                </el-input>		
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['lastname']">
+                <el-input
+                    v-model="dataForm.__data__['lastname']"
+                    :maxlength="colsSize['lastname']"
+                    show-word-limit
+                    @change="cache(dataForm, 'lastname')"
+                    :readonly="readonly('lastname')"
+                >
+                    <template v-if="isCompute('lastname')" #prepend>
+                        <el-button type="primary" size="small" :icon="Monitor" />
+                        <el-dropdown v-if="colsTranslate['lastname']" @command="i18nCommand">
+                            <span class="el-dropdown-link">
+                                {{ colsLang['lastname'].toLowerCase() }}
+                                <i
+                                    class="el-icon-arrow-down el-icon--right"
+                                ></i>
+                            </span>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item
+                                        v-for="lang in $UserPreferences.langs"
+                                        :key="lang.code"
+                                        :command="{ col: 'lastname', lang: lang.code }"
+                                    >{{ lang.description }}</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                    </template>
+                </el-input>		
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['issuperuser']">
+                <el-switch
+                    v-model="dataForm.__data__['{0}']"
+                    @change="cache(dataForm, '{0}')"
+                    :disabled="readonly('{0}')"
+                ></el-switch>
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['preferences']">
             <el-tabs type="border-card" v-if="o2mcols.length > 0">
                 <el-tab-pane :label="colsLabel[o2mcol]" v-for="o2mcol in o2mcols" :key="o2mcol">
-                    <gp-o2m-components :cid="cid" :guid="guid" :root="proxy" :metas="metas"
-                        :model="metas[model].meta.columns[o2mcol].obj" :container="o2mcol + '.' + dataForm.__path__"
-                        :cdata="dataForm.__containers__[o2mcol + '.' + dataForm.__path__]" :mode="mode"
-                        :rel="metas[model].meta.columns[o2mcol].rel" />
+                    <gp-o2m-components
+                        :cid="cid"
+                        :guid="guid"
+                        :root="proxy"
+                        :metas="metas"
+                        :model="metas[model].meta.columns[o2mcol].obj"
+                        :container="o2mcol + '.' + dataForm.__path__"
+                        :cdata="dataForm.__containers__[o2mcol + '.' + dataForm.__path__]"
+                        :mode="mode"
+                        :rel="metas[model].meta.columns[o2mcol].rel"
+                    />
                 </el-tab-pane>
             </el-tabs>
-        </el-form>
+
+		</el-form-item>
+	        </el-form>
     </slot>
     <slot name="footer">
-        <el-popconfirm v-if="mode == 'new'" confirmButtonText="OK" cancelButtonText="No, Thanks" icon="el-icon-info"
-            iconColor="red" title="Are you sure to cancel?" @confirm="onCancel">
+        <el-popconfirm
+            v-if="mode == 'new'"
+            confirmButtonText="OK"
+            cancelButtonText="No, Thanks"
+            icon="el-icon-info"
+            iconColor="red"
+            title="Are you sure to cancel?"
+            @confirm="onCancel"
+        >
             <template #reference>
                 <el-button type="danger">Cancel</el-button>
             </template>
         </el-popconfirm>
-        <el-popconfirm v-if="Object.keys(modal).length > 0" confirmButtonText="OK" cancelButtonText="No, Thanks"
-            icon="el-icon-info" iconColor="red" title="Are you sure to close?" @confirm="onClose">
+        <el-popconfirm
+            v-if="Object.keys(modal).length > 0"
+            confirmButtonText="OK"
+            cancelButtonText="No, Thanks"
+            icon="el-icon-info"
+            iconColor="red"
+            title="Are you sure to close?"
+            @confirm="onClose"
+        >
             <template #reference>
                 <el-button type="danger">Close</el-button>
             </template>
         </el-popconfirm>
 
         <el-button type="success" @click="onValidate" :disabled="mode == 'lookup'">Validate</el-button>
-        <el-button type="primary" @click="onSubmit" :disabled="mode == 'lookup'">{{ mode == 'copy' ? 'Copy' : 'Save' }}
-        </el-button>
+        <el-button
+            type="primary"
+            @click="onSubmit"
+            :disabled="mode == 'lookup'"
+        >{{ mode == 'copy' ? 'Copy' : 'Save' }}</el-button>
     </slot>
-</template>
-
-<script>
-
+</template><script>
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-    name: 'gp-form'
+    name: 'gp-form-bc-users'
 })
 
-</script>
-
-
-<script setup>
-
+</script><script setup>
 import {
     defineAsyncComponent,
     onBeforeMount,
@@ -178,7 +286,7 @@ import {
 }
     from 'vue'
 
-import { on_modify_models } from '../js/nf.js'
+import { on_modify_models } from './js/nf.js'
 
 import { Monitor, Search, DocumentAdd, Edit, View } from '@element-plus/icons-vue'
 
@@ -860,8 +968,5 @@ onBeforeMount(async () => {
     }
     //console.log('fields:',fields);
 })
-
-
-
 
 </script>

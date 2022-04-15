@@ -83,6 +83,7 @@ export default defineComponent({
         const cols = reactive([]);
         const relatedcols = reactive({});
         const cond = reactive([]);
+        const extcond = reactive({});
         const offset = ref(0);
         const limit = ref(80);
 
@@ -91,7 +92,7 @@ export default defineComponent({
         };
 
         const on_find_new = (value, opts) => {
-            console.log('on_find_new:', value, opts);
+            //console.log('on_find_new:', value, opts);
             if (!readonly(opts.col) && value.id.length > 0 && value.name.length) dataForm[opts.col] = value;
         };
 
@@ -127,7 +128,42 @@ export default defineComponent({
                 });
                 if ('extcond' in rootProps) rootProps.extcond.splice(0, 0, ...extcond);
                 else rootProps.extcond = extcond;
+
+
             }
+
+                switch (colsType[col]) {
+                    case 'many2one':
+                    case 'referenced':
+                        if (dataForm[col].name != null && dataForm[col].name.length > 0) cond.push({
+                            __tuple__: [col, dataForm[col].name.match(/%/g) ? 'like' : '=', dataForm[col].name]
+                        });
+                        break;
+                    case 'related':
+                        if (dataForm[col].name != null && dataForm[col].name.length > 0) cond.push({
+                            __tuple__: [col, dataForm[col].name.match(/%/g) ? 'like' : '=', dataForm[col].name]
+                        });
+                        break;
+                    case 'selection':
+                        if (dataForm[col] != null && dataForm[col].length > 0)
+                            if (dataForm[col].length == 1) cond.push({
+                                __tuple__: [col, '=', dataForm[col][0]]
+                            });
+                            else cond.push({
+                                __tuple__: [col, 'in', dataForm[col]]
+                            });
+                        break;
+                    case 'boolean':
+                        if (dataForm[col]) cond.push({
+                            __tuple__: [col]
+                        });
+                        break;
+                    default:
+                        if (dataForm[col] != null && dataForm[col].length > 0) cond.push({
+                            __tuple__: [col, dataForm[k].match(/%/g) ? 'like' : '=', dataForm[col]]
+                        });
+                }
+
 
             const vnode = createVNode(rootComponent, rootProps);
             vnode.appContext = proxy.$appcontext;
@@ -148,6 +184,7 @@ export default defineComponent({
             for (let k in dataForm) {
                 switch (colsType[k]) {
                     case 'many2one':
+                    case 'referenced':
                         if (dataForm[k].name != null && dataForm[k].name.length > 0) cond.push({
                             __tuple__: [k, dataForm[k].name.match(/%/g) ? 'like' : '=', dataForm[k].name]
                         });
@@ -176,8 +213,27 @@ export default defineComponent({
                             __tuple__: [k, dataForm[k].match(/%/g) ? 'like' : '=', dataForm[k]]
                         });
                 }
+            // if ('domain' in props.columns[k] && props.columns[k].domain != null) {
+            //     let extcond = [];
+            //     for (let i = 0, domain = props.columns[k].domain; i < domain.length; i++) extcond.push({
+            //         '__tuple__': domain[i]
+            //     });
+            //     cond.splice(0,0, ...extcond);
+            // }
+
+            // if (props.columns[k].type == 'related') {
+            //     let extcond = [];
+            //     for (let i = 0, relatedy = props.columns[k].relatedy; i < relatedy.length; i++) extcond.push({
+            //         '__tuple__': [relatedy[i], '=', ['many2one','related'].indexOf(colsType[relatedy[i]]) >= 0 ? dataForm[relatedy[i]].name : dataForm[relatedy[i]]]
+            //     });
+            //     cond.splice(0, 0, ...extcond);
+                
+
+
+            //}
+            
             }
-            //console.log('cond:', cond);
+            console.log('cond:', cond);
             proxy.$emit('update:search', {
                 'cond': cond,
                 'offset': offset,
@@ -233,7 +289,7 @@ export default defineComponent({
                             else dataForm[c[i]] = '';
                     }
                 }
-                console.log('colstype:',colsType)
+                //console.log('colstype:',colsType)
         });
         return {
             readonly,

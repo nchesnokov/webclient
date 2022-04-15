@@ -30,20 +30,14 @@
     width: 100%;
     /* Ширина слоя */
 }
+
 button.active {
     background-color: Aqua;
 }
 </style>
 
 <template>
-    <el-drawer
-        v-if="isLogged"
-        append-to-body
-        v-model="drawer"
-        direction="ltr"
-        size="20%"
-        title="Root Menu"
-    >
+    <el-drawer v-if="isLogged" append-to-body v-model="drawer" direction="ltr" size="20%" title="Root Menu">
         <el-tree :data="menuData" :props="defaultProps" @node-click="handleNodeClick" />
     </el-drawer>
     <el-container>
@@ -62,18 +56,11 @@ button.active {
         </el-header>
         <el-main>
             <gp-form-login :isLogged="isLogged" v-if="isLoginFormShow" @update:login="do_login" />
-            <gp-user-preferences
-                v-if="isUserPreferencesFormShow"
-                :cid="cid"
-                @update:user-prefereces="do_user_preferences"
-            />
+            <gp-user-preferences v-if="isUserPreferencesFormShow" :cid="cid"
+                @update:user-prefereces="do_user_preferences" />
             <template v-if="tabs.length > 0">
-                <el-button
-                    v-for="tab in tabs"
-                    :key="tab"
-                    :class="['tab-button', { active: currentTab === tab }]"
-                    @click="on_clicktab(tab)"
-                >{{ tab.split("-")[1] }}</el-button>
+                <el-button v-for="tab in tabs" :key="tab" :class="['tab-button', { active: currentTab === tab }]"
+                    @click="on_clicktab(tab)">{{ tab.split("-")[1] }}</el-button>
                 <component :is="currentTab" :cid="cid" :metas="metas" :model="model" />
             </template>
         </el-main>
@@ -94,19 +81,34 @@ button.active {
 </template>
 
 <script>
-import { defineComponent, defineAsyncComponent } from "vue";
 
-import { loadModule } from "vue3-sfc-loader";
+import { defineComponent } from "vue";
 
 export default defineComponent({
     name: "App",
 });
+
 </script>
 
 <script setup>
+
 import { User, Menu } from "@element-plus/icons-vue";
 
-import { reactive, ref, getCurrentInstance } from "vue";
+import { defineAsyncComponent, reactive, ref, getCurrentInstance } from "vue";
+
+
+//import {createHotContext} from '@vite/client'
+
+//import { addFile, changeFile, deleteFile,compileModules } from 'vue-sfc2esm'
+
+
+import { generate } from "@vue/compiler-core";
+
+import { parse as myParse, compileScript, compileTemplate, compileStyle, rewriteDefault } from "@vue/compiler-sfc";
+
+
+import { useI18n } from 'vue-i18n'
+
 
 const { proxy } = getCurrentInstance();
 const cid = ref(null);
@@ -127,7 +129,7 @@ const defaultProps = reactive({
 });
 
 const handleNodeClick = (data) => {
-    console.log("handleNodeClick:", data);
+    //console.log("handleNodeClick:", data);
     if (data.action_id.name !== null) {
         tabs.splice(0, tabs.length);
         proxy.$websocket.send(
@@ -252,24 +254,23 @@ const do_user_preferences = (event) => {
                 },
             ],
         },
-        console.log
+
     );
     proxy.$websocket.send(
         {
             _msg: [cid.value, "_commit", {}],
         },
-        console.log
     );
 
     isUserPreferencesFormShow.value = false;
 };
 const on_except = (event) => {
-    console.error("except:", event);
+    //console.error("except:", event);
     //proxy.$websocket.addEStaticventListener('_exception','except',on_except);
 };
 
 const on_close_websocket = (event) => {
-    console.log("event:", event);
+    //console.log("event:", event);
     isLogged.value = false;
     menuData.splice(0, menuData.length);
     tabs.splice(0, tabs.length);
@@ -374,51 +375,42 @@ const on_menu_load = (msg) => {
     isLogged.value = true;
 };
 
-const registerViews = async (framework) => {
-    const options = {
-        additionalBabelParserPlugins: ['@babel/parser'],
-        moduleCache: {
-            vue: proxy.$appcontext.app
-        },
-        async getFile(url) {
-            console.log('URL:', url)
-            //console.log('URL-PARMS:', url, url.split(':')[1].replace('.vue', ''), url.split(':')[0])
-            if (url in options['my-parms']){
-            const view = await proxy.$websocket.sendAsync({
-                _msg: [
-                    cid.value,
-                    "models",
-                    "bc.ui.model.views",
-                    "getSFC",
-                    {
-                        model: options['my-parms'][url]['model'],
-                        vtype: options['my-parms'][url]['vtype'],
-                        context: proxy.$UserPreferences.Context,
-                    },
-                ],
-            });
-            //console.log('SFC:', view[0].sfc)
-            //const res = await fetch(url);
-            //if ( !res.ok )
-            //throw Object.assign(new Error(res.statusText + ' ' + url), { res });
-            return Promise.resolve(view[0].sfc)
-            }
-        },
-        addStyle(textContent) {
+const MyloadModule = async (name, names) => {
+    if (name in names) {
+        const view = await proxy.$websocket.sendAsync({
+            _msg: [
+                cid.value,
+                "models",
+                "bc.ui.model.views",
+                "getSFC",
+                {
+                    model: names[name]['model'],
+                    vtype: names[name]['vtype'],
+                    context: proxy.$UserPreferences.Context,
+                },
+            ],
+        });
 
-            const style = Object.assign(document.createElement('style'), { textContent });
-            const ref = document.head.getElementsByTagName('style')[0] || null;
-            document.head.insertBefore(style, ref);
-        },
-        handleModule(type, source, path, options) {
-        
-        console.log('HANDLE-MOULE:',type,'\n', source, '\n', path, '\n', options)
-        if ( type === '.json' )
-          return JSON.parse(source);
-      }
+        await myWs.send(JSON.stringify({action:'PUTFILE',name:name+'.vue',data:view[0].sfc}))
+        return Promise.resolve(import('./components/'+name+'.vue'))
+
+
     }
+}
 
-    console.log('appcontext:', proxy.$appcontext)
+//const hmr = createHotContext('.vue')
+const myWs = new WebSocket('ws://localhost:9000');
+// обработчик проинформирует в консоль когда соединение установится
+myWs.onopen = function () {
+  console.log('подключился');
+};
+// обработчик сообщений от сервера
+myWs.onmessage = function (message) {
+  console.log('Message: %s', message.data);
+};
+
+
+const registerViews = async (framework) => {
 
     let views = await proxy.$websocket.sendAsync({
         _msg: [
@@ -434,16 +426,18 @@ const registerViews = async (framework) => {
         ],
     });
     //console.log('views:', views)
-    options['my-parms'] = {}
-    for (let i = 0, n ; i < views.length; i++) {
+    let options = {}
+    for (let i = 0, n; i < views.length; i++) {
         n = views[i]["vtype"]["name"].split('/')[1] + '-' + views[i]["model"]["name"].replaceAll('.', '-')
-        options['my-parms']['./gp-' + n + '.vue'] = {'model':views[i]["model"]["name"],'vtype':views[i]["vtype"]["name"]}
+        options['gp-' + n] = { 'model': views[i]["model"]["name"], 'vtype': views[i]["vtype"]["name"] }
+        //hmr.accept('gp-' + n + '.vue',MyloadModule) 
+
     }
-    for (let i = 0, n ; i < views.length; i++) {
-       n = views[i]["vtype"]["name"].split('/')[1] + '-' + views[i]["model"]["name"].replaceAll('.', '-')
- 
-        proxy.$appcontext.app.component('gp-' + n,
-            defineAsyncComponent(() => loadModule('./gp-' + n + '.vue', options)))
+    for (let i = 0, n; i < views.length; i++) {
+        n = views[i]["vtype"]["name"].split('/')[1] + '-' + views[i]["model"]["name"].replaceAll('.', '-')
+
+        if (!('components' in proxy.$appcontext.app && 'gp-' + n in proxy.$appcontext.app.components)) proxy.$appcontext.app.component('gp-' + n,
+            defineAsyncComponent(() => MyloadModule('gp-' + n ,options)))
     }
 
 

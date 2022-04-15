@@ -1,3 +1,15 @@
+<i18n>
+{
+    en:{
+  hello: "hello world!"
+    },
+ja:
+  {
+      hello: "こんにちは、世界！"
+  }
+}
+</i18n>
+
 <template>
     <gp-selectable
         v-if="showSearch"
@@ -130,9 +142,8 @@ export default defineComponent({
 </script>
 
 <script setup>
+
 import {
-    //defineProps,
-    //defineEmits,
     defineAsyncComponent,
     createVNode,
     render,
@@ -145,11 +156,17 @@ import {
 }
     from 'vue'
 import { Search, DocumentAdd, DocumentCopy, Edit, DocumentDelete, View, Delete, Download, Upload, Setting } from '@element-plus/icons-vue'
+
+//import {useI18n} from 'vue3-i18n'
+
 const props = defineProps({ cid: String, metas: Object, model: String })
-//const emit = defineEmits(['action:form'])
+const emit = defineEmits(['action:form'])
+
+
 const {
     proxy
 } = getCurrentInstance()
+//const {t} = useI18n()
 const page = ref(1)
 const pageSize = ref(15)
 const showSearch = ref(false)
@@ -223,7 +240,7 @@ const do_modal_form = (oid, mode) => {
 }
 
 const do_action = action => {
-    console.log('action:', action)
+    //console.log('action:', action)
     switch (action) {
         case 'find':
             do_select()
@@ -266,7 +283,7 @@ const do_action = action => {
                 ]
             }
             ).then((msg) => {
-                console.log('action:', msg)
+                //console.log('action:', msg)
                 if (msg.length > 0) {
                     proxy.$websocket.sendAsync({
                         _msg: [
@@ -303,7 +320,7 @@ const on_select_data = msg => {
 
 const tableDataDisplay = computed(() => {
     //console.log('computed:');
-    console.log('computed:', tableData === null || tableData.length === 0 ? reactive([]) : tableData.slice(pageSize.value * page.value - pageSize.value, pageSize.value * page.value));
+    //console.log('computed:', tableData === null || tableData.length === 0 ? reactive([]) : tableData.slice(pageSize.value * page.value - pageSize.value, pageSize.value * page.value));
     if (tableData === null || tableData.length === 0) return reactive([])
     else return tableData.slice(pageSize.value * page.value - pageSize.value, pageSize.value * page.value)
 })

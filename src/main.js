@@ -35,6 +35,10 @@ app.use(VueApexCharts);
 import JsonViewer from "vue3-json-viewer"
 app.use(JsonViewer)
 
+import {createI18n} from 'vue3-i18n'
+const VueI18n = createI18n({locale:'en'})
+app.use(VueI18n)
+
 app.component('gp-customizable',defineAsyncComponent(() => import('./components/gp-customizable.vue')));
 app.component('gp-selectable',defineAsyncComponent(() => import('./components/gp-selectable.vue')));
 app.component('gp-form-login',defineAsyncComponent(() => import('./components/gp-form-login.vue')));
