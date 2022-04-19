@@ -110,19 +110,19 @@
                 </el-input>		
 
 		</el-form-item>
-		<el-form-item :label="colsLabel['description']">
+		<el-form-item :label="colsLabel['descr']">
                 <el-input
-                    v-model="dataForm.__data__['description']"
-                    :maxlength="colsSize['description']"
+                    v-model="dataForm.__data__['descr']"
+                    :maxlength="colsSize['descr']"
                     show-word-limit
-                    @change="cache(dataForm, 'description')"
-                    :readonly="readonly('description')"
+                    @change="cache(dataForm, 'descr')"
+                    :readonly="readonly('descr')"
                 >
-                    <template v-if="isCompute('description')" #prepend>
+                    <template v-if="isCompute('descr')" #prepend>
                         <el-button type="primary" size="small" :icon="Monitor" />
-                        <el-dropdown v-if="colsTranslate['description']" @command="i18nCommand">
+                        <el-dropdown v-if="colsTranslate['descr']" @command="i18nCommand">
                             <span class="el-dropdown-link">
-                                {{ colsLang['description'].toLowerCase() }}
+                                {{ colsLang['descr'].toLowerCase() }}
                                 <i
                                     class="el-icon-arrow-down el-icon--right"
                                 ></i>
@@ -132,7 +132,7 @@
                                     <el-dropdown-item
                                         v-for="lang in $UserPreferences.langs"
                                         :key="lang.code"
-                                        :command="{ col: 'description', lang: lang.code }"
+                                        :command="{ col: 'descr', lang: lang.code }"
                                     >{{ lang.description }}</el-dropdown-item>
                                 </el-dropdown-menu>
                             </template>
@@ -182,7 +182,7 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-    name: 'gp-form-bc-langs',
+    name: 'gp-form-bc-web-frameworks',
 })
 
 </script>

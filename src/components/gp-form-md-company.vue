@@ -79,19 +79,19 @@
         >
 
 
-		<el-form-item :label="colsLabel['code']">
+		<el-form-item :label="colsLabel['name']">
                 <el-input
-                    v-model="dataForm.__data__['code']"
-                    :maxlength="colsSize['code']"
+                    v-model="dataForm.__data__['name']"
+                    :maxlength="colsSize['name']"
                     show-word-limit
-                    @change="cache(dataForm, 'code')"
-                    :readonly="readonly('code')"
+                    @change="cache(dataForm, 'name')"
+                    :readonly="readonly('name')"
                 >
-                    <template v-if="isCompute('code')" #prepend>
+                    <template v-if="isCompute('name')" #prepend>
                         <el-button type="primary" size="small" :icon="Monitor" />
-                        <el-dropdown v-if="colsTranslate['code']" @command="i18nCommand">
+                        <el-dropdown v-if="colsTranslate['name']" @command="i18nCommand">
                             <span class="el-dropdown-link">
-                                {{ colsLang['code'].toLowerCase() }}
+                                {{ colsLang['name'].toLowerCase() }}
                                 <i
                                     class="el-icon-arrow-down el-icon--right"
                                 ></i>
@@ -101,7 +101,7 @@
                                     <el-dropdown-item
                                         v-for="lang in $UserPreferences.langs"
                                         :key="lang.code"
-                                        :command="{ col: 'code', lang: lang.code }"
+                                        :command="{ col: 'name', lang: lang.code }"
                                     >{{ lang.description }}</el-dropdown-item>
                                 </el-dropdown-menu>
                             </template>
@@ -110,35 +110,28 @@
                 </el-input>		
 
 		</el-form-item>
-		<el-form-item :label="colsLabel['description']">
-                <el-input
-                    v-model="dataForm.__data__['description']"
-                    :maxlength="colsSize['description']"
-                    show-word-limit
-                    @change="cache(dataForm, 'description')"
-                    :readonly="readonly('description')"
-                >
-                    <template v-if="isCompute('description')" #prepend>
-                        <el-button type="primary" size="small" :icon="Monitor" />
-                        <el-dropdown v-if="colsTranslate['description']" @command="i18nCommand">
-                            <span class="el-dropdown-link">
-                                {{ colsLang['description'].toLowerCase() }}
-                                <i
-                                    class="el-icon-arrow-down el-icon--right"
-                                ></i>
-                            </span>
-                            <template #dropdown>
-                                <el-dropdown-menu>
-                                    <el-dropdown-item
-                                        v-for="lang in $UserPreferences.langs"
-                                        :key="lang.code"
-                                        :command="{ col: 'description', lang: lang.code }"
-                                    >{{ lang.description }}</el-dropdown-item>
-                                </el-dropdown-menu>
-                            </template>
-                        </el-dropdown>
-                    </template>
-                </el-input>		
+		<el-form-item :label="colsLabel['currency_rate']">
+            <el-tabs type="border-card" v-if="o2mcols.length > 0">
+                <el-tab-pane :label="colsLabel[o2mcol]" v-for="o2mcol in o2mcols" :key="o2mcol">
+                    <gp-o2m-components
+                        :cid="cid"
+                        :guid="guid"
+                        :root="proxy"
+                        :metas="metas"
+                        :model="metas[model].meta.columns[o2mcol].obj"
+                        :container="o2mcol + '.' + dataForm.__path__"
+                        :cdata="dataForm.__containers__[o2mcol + '.' + dataForm.__path__]"
+                        :mode="mode"
+                        :rel="metas[model].meta.columns[o2mcol].rel"
+                    />
+                </el-tab-pane>
+            </el-tabs>
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['note']">
+                <el-input v-model="dataForm.__data__['note']" autosize type="textarea"
+                    @change="cache(dataForm, 'note')" :readonly="readonly('note')">
+                 </el-input>
 
 		</el-form-item>
 	        </el-form>
@@ -182,7 +175,7 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-    name: 'gp-form-bc-langs',
+    name: 'gp-form-md-company',
 })
 
 </script>

@@ -201,13 +201,24 @@ const do_login = (event) => {
 
 const getFrameworkID = (framework) => {
     for (
-        let i = 0, frameworks = proxy.$UserPreferences.franeworks;
+        let i = 0, frameworks = proxy.$UserPreferences.frameworks;
         i < frameworks.length;
         i++
     )
         if (frameworks[i].code == framework) return frameworks[i].id;
     return null;
 };
+
+const getFrameworkName = (frameworkid) => {
+    for (
+        let i = 0, frameworks = proxy.$UserPreferences.frameworks;
+        i < frameworks.length;
+        i++
+    )
+        if (frameworks[i].id == frameworkid) return frameworks[i].code;
+    return null;
+};
+
 
 const getLanguageID = (lang) => {
     for (let i = 0, langs = proxy.$UserPreferences.langs; i < langs.length; i++)
@@ -231,7 +242,7 @@ const do_user_preferences = (event) => {
             "user_id" in proxy.$UserPreferences
                 ? proxy.$UserPreferences.user_id
                 : uid[1],
-        framework: getFrameworkID(event.frameworr),
+        framework: getFrameworkID(event.framework),
         lang: getLanguageID(event.language),
         country: proxy.$UserPreferences.country_names[event.country],
         timezone: event.timezone,
@@ -331,6 +342,8 @@ const on_service_login = (msg) => {
             proxy.$UserPreferences.preferences_id = msg[2].preferences[0].id;
             proxy.$UserPreferences.user_id = msg[2].preferences[0].user_id.id;
             proxy.$UserPreferences.framework_id = msg[2].preferences[0].framework.id;
+            proxy.$UserPreferences.frameworks = msg[2].frameworks;
+            proxy.$UserPreferences.framework = getFrameworkName(proxy.$UserPreferences.framework_id);
             proxy.$UserPreferences.lang_id = msg[2].preferences[0].lang.id;
             proxy.$UserPreferences.lang = msg[2].preferences[0].lang.name;
             proxy.$UserPreferences.country = getCountryID(
@@ -341,8 +354,8 @@ const on_service_login = (msg) => {
             proxy.$UserPreferences.user_id = uid[1];
             proxy.$UserPreferences.framework = "element-plus";
             proxy.$UserPreferences.frameworks = msg[2].frameworks;
-            proxy.$UserPreferences.lang = "EN";
-            proxy.$UserPreferences.country = "EN";
+            proxy.$UserPreferences.lang = "en";
+            proxy.$UserPreferences.country = "en";
             proxy.$UserPreferences.timezone = "UTC";
         }
         proxy.$UserPreferences.Context = {
@@ -376,37 +389,46 @@ const on_menu_load = (msg) => {
 };
 
 const MyloadModule = async (name, names) => {
-    if (name in names) {
-        const view = await proxy.$websocket.sendAsync({
-            _msg: [
-                cid.value,
-                "models",
-                "bc.ui.model.views",
-                "getSFC",
-                {
-                    model: names[name]['model'],
-                    vtype: names[name]['vtype'],
-                    context: proxy.$UserPreferences.Context,
-                },
-            ],
-        });
+    console.log('MyLoadModule:', name)
 
-        await myWs.send(JSON.stringify({action:'PUTFILE',name:name+'.vue',data:view[0].sfc}))
-        return Promise.resolve(import('./components/'+name+'.vue'))
+    //await myWs.send(JSON.stringify({ action: 'STAT', name: name + '.vue' }))
+    // setTimeout(function () { }, 1000)
+    // if (typeof msg === 'object' && 'ONSTAT' in msg) {
+    //     if (name in names) {
+    //         console.log('stat:', msg['ONSTAT'])
+            const view = await proxy.$websocket.sendAsync({
+                _msg: [
+                    cid.value,
+                    "models",
+                    "bc.ui.model.views",
+                    "getSFC",
+                    {
+                        model: names[name]['model'],
+                        vtype: names[name]['vtype'],
+                        context: proxy.$UserPreferences.Context,
+                    },
+                ],
+            });
+
+            await myWs.send(JSON.stringify({ action: 'PUT', name: name + '.vue', data: view[0].sfc }))
+            setTimeout(function () { }, 1000)
+            return Promise.resolve(import('./components/' + name + '.vue'))
+        }
 
 
-    }
-}
+    //}
+//}
 
-//const hmr = createHotContext('.vue')
 const myWs = new WebSocket('ws://localhost:9000');
+//var msg = {};
 // обработчик проинформирует в консоль когда соединение установится
 myWs.onopen = function () {
-  console.log('подключился');
+    //console.log('подключился');
 };
 // обработчик сообщений от сервера
 myWs.onmessage = function (message) {
-  console.log('Message: %s', message.data);
+    //msg = message.data;
+    console.log('Message: %s', message.data);
 };
 
 
@@ -437,7 +459,7 @@ const registerViews = async (framework) => {
         n = views[i]["vtype"]["name"].split('/')[1] + '-' + views[i]["model"]["name"].replaceAll('.', '-')
 
         if (!('components' in proxy.$appcontext.app && 'gp-' + n in proxy.$appcontext.app.components)) proxy.$appcontext.app.component('gp-' + n,
-            defineAsyncComponent(() => MyloadModule('gp-' + n ,options)))
+            defineAsyncComponent(() => MyloadModule('gp-' + n, options)))
     }
 
 

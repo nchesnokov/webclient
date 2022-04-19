@@ -885,3 +885,45 @@ onBeforeMount(async () => {
 })
 
 </script>
+<i18n lang="yaml">
+de:
+  Columns: Columns
+  Columns Inherit: Columns Inherit
+  Full Name: Full Name
+  Model: Model
+  Note: Note
+  Scoped: Scoped
+  Script: Script
+  Single File Component: Single File Component
+  Standalone View: Standalone View
+  Style: Style
+  Template: Template
+  View Type: View Type
+en:
+  Columns: Columns
+  Columns Inherit: Columns Inherit
+  Full Name: Full Name
+  Model: Model
+  Note: Note
+  Scoped: Scoped
+  Script: Script
+  Single File Component: Single File Component
+  Standalone View: Standalone View
+  Style: Style
+  Template: Template
+  View Type: View Type
+ru:
+  Columns: Columns
+  Columns Inherit: Columns Inherit
+  Full Name: Full Name
+  Model: Model
+  Note: Note
+  Scoped: Scoped
+  Script: Script
+  Single File Component: Single File Component
+  Standalone View: Standalone View
+  Style: Style
+  Template: Template
+  View Type: View Type
+
+</i18n>

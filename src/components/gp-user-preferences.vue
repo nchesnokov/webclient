@@ -36,7 +36,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item
-                v-if="form.country.length > 0"
+                v-if="form.country != null && form.country.length > 0"
                 label="Timezone"
                 :label-width="formLabelWidth"
             >
@@ -96,10 +96,10 @@ export default defineComponent({
         }
         onMounted(() => {
             console.log('lang:', proxy.$UserPreferences.lang);
-            form.framework = proxy.$UserPreferences.framework;
-            form.language = proxy.$UserPreferences.lang;
-            form.country = proxy.$UserPreferences.country;
-            form.timezone = proxy.$UserPreferences.timezone;
+            form.framework = proxy.$UserPreferences.framework ? proxy.$UserPreferences.framework: '';
+            form.language = proxy.$UserPreferences.lang ? proxy.$UserPreferences.lang:'';
+            form.country = proxy.$UserPreferences.country ? proxy.$UserPreferences.country:'';
+            form.timezone = proxy.$UserPreferences.timezone ? proxy.$UserPreferences.timezone:'';
         });
 
         return {

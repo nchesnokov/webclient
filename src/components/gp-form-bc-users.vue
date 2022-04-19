@@ -205,9 +205,9 @@
 		</el-form-item>
 		<el-form-item :label="colsLabel['issuperuser']">
                 <el-switch
-                    v-model="dataForm.__data__['{0}']"
-                    @change="cache(dataForm, '{0}')"
-                    :disabled="readonly('{0}')"
+                    v-model="dataForm.__data__['issuperuser']"
+                    @change="cache(dataForm, 'issuperuser')"
+                    :disabled="readonly('issuperuser')"
                 ></el-switch>
 
 		</el-form-item>
@@ -270,10 +270,11 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-    name: 'gp-form-bc-users'
+    name: 'gp-form-bc-users',
 })
 
-</script><script setup>
+</script>
+<script setup>
 import {
     defineAsyncComponent,
     onBeforeMount,
@@ -969,4 +970,27 @@ onBeforeMount(async () => {
     //console.log('fields:',fields);
 })
 
-</script>
+</script><i18n lang="yaml">
+DE:
+  First Name: First Name
+  Is Super User: Is Super User
+  Last Name: Last Name
+  Login: Login
+  Password: Password
+  Preferences: Preferences
+EN:
+  First Name: First Name
+  Is Super User: Is Super User
+  Last Name: Last Name
+  Login: Login
+  Password: Password
+  Preferences: Preferences
+RU:
+  First Name: First Name
+  Is Super User: Is Super User
+  Last Name: Last Name
+  Login: Login
+  Password: Password
+  Preferences: Preferences
+
+</i18n>

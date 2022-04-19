@@ -79,6 +79,46 @@
         >
 
 
+		<el-form-item :label="colsLabel['group_module_id']">
+                <el-input
+                    v-model="dataForm.__data__['group_module_id'].name"
+                    @change="m2o_cache(dataForm, 'group_module_id')"
+                    :readonly="readonly('group_module_id')"
+                >
+                    <template v-if="isCompute('group_module_id')" #prefix>
+                        <el-button type="primary" size="mini" icon="el-icon-s-data" />
+                    </template>
+                    <template #suffix>
+                        <el-button
+                            type="primary"
+                            size="small"
+                            :icon="Search"
+                            @click="do_find('group_module_id', 'single', [], { 'item': dataForm })"
+                        ></el-button>
+                        <el-button
+                            type="primary"
+                            size="small"
+                            :icon="DocumentAdd"
+                            @click="do_add('group_module_id')"
+                        ></el-button>
+                        <el-button
+                            v-if="dataForm.__data__['group_module_id'].id != null"
+                            type="primary"
+                            size="small"
+                            :icon="Edit"
+                            @click="do_edit('group_module_id', dataForm.__data__['group_module_id'].id)"
+                        ></el-button>
+                        <el-button
+                            v-if="dataForm.__data__['group_module_id'].id != null"
+                            type="primary"
+                            size="small"
+                            :icon="View"
+                            @click="do_lookup('group_module_id', dataForm.__data__['group_module_id'].id)"
+                        ></el-button>
+                    </template>
+                </el-input>					
+
+		</el-form-item>
 		<el-form-item :label="colsLabel['code']">
                 <el-input
                     v-model="dataForm.__data__['code']"
@@ -110,19 +150,19 @@
                 </el-input>		
 
 		</el-form-item>
-		<el-form-item :label="colsLabel['description']">
+		<el-form-item :label="colsLabel['name']">
                 <el-input
-                    v-model="dataForm.__data__['description']"
-                    :maxlength="colsSize['description']"
+                    v-model="dataForm.__data__['name']"
+                    :maxlength="colsSize['name']"
                     show-word-limit
-                    @change="cache(dataForm, 'description')"
-                    :readonly="readonly('description')"
+                    @change="cache(dataForm, 'name')"
+                    :readonly="readonly('name')"
                 >
-                    <template v-if="isCompute('description')" #prepend>
+                    <template v-if="isCompute('name')" #prepend>
                         <el-button type="primary" size="small" :icon="Monitor" />
-                        <el-dropdown v-if="colsTranslate['description']" @command="i18nCommand">
+                        <el-dropdown v-if="colsTranslate['name']" @command="i18nCommand">
                             <span class="el-dropdown-link">
-                                {{ colsLang['description'].toLowerCase() }}
+                                {{ colsLang['name'].toLowerCase() }}
                                 <i
                                     class="el-icon-arrow-down el-icon--right"
                                 ></i>
@@ -132,13 +172,346 @@
                                     <el-dropdown-item
                                         v-for="lang in $UserPreferences.langs"
                                         :key="lang.code"
-                                        :command="{ col: 'description', lang: lang.code }"
+                                        :command="{ col: 'name', lang: lang.code }"
                                     >{{ lang.description }}</el-dropdown-item>
                                 </el-dropdown-menu>
                             </template>
                         </el-dropdown>
                     </template>
                 </el-input>		
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['version']">
+                <el-input
+                    v-model="dataForm.__data__['version']"
+                    :maxlength="colsSize['version']"
+                    show-word-limit
+                    @change="cache(dataForm, 'version')"
+                    :readonly="readonly('version')"
+                >
+                    <template v-if="isCompute('version')" #prepend>
+                        <el-button type="primary" size="small" :icon="Monitor" />
+                        <el-dropdown v-if="colsTranslate['version']" @command="i18nCommand">
+                            <span class="el-dropdown-link">
+                                {{ colsLang['version'].toLowerCase() }}
+                                <i
+                                    class="el-icon-arrow-down el-icon--right"
+                                ></i>
+                            </span>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item
+                                        v-for="lang in $UserPreferences.langs"
+                                        :key="lang.code"
+                                        :command="{ col: 'version', lang: lang.code }"
+                                    >{{ lang.description }}</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                    </template>
+                </el-input>		
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['category']">
+                <el-input
+                    v-model="dataForm.__data__['category']"
+                    :maxlength="colsSize['category']"
+                    show-word-limit
+                    @change="cache(dataForm, 'category')"
+                    :readonly="readonly('category')"
+                >
+                    <template v-if="isCompute('category')" #prepend>
+                        <el-button type="primary" size="small" :icon="Monitor" />
+                        <el-dropdown v-if="colsTranslate['category']" @command="i18nCommand">
+                            <span class="el-dropdown-link">
+                                {{ colsLang['category'].toLowerCase() }}
+                                <i
+                                    class="el-icon-arrow-down el-icon--right"
+                                ></i>
+                            </span>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item
+                                        v-for="lang in $UserPreferences.langs"
+                                        :key="lang.code"
+                                        :command="{ col: 'category', lang: lang.code }"
+                                    >{{ lang.description }}</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                    </template>
+                </el-input>		
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['shortdescription']">
+                <el-input
+                    v-model="dataForm.__data__['shortdescription']"
+                    :maxlength="colsSize['shortdescription']"
+                    show-word-limit
+                    @change="cache(dataForm, 'shortdescription')"
+                    :readonly="readonly('shortdescription')"
+                >
+                    <template v-if="isCompute('shortdescription')" #prepend>
+                        <el-button type="primary" size="small" :icon="Monitor" />
+                        <el-dropdown v-if="colsTranslate['shortdescription']" @command="i18nCommand">
+                            <span class="el-dropdown-link">
+                                {{ colsLang['shortdescription'].toLowerCase() }}
+                                <i
+                                    class="el-icon-arrow-down el-icon--right"
+                                ></i>
+                            </span>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item
+                                        v-for="lang in $UserPreferences.langs"
+                                        :key="lang.code"
+                                        :command="{ col: 'shortdescription', lang: lang.code }"
+                                    >{{ lang.description }}</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                    </template>
+                </el-input>		
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['author']">
+                <el-input
+                    v-model="dataForm.__data__['author']"
+                    :maxlength="colsSize['author']"
+                    show-word-limit
+                    @change="cache(dataForm, 'author')"
+                    :readonly="readonly('author')"
+                >
+                    <template v-if="isCompute('author')" #prepend>
+                        <el-button type="primary" size="small" :icon="Monitor" />
+                        <el-dropdown v-if="colsTranslate['author']" @command="i18nCommand">
+                            <span class="el-dropdown-link">
+                                {{ colsLang['author'].toLowerCase() }}
+                                <i
+                                    class="el-icon-arrow-down el-icon--right"
+                                ></i>
+                            </span>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item
+                                        v-for="lang in $UserPreferences.langs"
+                                        :key="lang.code"
+                                        :command="{ col: 'author', lang: lang.code }"
+                                    >{{ lang.description }}</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                    </template>
+                </el-input>		
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['website']">
+                <el-input
+                    v-model="dataForm.__data__['website']"
+                    :maxlength="colsSize['website']"
+                    show-word-limit
+                    @change="cache(dataForm, 'website')"
+                    :readonly="readonly('website')"
+                >
+                    <template v-if="isCompute('website')" #prepend>
+                        <el-button type="primary" size="small" :icon="Monitor" />
+                        <el-dropdown v-if="colsTranslate['website']" @command="i18nCommand">
+                            <span class="el-dropdown-link">
+                                {{ colsLang['website'].toLowerCase() }}
+                                <i
+                                    class="el-icon-arrow-down el-icon--right"
+                                ></i>
+                            </span>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item
+                                        v-for="lang in $UserPreferences.langs"
+                                        :key="lang.code"
+                                        :command="{ col: 'website', lang: lang.code }"
+                                    >{{ lang.description }}</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                    </template>
+                </el-input>		
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['maintainer']">
+                <el-input
+                    v-model="dataForm.__data__['maintainer']"
+                    :maxlength="colsSize['maintainer']"
+                    show-word-limit
+                    @change="cache(dataForm, 'maintainer')"
+                    :readonly="readonly('maintainer')"
+                >
+                    <template v-if="isCompute('maintainer')" #prepend>
+                        <el-button type="primary" size="small" :icon="Monitor" />
+                        <el-dropdown v-if="colsTranslate['maintainer']" @command="i18nCommand">
+                            <span class="el-dropdown-link">
+                                {{ colsLang['maintainer'].toLowerCase() }}
+                                <i
+                                    class="el-icon-arrow-down el-icon--right"
+                                ></i>
+                            </span>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item
+                                        v-for="lang in $UserPreferences.langs"
+                                        :key="lang.code"
+                                        :command="{ col: 'maintainer', lang: lang.code }"
+                                    >{{ lang.description }}</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                    </template>
+                </el-input>		
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['able']">
+                <el-input
+                    v-model="dataForm.__data__['able']"
+                    :maxlength="colsSize['able']"
+                    show-word-limit
+                    @change="cache(dataForm, 'able')"
+                    :readonly="readonly('able')"
+                >
+                    <template v-if="isCompute('able')" #prepend>
+                        <el-button type="primary" size="small" :icon="Monitor" />
+                        <el-dropdown v-if="colsTranslate['able']" @command="i18nCommand">
+                            <span class="el-dropdown-link">
+                                {{ colsLang['able'].toLowerCase() }}
+                                <i
+                                    class="el-icon-arrow-down el-icon--right"
+                                ></i>
+                            </span>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item
+                                        v-for="lang in $UserPreferences.langs"
+                                        :key="lang.code"
+                                        :command="{ col: 'able', lang: lang.code }"
+                                    >{{ lang.description }}</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                    </template>
+                </el-input>		
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['area']">
+                <el-select
+                    v-model="dataForm.__data__['area']"
+                    @change="cache(dataForm, 'area')"
+                    :disabled="readonly('area')"
+                >
+                    <el-option
+                        v-for="item in selOptions['area']"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                    ></el-option>
+                </el-select>
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['icon']">
+                <el-input
+                    v-model="dataForm.__data__['icon']"
+                    :maxlength="colsSize['icon']"
+                    show-word-limit
+                    @change="cache(dataForm, 'icon')"
+                    :readonly="readonly('icon')"
+                >
+                    <template v-if="isCompute('icon')" #prepend>
+                        <el-button type="primary" size="small" :icon="Monitor" />
+                        <el-dropdown v-if="colsTranslate['icon']" @command="i18nCommand">
+                            <span class="el-dropdown-link">
+                                {{ colsLang['icon'].toLowerCase() }}
+                                <i
+                                    class="el-icon-arrow-down el-icon--right"
+                                ></i>
+                            </span>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item
+                                        v-for="lang in $UserPreferences.langs"
+                                        :key="lang.code"
+                                        :command="{ col: 'icon', lang: lang.code }"
+                                    >{{ lang.description }}</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                    </template>
+                </el-input>		
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['image']">
+                <el-input
+                    v-model="dataForm.__data__['image']"
+                    :maxlength="colsSize['image']"
+                    show-word-limit
+                    @change="cache(dataForm, 'image')"
+                    :readonly="readonly('image')"
+                >
+                    <template v-if="isCompute('image')" #prepend>
+                        <el-button type="primary" size="small" :icon="Monitor" />
+                        <el-dropdown v-if="colsTranslate['image']" @command="i18nCommand">
+                            <span class="el-dropdown-link">
+                                {{ colsLang['image'].toLowerCase() }}
+                                <i
+                                    class="el-icon-arrow-down el-icon--right"
+                                ></i>
+                            </span>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item
+                                        v-for="lang in $UserPreferences.langs"
+                                        :key="lang.code"
+                                        :command="{ col: 'image', lang: lang.code }"
+                                    >{{ lang.description }}</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                    </template>
+                </el-input>		
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['state']">
+                <el-select
+                    v-model="dataForm.__data__['state']"
+                    @change="cache(dataForm, 'state')"
+                    :disabled="readonly('state')"
+                >
+                    <el-option
+                        v-for="item in selOptions['state']"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                    ></el-option>
+                </el-select>
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['description']">
+                <el-input v-model="dataForm.__data__['description']" autosize type="textarea"
+                    @change="cache(dataForm, 'description')" :readonly="readonly('description')">
+                 </el-input>
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['models']">
+            <el-tabs type="border-card" v-if="o2mcols.length > 0">
+                <el-tab-pane :label="colsLabel[o2mcol]" v-for="o2mcol in o2mcols" :key="o2mcol">
+                    <gp-o2m-components
+                        :cid="cid"
+                        :guid="guid"
+                        :root="proxy"
+                        :metas="metas"
+                        :model="metas[model].meta.columns[o2mcol].obj"
+                        :container="o2mcol + '.' + dataForm.__path__"
+                        :cdata="dataForm.__containers__[o2mcol + '.' + dataForm.__path__]"
+                        :mode="mode"
+                        :rel="metas[model].meta.columns[o2mcol].rel"
+                    />
+                </el-tab-pane>
+            </el-tabs>
 
 		</el-form-item>
 	        </el-form>
@@ -182,7 +555,7 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-    name: 'gp-form-bc-langs',
+    name: 'gp-form-bc-modules',
 })
 
 </script>
@@ -883,3 +1256,63 @@ onBeforeMount(async () => {
 })
 
 </script>
+<i18n lang="yaml">
+de:
+  Able: Able
+  Area: Area
+  Author: Author
+  Category: Category
+  Code: Code
+  Files: Files
+  Group: Group
+  Icon: Icon
+  'Image ': 'Image '
+  Inherit Modelss: Inherit Modelss
+  Long Description: Long Description
+  Maintainer: Maintainer
+  Name: Name
+  Objects: Objects
+  Short Description: Short Description
+  State: State
+  Version: Version
+  Website: Website
+en:
+  Able: Able
+  Area: Area
+  Author: Author
+  Category: Category
+  Code: Code
+  Files: Files
+  Group: Group
+  Icon: Icon
+  'Image ': 'Image '
+  Inherit Modelss: Inherit Modelss
+  Long Description: Long Description
+  Maintainer: Maintainer
+  Name: Name
+  Objects: Objects
+  Short Description: Short Description
+  State: State
+  Version: Version
+  Website: Website
+ru:
+  Able: Able
+  Area: Area
+  Author: Author
+  Category: Category
+  Code: Code
+  Files: Files
+  Group: Group
+  Icon: Icon
+  'Image ': 'Image '
+  Inherit Modelss: Inherit Modelss
+  Long Description: Long Description
+  Maintainer: Maintainer
+  Name: Name
+  Objects: Objects
+  Short Description: Short Description
+  State: State
+  Version: Version
+  Website: Website
+
+</i18n>
