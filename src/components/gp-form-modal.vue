@@ -61,7 +61,7 @@ export default defineComponent({
 
         onBeforeMount(() => {
             console.log('props:',props)
-            proxy.$websocket.sendAsync({
+            proxy.$ws.sendAsync({
                     _msg: [props.cid, 'uis', 'get_meta_of_models_v2', {
                         model: props.model,
                         context: proxy.$UserPreferences.Context

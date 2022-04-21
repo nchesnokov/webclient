@@ -197,7 +197,7 @@
 
 		</el-form-item>
 		<el-form-item :label="colsLabel['qrcode']">
-                <el-image if="colsType['{0}'] == 'binary' && metas[model].meta.columns['{0}'].accept == 'image/*'"
+                <el-image if="colsType['qrcode'] == 'binary' && metas[model].meta.columns['qrcode'].accept == 'image/*'"
                     style="width: 100px; height: 100px"
                     :src="'data:image/jpeg;base64,'+dataForm.__data__['qrcode']"
                     fit="fit"
@@ -205,7 +205,7 @@
 
 		</el-form-item>
 		<el-form-item :label="colsLabel['image']">
-                <el-image if="colsType['{0}'] == 'binary' && metas[model].meta.columns['{0}'].accept == 'image/*'"
+                <el-image if="colsType['image'] == 'binary' && metas[model].meta.columns['image'].accept == 'image/*'"
                     style="width: 100px; height: 100px"
                     :src="'data:image/jpeg;base64,'+dataForm.__data__['image']"
                     fit="fit"
@@ -213,7 +213,7 @@
 
 		</el-form-item>
 		<el-form-item :label="colsLabel['image_medium']">
-                <el-image if="colsType['{0}'] == 'binary' && metas[model].meta.columns['{0}'].accept == 'image/*'"
+                <el-image if="colsType['image_medium'] == 'binary' && metas[model].meta.columns['image_medium'].accept == 'image/*'"
                     style="width: 100px; height: 100px"
                     :src="'data:image/jpeg;base64,'+dataForm.__data__['image_medium']"
                     fit="fit"
@@ -221,7 +221,7 @@
 
 		</el-form-item>
 		<el-form-item :label="colsLabel['image_small']">
-                <el-image if="colsType['{0}'] == 'binary' && metas[model].meta.columns['{0}'].accept == 'image/*'"
+                <el-image if="colsType['image_small'] == 'binary' && metas[model].meta.columns['image_small'].accept == 'image/*'"
                     style="width: 100px; height: 100px"
                     :src="'data:image/jpeg;base64,'+dataForm.__data__['image_small']"
                     fit="fit"
@@ -260,6 +260,9 @@
 
 		</el-form-item>
 		<el-form-item :label="colsLabel['note']">
+                <el-input v-model="dataForm.__data__['note']" autosize type="textarea"
+                    @change="cache(dataForm, 'note')" :readonly="readonly('note')">
+                 </el-input>
 
 		</el-form-item>
 	        </el-form>
@@ -374,12 +377,12 @@ const readonly = col => {
 }
 
 const required = (path, col) => {
-    console.log('required:', path, col)
+    //console.log('required:', path, col)
     return dataForm.__meta__.rq[col]
 }
 
 const visible = (path, col) => {
-    console.log('required:', path, col)
+    //console.log('required:', path, col)
     return !dataForm.__meta__.iv[col]
 }
 
@@ -410,7 +413,7 @@ const dataRowForm = (row) => {
 };
 
 const cache = (item, name) => {
-    console.log('cache-item:', name, item.__data__[name], item)
+    //console.log('cache-item:', name, item.__data__[name], item)
     let value
     switch (props.metas[props.model].meta.columns[name].type) {
         case 'integer':
@@ -491,19 +494,19 @@ const cache = (item, name) => {
         value: value,
         context: proxy.$UserPreferences.Context
     }
-    console.log('cache:', r)
+    //console.log('cache:', r)
     proxy.$websocket
         .sendAsync({
             _msg: [props.cid, '_cache', 'cache', guid.value, r]
         })
         .then(v => {
-            console.log('cache:', v);
+            //console.log('cache:', v);
             on_modify_models(dataForm, v[0]);
         })
 }
 
 const m2o_cache = (item, name) => {
-    console.log('m2o_cache:', name, item.__data__[name], item)
+    //console.log('m2o_cache:', name, item.__data__[name], item)
     if (item.__data__[name].name.length == 0) {
         item.__data__[name].id = null
         item.__data__[name].name = null
@@ -521,7 +524,7 @@ const m2o_cache = (item, name) => {
     proxy.$websocket.sendAsync({
         '_msg': [props.cid, '_cache', 'm2ofind', guid.value, r]
     }).then((v) => {
-        console.log('m2ofind:', v);
+        //console.log('m2ofind:', v);
         let f = v[0];
         if (f.__m2o_find__.__data__.v.length == 1) {
             dataForm.__data__[name] = f.__m2o_find__.__data__.v[0];
@@ -562,7 +565,7 @@ const related_cache = (item, name, relatedy) => {
     proxy.$websocket.sendAsync({
         '_msg': [props.cid, '_cache', 'relatedfind', guid.value, r]
     }).then((v) => {
-        console.log('relatedfind:', v);
+        //console.log('relatedfind:', v);
         let f = v[0];
         if (f.__related_find__.__data__.v.length == 1) {
             dataForm.__data__[name] = f.__related_find__.__data__.v[0];
@@ -641,7 +644,7 @@ const _get_selections = s => {
 }
 
 const on_find_new = (value, opts) => {
-    console.log('on_find_new:', value, opts)
+    //console.log('on_find_new:', value, opts)
     if (
         ['new', 'edit'].indexOf(mode.value) >= 0 &&
         value.id &&
@@ -654,7 +657,7 @@ const on_find_new = (value, opts) => {
 }
 
 const on_find_m2m = (value, opts) => {
-    console.log('on_find_m2m:', value, opts)
+    //console.log('on_find_m2m:', value, opts)
     if (
         ['new', 'edit'].indexOf(mode.value) >= 0 &&
         value.length > 0
@@ -825,7 +828,7 @@ const onSubmit = () => {
                 _msg: [props.cid, '_cache', mode.value == 'copy' ? 'copy' : 'save', guid.value, {}]
             })
             let action = msg[0], oid = msg[1];
-            console.log('action:', msg)
+            //console.log('action:', msg)
             if (action == 'commit') {
                 await proxy.$websocket.sendAsync({
                     _msg: [
@@ -907,7 +910,7 @@ const onCancel = () => {
             })
             .then(msg => {
                 if (msg && msg.length > 0) Object.assign(dataForm, msg[0])
-                console.log('initialize:', msg)
+                //console.log('initialize:', msg)
             })
 }
 const init_metacache = () => {
@@ -915,13 +918,13 @@ const init_metacache = () => {
 }
 
 const on_read = msg => {
-    console.log('on_read:', msg)
+    //console.log('on_read:', msg)
     if (msg && msg.length > 0) {
         init_metacache()
         //Object.assign(dataForm, msg[0])
         //dataRow(dataForm)
         Object.assign(dataForm, dataRowForm(msg[0]))
-        console.log('dataForm:', dataForm)
+        //console.log('dataForm:', dataForm)
     }
 }
 
@@ -952,7 +955,7 @@ onBeforeMount(async () => {
                     }
                 ]
             })
-        console.log('onBeforeMount-msg-initialize:', msg);
+        //console.log('onBeforeMount-msg-initialize:', msg);
         if (msg && msg.length > 0) {
             init_metacache()
             Object.assign(dataForm, dataRowForm(msg[0]))
@@ -982,7 +985,7 @@ onBeforeMount(async () => {
     if (mode.value !== 'new' && 'oid' in props.modal) {
         if (Array.isArray(props.modal.oid)) multipleSelection.splice(0, multipleSelection.length, ...props.modal.oid)
         else multipleSelection.splice(0, multipleSelection.length, props.modal.oid)
-        console.log('multipleSelection:', multipleSelection)
+        //console.log('multipleSelection:', multipleSelection)
         let ctx = Object.assign({}, proxy.$UserPreferences.Context)
         ctx.cache = guid.value
         proxy.$websocket.send({
@@ -1004,3 +1007,57 @@ onBeforeMount(async () => {
 })
 
 </script>
+<i18n lang="yaml">
+de:
+  Code: Code
+  Group Of Type Items: Group Of Type Items
+  Link: Link
+  Medium-sized photo: Medium-sized photo
+  Name: Name
+  Note: Note
+  Photo: Photo
+  QRCode: QRCode
+  Small-sized photo: Small-sized photo
+  State: State
+  Template: Template
+  Unit Of Measure: Unit Of Measure
+  Volume: Volume
+  Volume UoM: Volume UoM
+  Weight: Weight
+  Weight UoM: Weight UoM
+en:
+  Code: Code
+  Group Of Type Items: Group Of Type Items
+  Link: Link
+  Medium-sized photo: Medium-sized photo
+  Name: Name
+  Note: Note
+  Photo: Photo
+  QRCode: QRCode
+  Small-sized photo: Small-sized photo
+  State: State
+  Template: Template
+  Unit Of Measure: Unit Of Measure
+  Volume: Volume
+  Volume UoM: Volume UoM
+  Weight: Weight
+  Weight UoM: Weight UoM
+ru:
+  Code: Code
+  Group Of Type Items: Group Of Type Items
+  Link: Link
+  Medium-sized photo: Medium-sized photo
+  Name: Name
+  Note: Note
+  Photo: Photo
+  QRCode: QRCode
+  Small-sized photo: Small-sized photo
+  State: State
+  Template: Template
+  Unit Of Measure: Unit Of Measure
+  Volume: Volume
+  Volume UoM: Volume UoM
+  Weight: Weight
+  Weight UoM: Weight UoM
+
+</i18n>

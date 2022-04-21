@@ -182,7 +182,7 @@ export default defineComponent({
             console.log('select data:', event)
             if (props.extcond.length > 0)
                 for (let i = 0; i < props.extcond.length; i++) event.cond.push(props.extcond[i]);
-            proxy.$websocket.send({
+            proxy.$ws.sendAsync({
                 _msg: [
                     props.cid,
                     'models',
@@ -196,8 +196,8 @@ export default defineComponent({
                     }
                 ]
             },
-                on_select_data
-            )
+                
+            ).then(msg => on_select_data(msg))
         }
 
         const on_select_data = msg => {
@@ -227,14 +227,13 @@ export default defineComponent({
         }
 
         onMounted(() => {
-            proxy.$websocket.send({
+            proxy.$ws.sendAsync({
                 _msg: [props.cid, 'uis', 'get_meta_of_models_v2', {
                     model: props.model,
                     context: proxy.$UserPreferences.Context
                 }]
-            },
-                on_load_meta
-            )
+            }
+            ).then(msg => on_load_meta(msg))
         })
         return {
             showDialog,

@@ -96,16 +96,7 @@ import { User, Menu } from "@element-plus/icons-vue";
 
 import { defineAsyncComponent, reactive, ref, getCurrentInstance } from "vue";
 
-
-//import {createHotContext} from '@vite/client'
-
-//import { addFile, changeFile, deleteFile,compileModules } from 'vue-sfc2esm'
-
-
-import { generate } from "@vue/compiler-core";
-
-import { parse as myParse, compileScript, compileTemplate, compileStyle, rewriteDefault } from "@vue/compiler-sfc";
-
+import WebSocketAsPromised from 'websocket-as-promised';
 
 import { useI18n } from 'vue-i18n'
 
@@ -128,11 +119,12 @@ const defaultProps = reactive({
     children: "childs_id",
 });
 
-const handleNodeClick = (data) => {
+const handleNodeClick = async (data) => {
     //console.log("handleNodeClick:", data);
     if (data.action_id.name !== null) {
         tabs.splice(0, tabs.length);
-        proxy.$websocket.send(
+        currentTab.value = "gp-search";
+        on_load_meta( await proxy.$ws.sendAsync(
             {
                 _msg: [
                     cid.value,
@@ -144,18 +136,19 @@ const handleNodeClick = (data) => {
                     },
                 ],
             },
-            on_load_meta
-        );
+            
+        )
+        )
     }
 };
 
-const handleUserMenuCommand = (command) => {
+const handleUserMenuCommand = async (command) => {
     switch (command) {
         case "preferences":
             isUserPreferencesFormShow.value = true;
             break;
         case "logout":
-            proxy.$websocket.send({
+            await proxy.$ws.sendAsync({
                 _msg: [cid.value, "logout", {}],
             });
             isLogged.value = false;
@@ -172,30 +165,26 @@ const on_login = () => {
     if (!isLogged.value) isLoginFormShow.value = true;
 };
 
-const do_login = (event) => {
+const do_login = async (event) => {
     if (event === "cancel") isLoginFormShow.value = false;
     else {
-        Object.assign(cinfo, event);
-        proxy.$websocket.webSocket = null;
-        proxy.$websocket.setURL(cinfo.url);
-        proxy.$websocket.open();
-        proxy.$websocket.addEventListener("onclose", on_close_websocket);
-        proxy.$websocket.addStaticCallback("_exception", on_except);
-        setTimeout(() => {
-            proxy.$websocket.send(
-                {
-                    _msg: [
-                        "00000000000000000000000000000000",
-                        "_open",
-                        "gsrp5.user",
-                        {
-                            profile: cinfo.slot,
-                        },
-                    ],
-                },
-                on_connect
-            );
-        }, 500);
+         Object.assign(cinfo, event);
+        let r = await proxy.$ws.sendAsync(
+            {
+                _msg: [
+                    "00000000000000000000000000000000",
+                    "_open",
+                    "gsrp5.user",
+                    {
+                        profile: cinfo.slot,
+                    },
+                ],
+            }
+        )
+        console.log('r:',r)
+        on_connect(r)
+        
+
     }
 };
 
@@ -232,7 +221,7 @@ const getCountryID = (country) => {
     return null;
 };
 
-const do_user_preferences = (event) => {
+const do_user_preferences = async (event) => {
     //console.log('do_user_preference:', event);
     proxy.$UserPreferences.lang = event.language;
     proxy.$UserPreferences.country = event.country;
@@ -252,7 +241,7 @@ const do_user_preferences = (event) => {
     if ("preferences_id" in proxy.$UserPreferences)
         records.id = proxy.$UserPreferences.preferences_id;
 
-    proxy.$websocket.send(
+    await proxy.$ws.sendAsync(
         {
             _msg: [
                 cid.value,
@@ -267,7 +256,7 @@ const do_user_preferences = (event) => {
         },
 
     );
-    proxy.$websocket.send(
+    await proxy.$ws.sendAsync(
         {
             _msg: [cid.value, "_commit", {}],
         },
@@ -276,11 +265,9 @@ const do_user_preferences = (event) => {
     isUserPreferencesFormShow.value = false;
 };
 const on_except = (event) => {
-    //console.error("except:", event);
-    //proxy.$websocket.addEStaticventListener('_exception','except',on_except);
 };
 
-const on_close_websocket = (event) => {
+const on_close_websocket = async (event) => {
     //console.log("event:", event);
     isLogged.value = false;
     menuData.splice(0, menuData.length);
@@ -288,34 +275,27 @@ const on_close_websocket = (event) => {
     document.querySelector("#sv").childNodes.forEach((e) => {
         e.remove();
     });
-    proxy.$websocket.close();
-    proxy.$message("Relogin");
-    setTimeout(() => {
-        proxy.$websocket.webSocket = null;
-    }, 1500);
-    proxy.$websocket.setURL(cinfo.url);
-    proxy.$websocket.open();
-    proxy.$websocket.addStaticCallback("_exception", on_except);
-    setTimeout(() => {
-        proxy.$websocket.send(
-            {
-                _msg: [
-                    "00000000000000000000000000000000",
-                    "_open",
-                    "gsrp5.user",
-                    {
-                        profile: cinfo.slot,
-                    },
-                ],
-            },
-            on_connect
-        );
-    }, 1500);
+    await proxy.$ws.close();
+    await proxy.$message("Relogin");
+    on_connect(await proxy.$ws.sendAsync(
+        {
+            _msg: [
+                "00000000000000000000000000000000",
+                "_open",
+                "gsrp5.user",
+                {
+                    profile: cinfo.slot,
+                },
+            ],
+        },
+
+    )
+        )
 };
 
-const on_connect = (msg) => {
+const on_connect = async (msg) => {
     cid.value = msg[0];
-    proxy.$websocket.send(
+    on_service_login(await proxy.$ws.sendAsync(
         {
             _msg: [
                 cid.value,
@@ -325,13 +305,13 @@ const on_connect = (msg) => {
                     password: cinfo.password,
                 },
             ],
-            _type: "main",
         },
-        on_service_login
-    );
+
+    )
+    )
 };
 
-const on_service_login = (msg) => {
+const on_service_login = async (msg) => {
     //console.log('on_service_login:  ', msg);
     uid.splice(0, uid.length, ...msg);
     if (uid[0]) {
@@ -366,7 +346,7 @@ const on_service_login = (msg) => {
         };
         isLoginFormShow.value = false;
         timestampLogged.value = Date(); //.toLocaleDateString();
-        proxy.$websocket.send(
+        on_menu_load(await proxy.$ws.sendAsync(
             {
                 _msg: [
                     cid.value,
@@ -377,7 +357,7 @@ const on_service_login = (msg) => {
                     },
                 ],
             },
-            on_menu_load
+        )
         );
     } else proxy.$message("Invalid login. Please check Slot User or Password");
 };
@@ -388,15 +368,25 @@ const on_menu_load = (msg) => {
     isLogged.value = true;
 };
 
-const MyloadModule = async (name, names) => {
-    console.log('MyLoadModule:', name)
+const options = {}
 
-    //await myWs.send(JSON.stringify({ action: 'STAT', name: name + '.vue' }))
-    // setTimeout(function () { }, 1000)
-    // if (typeof msg === 'object' && 'ONSTAT' in msg) {
-    //     if (name in names) {
-    //         console.log('stat:', msg['ONSTAT'])
-            const view = await proxy.$websocket.sendAsync({
+const MyloadModule = async (name, names) => {
+    //console.log('MyLoadModule:', name)
+    // const wsp = new WebSocketAsPromised('ws://localhost:9000', {
+    //     packMessage: data => JSON.stringify(data),
+    //     unpackMessage: data => JSON.parse(data),
+    //     attachRequestId: (data, requestId) => Object.assign({ id: requestId }, data), // attach requestId to message as `id` field
+    //     extractRequestId: data => data && data.id,
+    // });
+    // await wsp.open();
+
+    let stat = await proxy.$wsp.sendRequest({ action: 'STAT', name: name + '.vue' })
+
+    //console.log('stat:', stat)
+    if (typeof stat === 'object' && 'stats' in stat) {
+        if (name in names) {
+            //console.log('stat:', stat['stats'])
+            const view = await proxy.$ws.sendAsync({
                 _msg: [
                     cid.value,
                     "models",
@@ -410,31 +400,20 @@ const MyloadModule = async (name, names) => {
                 ],
             });
 
-            await myWs.send(JSON.stringify({ action: 'PUT', name: name + '.vue', data: view[0].sfc }))
-            setTimeout(function () { }, 1000)
-            return Promise.resolve(import('./components/' + name + '.vue'))
+
+            let put = await proxy.$wsp.sendRequest({ action: 'PUT', name: name + '.vue', data: view[0].sfc })
+            //console.log('put:', put)
         }
+        //await wsp.close()
+        return Promise.resolve(import('./components/' + name + '.vue'))
+    }
 
 
-    //}
-//}
-
-const myWs = new WebSocket('ws://localhost:9000');
-//var msg = {};
-// обработчик проинформирует в консоль когда соединение установится
-myWs.onopen = function () {
-    //console.log('подключился');
-};
-// обработчик сообщений от сервера
-myWs.onmessage = function (message) {
-    //msg = message.data;
-    console.log('Message: %s', message.data);
-};
-
+}
 
 const registerViews = async (framework) => {
 
-    let views = await proxy.$websocket.sendAsync({
+    let views = await proxy.$ws.sendAsync({
         _msg: [
             cid.value,
             "models",
@@ -448,11 +427,9 @@ const registerViews = async (framework) => {
         ],
     });
     //console.log('views:', views)
-    let options = {}
     for (let i = 0, n; i < views.length; i++) {
         n = views[i]["vtype"]["name"].split('/')[1] + '-' + views[i]["model"]["name"].replaceAll('.', '-')
         options['gp-' + n] = { 'model': views[i]["model"]["name"], 'vtype': views[i]["vtype"]["name"] }
-        //hmr.accept('gp-' + n + '.vue',MyloadModule) 
 
     }
     for (let i = 0, n; i < views.length; i++) {

@@ -271,7 +271,7 @@ export default defineComponent({
                 'context': proxy.$UserPreferences.Context
             }
             //console.log('cache:',r);
-            proxy.$websocket.sendAsync({
+            proxy.$ws.sendAsync({
                 '_msg': [props.cid, '_cache', 'm2ofind', props.guid, r]
             }).then((v) => {
                 console.log('m2ofind:', v);
@@ -312,7 +312,7 @@ export default defineComponent({
                 'context': proxy.$UserPreferences.Context
             }
             //console.log('cache-related:',r);
-            proxy.$websocket.sendAsync({
+            proxy.$ws.sendAsync({
                 '_msg': [props.cid, '_cache', 'relatedfind', props.guid, r]
             }).then((v) => {
                 console.log('relatedfind:', v);

@@ -202,7 +202,7 @@ const do_select = () => {
 
 const do_search = event => {
     //console.log('select data:', event)
-    proxy.$websocket.send({
+    proxy.$ws.sendAsync({
         _msg: [
             props.cid,
             'models',
@@ -215,9 +215,9 @@ const do_search = event => {
                 limit: event.limit.value
             }
         ]
-    },
-        on_select_data
-    )
+    }
+        
+    ).then(msg => on_select_data(msg) )
 }
 
 const do_modal_form = (oid, mode) => {
@@ -271,7 +271,7 @@ const do_action = action => {
             )
             break
         case 'delete':
-            proxy.$websocket.sendAsync({
+            proxy.$ws.sendAsync({
                 _msg: [
                     props.cid,
                     'models',
@@ -285,7 +285,7 @@ const do_action = action => {
             ).then((msg) => {
                 //console.log('action:', msg)
                 if (msg.length > 0) {
-                    proxy.$websocket.sendAsync({
+                    proxy.$ws.sendAsync({
                         _msg: [
                             props.cid,
                             '_commit'

@@ -327,8 +327,8 @@ export default defineComponent({
     name: 'gp-form-md-partner'
 })
 
-</script><
-script setup>
+</script>
+<script setup>
 import {
     defineAsyncComponent,
     onBeforeMount,

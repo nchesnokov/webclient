@@ -81,19 +81,19 @@ export default defineComponent({
 
         //const addRow = () => {}
         const add_row = (model,container,view) => {
-            proxy.$websocket.sendAsync({_msg:[props.cid,'_cache','add',props.guid,{'model':props.model,'container':props.container,'context':{},'view':view}]}).then((msg) => 
+            proxy.$ws.sendAsync({_msg:[props.cid,'_cache','add',props.guid,{'model':props.model,'container':props.container,'context':{},'view':view}]}).then((msg) => 
             on_modify_models(props.root.dataForm,msg[0]));
         }
 
         const remove_row = (path) => {
             console.log('remove_row:',path,props.container)
-            proxy.$websocket.sendAsync({_msg:[props.cid,'_cache','remove',props.guid,{'path':path,'container':props.container,'context':{}}]}).then((msg) => 
+            proxy.$ws.sendAsync({_msg:[props.cid,'_cache','remove',props.guid,{'path':path,'container':props.container,'context':{}}]}).then((msg) => 
             on_modify_models(props.root.dataForm,msg[0]));
         }
 
         const remove_rows = () => {
         if (confirm('Are you sure you want to delete this items?')) {       
-            proxy.$websocket.sendAsync({_msg:[props.cid,'_cache','removes',props.guid,{'rows':multipleSelection.map(function(v) { return {'path':v['__path__'],'container':props.container}}),'context':{}}]}).then((msg) => 
+            proxy.$ws.sendAsync({_msg:[props.cid,'_cache','removes',props.guid,{'rows':multipleSelection.map(function(v) { return {'path':v['__path__'],'container':props.container}}),'context':{}}]}).then((msg) => 
             //console.log('on_removes:',msg[0]))
             on_modify_models(props.root.dataForm,msg[0]));
         }

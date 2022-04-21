@@ -54,7 +54,7 @@ export default defineComponent({
           //console.log('load-tree:',tree)
           //console.log('load-treeNode:',treeNode)
           //console.log('load-resolve:',resolve)
-            proxy.$websocket.sendAsync({
+            proxy.$ws.sendAsync({
                 _msg: [props.cid, 'models', props.model, 'select', {
                     fields: fields,
                     cond: [{__tuple__:[props.metas[props.model].meta.names.parent_id,'=', tree[props.metas[props.model].meta.names.rec_name]]}],
@@ -82,8 +82,7 @@ export default defineComponent({
         const do_search = (event) => {
             console.log('tree_select_data_event:',event);
 
-            //proxy.$websocket.sendAsync({_msg:[props.cid,'models',props.model,'tree',{fields:fields,context:{}}]}).then(msg=>tableData.splice(0,tableData.length,...msg));
-            proxy.$websocket.send({
+            proxy.$ws.sendAsync({
                 _msg: [props.cid, 'models', props.model, 'select', {
                     fields: fields,
                     cond: event.cond.length > 0 ? event.cond:[{__tuple__:[props.metas[props.model].meta.names.parent_id,'?']}],
@@ -92,7 +91,7 @@ export default defineComponent({
                     limit: event.limit.value
 
                 }]
-            }, on_select_data);
+            }).then(msg => on_select_data(msg) );
         };
         const on_select_data = (msg) => {
             console.log('select data:', treeProps, msg);

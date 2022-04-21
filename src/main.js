@@ -6,33 +6,36 @@ import App from './App.vue'
 
 import VueApexCharts from "vue3-apexcharts";
 
-import WebSocketVue from './js/vue3-async-websocket';
+//import WebSocketVue from './js/vue3-async-websocket';
 import {v4 as uuidv4} from 'uuid'
 
-const url = 'ws://localhost:8100/ws';
+import WebSocketAsPromised from 'websocket-as-promised';
 
-function genID(){ return uuidv4()}
+//const url = 'ws://localhost:8100/ws';
+
+//function genID(){ return uuidv4()}
 
 
-const defOptions = {
-    'debug': false,
-    'load-on-start': true,   
-    'create-id-func': genID ,
-};
+// const defOptions = {
+//     'debug': false,
+//     'load-on-start': true,   
+//     'create-id-func': genID ,
+// };
 
-import mitt from 'mitt';
-const emitter = mitt();
+//import mitt from 'mitt';
+//const emitter = mitt();
 
 const app = createApp(App)
 
 app.use(ElementPlus)
 //installElementPlus(app)
 
-app.use( WebSocketVue, url, defOptions );
+//app.use( WebSocketVue, url, defOptions );
 
 app.use(VueApexCharts);
 
 import JsonViewer from "vue3-json-viewer"
+import "vue3-json-viewer/dist/index.css";
 app.use(JsonViewer)
 
 import {createI18n} from 'vue3-i18n'
@@ -61,9 +64,31 @@ app.component('kanban-board',defineAsyncComponent(() => import('./components/Kan
 app.component('gp-kanban',defineAsyncComponent({loader:() => import('./components/gp-kanban.vue')}));
 
 app.config.globalProperties.$appcontext = app._context;
-app.config.globalProperties.$emitter = emitter;
+//app.config.globalProperties.$emitter = emitter;
 app.config.globalProperties.$UserPreferences = reactive({});
 
+async function WSP(url){
+const wsp = new WebSocketAsPromised(url, {
+    packMessage: data => JSON.stringify(data),
+    unpackMessage: data => JSON.parse(data),
+    attachRequestId: (data, requestId) => Object.assign({ id: requestId }, data), // attach requestId to message as `id` field
+    extractRequestId: data => data && data.id,
+});
+await wsp.open();
+return wsp
+}
+
+async function sendAsync(message,options={}){
+    if (!( 'requestId' in options)) options.requestId = uuidv4()
+    let res = await this.sendRequest(message,options);
+    if ('_msg' in res) return res._msg;
+    return null;
+}
+
+WebSocketAsPromised.prototype.sendAsync = sendAsync
+
+app.config.globalProperties.$ws = await WSP('ws://localhost:8100/ws');
+app.config.globalProperties.$wsp = await WSP('ws://localhost:9000/');
 
 
 app.mount('#app')

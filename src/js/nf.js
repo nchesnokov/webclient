@@ -148,7 +148,7 @@ const on_modify_models = (dataForm, values) => {
     }
 
 
-    console.log('on_modify_models:', dataForm, values);
+    //console.log('on_modify_models:', dataForm, values);
 
     if ('__data__' in values) {
         let data = values.__data__;
