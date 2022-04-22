@@ -181,6 +181,190 @@
                 </el-input>		
 
 		</el-form-item>
+		<el-form-item :label="colsLabel['uom']">
+                <el-input
+                    v-model="dataForm.__data__['uom'].name"
+                    @change="m2o_cache(dataForm, 'uom')"
+                    :readonly="readonly('uom')"
+                >
+                    <template v-if="isCompute('uom')" #prefix>
+                        <el-button type="primary" size="mini" icon="el-icon-s-data" />
+                    </template>
+                    <template #suffix>
+                        <el-button
+                            type="primary"
+                            size="small"
+                            :icon="Search"
+                            @click="do_find('uom', 'single', [], { 'item': dataForm })"
+                        ></el-button>
+                        <el-button
+                            type="primary"
+                            size="small"
+                            :icon="DocumentAdd"
+                            @click="do_add('uom')"
+                        ></el-button>
+                        <el-button
+                            v-if="dataForm.__data__['uom'].id != null"
+                            type="primary"
+                            size="small"
+                            :icon="Edit"
+                            @click="do_edit('uom', dataForm.__data__['uom'].id)"
+                        ></el-button>
+                        <el-button
+                            v-if="dataForm.__data__['uom'].id != null"
+                            type="primary"
+                            size="small"
+                            :icon="View"
+                            @click="do_lookup('uom', dataForm.__data__['uom'].id)"
+                        ></el-button>
+                    </template>
+                </el-input>					
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['gti']">
+                <el-input
+                    v-model="dataForm.__data__['gti'].name"
+                    @change="m2o_cache(dataForm, 'gti')"
+                    :readonly="readonly('gti')"
+                >
+                    <template v-if="isCompute('gti')" #prefix>
+                        <el-button type="primary" size="mini" icon="el-icon-s-data" />
+                    </template>
+                    <template #suffix>
+                        <el-button
+                            type="primary"
+                            size="small"
+                            :icon="Search"
+                            @click="do_find('gti', 'single', [], { 'item': dataForm })"
+                        ></el-button>
+                        <el-button
+                            type="primary"
+                            size="small"
+                            :icon="DocumentAdd"
+                            @click="do_add('gti')"
+                        ></el-button>
+                        <el-button
+                            v-if="dataForm.__data__['gti'].id != null"
+                            type="primary"
+                            size="small"
+                            :icon="Edit"
+                            @click="do_edit('gti', dataForm.__data__['gti'].id)"
+                        ></el-button>
+                        <el-button
+                            v-if="dataForm.__data__['gti'].id != null"
+                            type="primary"
+                            size="small"
+                            :icon="View"
+                            @click="do_lookup('gti', dataForm.__data__['gti'].id)"
+                        ></el-button>
+                    </template>
+                </el-input>					
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['volume']">
+                <el-input
+                    v-model="dataForm.__data__['volume']"
+                    @change="cache(dataForm, 'volume')"
+                    :readonly="readonly('volume')"
+                >
+                    <template v-if="isCompute('volume')" #prefix>
+                        <el-button type="primary" size="small" :icon="Monitor" />
+                    </template>
+                </el-input>
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['volume_uom']">
+                <el-input
+                    v-model="dataForm.__data__['volume_uom'].name"
+                    @change="m2o_cache(dataForm, 'volume_uom')"
+                    :readonly="readonly('volume_uom')"
+                >
+                    <template v-if="isCompute('volume_uom')" #prefix>
+                        <el-button type="primary" size="mini" icon="el-icon-s-data" />
+                    </template>
+                    <template #suffix>
+                        <el-button
+                            type="primary"
+                            size="small"
+                            :icon="Search"
+                            @click="do_find('volume_uom', 'single', [], { 'item': dataForm })"
+                        ></el-button>
+                        <el-button
+                            type="primary"
+                            size="small"
+                            :icon="DocumentAdd"
+                            @click="do_add('volume_uom')"
+                        ></el-button>
+                        <el-button
+                            v-if="dataForm.__data__['volume_uom'].id != null"
+                            type="primary"
+                            size="small"
+                            :icon="Edit"
+                            @click="do_edit('volume_uom', dataForm.__data__['volume_uom'].id)"
+                        ></el-button>
+                        <el-button
+                            v-if="dataForm.__data__['volume_uom'].id != null"
+                            type="primary"
+                            size="small"
+                            :icon="View"
+                            @click="do_lookup('volume_uom', dataForm.__data__['volume_uom'].id)"
+                        ></el-button>
+                    </template>
+                </el-input>					
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['weight']">
+                <el-input
+                    v-model="dataForm.__data__['weight']"
+                    @change="cache(dataForm, 'weight')"
+                    :readonly="readonly('weight')"
+                >
+                    <template v-if="isCompute('weight')" #prefix>
+                        <el-button type="primary" size="small" :icon="Monitor" />
+                    </template>
+                </el-input>
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['weight_uom']">
+                <el-input
+                    v-model="dataForm.__data__['weight_uom'].name"
+                    @change="m2o_cache(dataForm, 'weight_uom')"
+                    :readonly="readonly('weight_uom')"
+                >
+                    <template v-if="isCompute('weight_uom')" #prefix>
+                        <el-button type="primary" size="mini" icon="el-icon-s-data" />
+                    </template>
+                    <template #suffix>
+                        <el-button
+                            type="primary"
+                            size="small"
+                            :icon="Search"
+                            @click="do_find('weight_uom', 'single', [], { 'item': dataForm })"
+                        ></el-button>
+                        <el-button
+                            type="primary"
+                            size="small"
+                            :icon="DocumentAdd"
+                            @click="do_add('weight_uom')"
+                        ></el-button>
+                        <el-button
+                            v-if="dataForm.__data__['weight_uom'].id != null"
+                            type="primary"
+                            size="small"
+                            :icon="Edit"
+                            @click="do_edit('weight_uom', dataForm.__data__['weight_uom'].id)"
+                        ></el-button>
+                        <el-button
+                            v-if="dataForm.__data__['weight_uom'].id != null"
+                            type="primary"
+                            size="small"
+                            :icon="View"
+                            @click="do_lookup('weight_uom', dataForm.__data__['weight_uom'].id)"
+                        ></el-button>
+                    </template>
+                </el-input>					
+
+		</el-form-item>
 		<el-form-item :label="colsLabel['state']">
                 <el-select
                     v-model="dataForm.__data__['state']"
@@ -495,7 +679,7 @@ const cache = (item, name) => {
         context: proxy.$UserPreferences.Context
     }
     //console.log('cache:', r)
-    proxy.$websocket
+    proxy.$ws
         .sendAsync({
             _msg: [props.cid, '_cache', 'cache', guid.value, r]
         })
@@ -521,7 +705,7 @@ const m2o_cache = (item, name) => {
         'context': proxy.$UserPreferences.Context
     }
     //console.log('cache:',r);
-    proxy.$websocket.sendAsync({
+    proxy.$ws.sendAsync({
         '_msg': [props.cid, '_cache', 'm2ofind', guid.value, r]
     }).then((v) => {
         //console.log('m2ofind:', v);
@@ -562,7 +746,7 @@ const related_cache = (item, name, relatedy) => {
         'context': proxy.$UserPreferences.Context
     }
     //console.log('cache-related:',r);
-    proxy.$websocket.sendAsync({
+    proxy.$ws.sendAsync({
         '_msg': [props.cid, '_cache', 'relatedfind', guid.value, r]
     }).then((v) => {
         //console.log('relatedfind:', v);
@@ -609,7 +793,7 @@ const handleCurrentChange = val => {
     page.value = val
     let ctx = Object.assign({}, proxy.$UserPreferences.Context)
     ctx.cache = guid.value
-    proxy.$websocket.send({
+    proxy.$ws.sendAsync({
         _msg: [
             props.cid,
             'models',
@@ -620,9 +804,8 @@ const handleCurrentChange = val => {
                 context: ctx
             }
         ]
-    },
-        on_read
-    )
+    }
+    ).then(msg => on_read(msg))
 }
 
 const isCompute = col => {
@@ -718,7 +901,7 @@ const do_find = (col, mode = 'single', extcond = [], callbackopts = {}) => {
 }
 
 const do_search = event => {
-    proxy.$websocket.send({
+    proxy.$ws.sendAsync({
         _msg: [
             props.cid,
             'models',
@@ -731,8 +914,8 @@ const do_search = event => {
             }
         ]
     },
-        on_search
-    )
+        
+    ).then((msg) => on_search(msg) )
 }
 
 const on_search = msg => {
@@ -743,7 +926,7 @@ const on_search = msg => {
         mode.value = 'edit'
         let ctx = Object.assign({}, proxy.$UserPreferences.Context)
         ctx.cache = guid.value
-        proxy.$websocket.send({
+        proxy.$ws.send({
             _msg: [
                 props.cid,
                 'models',
@@ -754,9 +937,8 @@ const on_search = msg => {
                     context: ctx
                 }
             ]
-        },
-            on_read
-        )
+        }
+        ).then(msg => on_read(msg) )
     }
 }
 const do_modal_form = (col, oid, mode) => {
@@ -821,16 +1003,16 @@ const do_lookup = (col, oid) => {
     do_modal_form(col, oid, 'lookup')
 }
 
-const onSubmit = () => {
+const onSubmit = async () => {
     (async () => {
         if (['new', 'edit', 'copy'].indexOf(mode.value) >= 0) {
-            let msg = await proxy.$websocket.sendAsync({
+            let msg = await proxy.$ws.sendAsync({
                 _msg: [props.cid, '_cache', mode.value == 'copy' ? 'copy' : 'save', guid.value, {}]
             })
             let action = msg[0], oid = msg[1];
             //console.log('action:', msg)
             if (action == 'commit') {
-                await proxy.$websocket.sendAsync({
+                await proxy.$ws.sendAsync({
                     _msg: [
                         props.cid,
                         '_cache',
@@ -849,7 +1031,7 @@ const onSubmit = () => {
                         }, props.modal.callbackOpts)
                     emit('update:close');
                 } else {
-                    msg = proxy.$websocket.sendAsync({
+                    msg = await proxy.$ws.sendAsync({
                         _msg: [
                             props.cid,
                             '_cache',
@@ -894,9 +1076,9 @@ const onValidate = () => {
 const onClose = () => {
     emit('update:close');
 }
-const onCancel = () => {
+const onCancel = async () => {
     if (mode.value == 'new')
-        proxy.$websocket
+        proxy.$ws
             .sendAsync({
                 _msg: [
                     props.cid,
@@ -930,7 +1112,7 @@ const on_read = msg => {
 
 onBeforeMount(async () => {
     if ('mode' in props.modal) mode.value = props.modal.mode;
-    let msg = await proxy.$websocket
+    let msg = await proxy.$ws
         .sendAsync({
             _msg: [
                 props.cid,
@@ -943,7 +1125,7 @@ onBeforeMount(async () => {
         })
     if (msg && msg.length > 0) guid.value = msg[0]
     if (mode.value == 'new') {
-        msg = await proxy.$websocket
+        msg = await proxy.$ws
             .sendAsync({
                 _msg: [
                     props.cid,
@@ -988,7 +1170,7 @@ onBeforeMount(async () => {
         //console.log('multipleSelection:', multipleSelection)
         let ctx = Object.assign({}, proxy.$UserPreferences.Context)
         ctx.cache = guid.value
-        proxy.$websocket.send({
+        proxy.$ws.sendAsync({
             _msg: [
                 props.cid,
                 'models',
@@ -999,9 +1181,8 @@ onBeforeMount(async () => {
                     context: ctx
                 }
             ]
-        },
-            on_read
-        )
+        }
+        ).then(msg => on_read(msg))
     }
     //console.log('fields:',fields);
 })

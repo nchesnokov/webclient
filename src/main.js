@@ -78,10 +78,27 @@ await wsp.open();
 return wsp
 }
 
+
+const _json_pickle = (obj) => {
+	if(typeof obj == 'object' && Array.isArray(obj)) for(let i = 0;i < obj.length;i++) obj[i] = _json_pickle(obj[i]);
+	else if (typeof obj == 'object'){
+		for(let k in obj) {
+			if (['__datetime_tz__','__datetime__','__time_tz__','__time__','__date__','__timedelta__','__decimal__','__tuple__'].indexOf(k) >= 0) {
+				if (k == '__decimal__') obj[k] = Number(obj[k]);
+				else obj = _json_pickle(obj[k]);
+			}
+			else obj[k] = _json_pickle(obj[k]);
+			}
+		return obj;
+		} 
+	return obj;
+}
+
+
 async function sendAsync(message,options={}){
     if (!( 'requestId' in options)) options.requestId = uuidv4()
     let res = await this.sendRequest(message,options);
-    if ('_msg' in res) return res._msg;
+    if ('_msg' in res) return _json_pickle(res._msg);
     return null;
 }
 

@@ -430,7 +430,7 @@ export default defineComponent({
                 context: proxy.$UserPreferences.Context
             }
             console.log('cache:', r)
-            proxy.$websocket
+            proxy.$ws
                 .sendAsync({
                     _msg: [props.cid, '_cache', 'cache', props.guid, r]
                 })

@@ -79,66 +79,44 @@
         >
 
 
-		<el-form-item :label="colsLabel['name']">
+		<el-form-item :label="colsLabel['module_id']">
                 <el-input
-                    v-model="dataForm.__data__['name']"
-                    :maxlength="colsSize['name']"
-                    show-word-limit
-                    @change="cache(dataForm, 'name')"
-                    :readonly="readonly('name')"
+                    v-model="dataForm.__data__['module_id'].name"
+                    @change="m2o_cache(dataForm, 'module_id')"
+                    :readonly="readonly('module_id')"
                 >
-                    <template v-if="isCompute('name')" #prepend>
-                        <el-button type="primary" size="small" :icon="Monitor" />
-                        <el-dropdown v-if="colsTranslate['name']" @command="i18nCommand">
-                            <span class="el-dropdown-link">
-                                {{ colsLang['name'].toLowerCase() }}
-                                <i
-                                    class="el-icon-arrow-down el-icon--right"
-                                ></i>
-                            </span>
-                            <template #dropdown>
-                                <el-dropdown-menu>
-                                    <el-dropdown-item
-                                        v-for="lang in $UserPreferences.langs"
-                                        :key="lang.code"
-                                        :command="{ col: 'name', lang: lang.code }"
-                                    >{{ lang.description }}</el-dropdown-item>
-                                </el-dropdown-menu>
-                            </template>
-                        </el-dropdown>
+                    <template v-if="isCompute('module_id')" #prefix>
+                        <el-button type="primary" size="mini" icon="el-icon-s-data" />
                     </template>
-                </el-input>		
-
-		</el-form-item>
-		<el-form-item :label="colsLabel['shortname']">
-                <el-input
-                    v-model="dataForm.__data__['shortname']"
-                    :maxlength="colsSize['shortname']"
-                    show-word-limit
-                    @change="cache(dataForm, 'shortname')"
-                    :readonly="readonly('shortname')"
-                >
-                    <template v-if="isCompute('shortname')" #prepend>
-                        <el-button type="primary" size="small" :icon="Monitor" />
-                        <el-dropdown v-if="colsTranslate['shortname']" @command="i18nCommand">
-                            <span class="el-dropdown-link">
-                                {{ colsLang['shortname'].toLowerCase() }}
-                                <i
-                                    class="el-icon-arrow-down el-icon--right"
-                                ></i>
-                            </span>
-                            <template #dropdown>
-                                <el-dropdown-menu>
-                                    <el-dropdown-item
-                                        v-for="lang in $UserPreferences.langs"
-                                        :key="lang.code"
-                                        :command="{ col: 'shortname', lang: lang.code }"
-                                    >{{ lang.description }}</el-dropdown-item>
-                                </el-dropdown-menu>
-                            </template>
-                        </el-dropdown>
+                    <template #suffix>
+                        <el-button
+                            type="primary"
+                            size="small"
+                            :icon="Search"
+                            @click="do_find('module_id', 'single', [], { 'item': dataForm })"
+                        ></el-button>
+                        <el-button
+                            type="primary"
+                            size="small"
+                            :icon="DocumentAdd"
+                            @click="do_add('module_id')"
+                        ></el-button>
+                        <el-button
+                            v-if="dataForm.__data__['module_id'].id != null"
+                            type="primary"
+                            size="small"
+                            :icon="Edit"
+                            @click="do_edit('module_id', dataForm.__data__['module_id'].id)"
+                        ></el-button>
+                        <el-button
+                            v-if="dataForm.__data__['module_id'].id != null"
+                            type="primary"
+                            size="small"
+                            :icon="View"
+                            @click="do_lookup('module_id', dataForm.__data__['module_id'].id)"
+                        ></el-button>
                     </template>
-                </el-input>		
+                </el-input>					
 
 		</el-form-item>
 		<el-form-item :label="colsLabel['code']">
@@ -172,19 +150,19 @@
                 </el-input>		
 
 		</el-form-item>
-		<el-form-item :label="colsLabel['alpha2']">
+		<el-form-item :label="colsLabel['descr']">
                 <el-input
-                    v-model="dataForm.__data__['alpha2']"
-                    :maxlength="colsSize['alpha2']"
+                    v-model="dataForm.__data__['descr']"
+                    :maxlength="colsSize['descr']"
                     show-word-limit
-                    @change="cache(dataForm, 'alpha2')"
-                    :readonly="readonly('alpha2')"
+                    @change="cache(dataForm, 'descr')"
+                    :readonly="readonly('descr')"
                 >
-                    <template v-if="isCompute('alpha2')" #prepend>
+                    <template v-if="isCompute('descr')" #prepend>
                         <el-button type="primary" size="small" :icon="Monitor" />
-                        <el-dropdown v-if="colsTranslate['alpha2']" @command="i18nCommand">
+                        <el-dropdown v-if="colsTranslate['descr']" @command="i18nCommand">
                             <span class="el-dropdown-link">
-                                {{ colsLang['alpha2'].toLowerCase() }}
+                                {{ colsLang['descr'].toLowerCase() }}
                                 <i
                                     class="el-icon-arrow-down el-icon--right"
                                 ></i>
@@ -194,7 +172,7 @@
                                     <el-dropdown-item
                                         v-for="lang in $UserPreferences.langs"
                                         :key="lang.code"
-                                        :command="{ col: 'alpha2', lang: lang.code }"
+                                        :command="{ col: 'descr', lang: lang.code }"
                                     >{{ lang.description }}</el-dropdown-item>
                                 </el-dropdown-menu>
                             </template>
@@ -203,49 +181,83 @@
                 </el-input>		
 
 		</el-form-item>
-		<el-form-item :label="colsLabel['alpha3']">
+		<el-form-item :label="colsLabel['class_model']">
                 <el-input
-                    v-model="dataForm.__data__['alpha3']"
-                    :maxlength="colsSize['alpha3']"
-                    show-word-limit
-                    @change="cache(dataForm, 'alpha3')"
-                    :readonly="readonly('alpha3')"
+                    v-model="dataForm.__data__['class_model'].name"
+                    v-if="colsType['class_model'] == 'related'"
+                    @change="related_cache(dataForm, 'class_model', metas[model].meta.columns['class_model'].relatedy)"
+                    :readonly="readonly('class_model')"
                 >
-                    <template v-if="isCompute('alpha3')" #prepend>
+                    <template v-if="isCompute('class_model')" #prefix>
                         <el-button type="primary" size="small" :icon="Monitor" />
-                        <el-dropdown v-if="colsTranslate['alpha3']" @command="i18nCommand">
-                            <span class="el-dropdown-link">
-                                {{ colsLang['alpha3'].toLowerCase() }}
-                                <i
-                                    class="el-icon-arrow-down el-icon--right"
-                                ></i>
-                            </span>
-                            <template #dropdown>
-                                <el-dropdown-menu>
-                                    <el-dropdown-item
-                                        v-for="lang in $UserPreferences.langs"
-                                        :key="lang.code"
-                                        :command="{ col: 'alpha3', lang: lang.code }"
-                                    >{{ lang.description }}</el-dropdown-item>
-                                </el-dropdown-menu>
-                            </template>
-                        </el-dropdown>
                     </template>
-                </el-input>		
+                    <template #suffix>
+                        <el-button type="primary" size="small" :icon="Search" @click="do_find('class_model')"></el-button>
+                        <el-button
+                            type="primary"
+                            size="small"
+                            :icon="DocumentAdd"
+                            @click="do_add('class_model')"
+                        ></el-button>
+                        <el-button
+                            v-if="dataForm.__data__['class_model'].id != null"
+                            type="primary"
+                            size="small"
+                            :icon="Edit"
+                            @click="do_edit('class_model', dataForm.__data__['class_model'].id)"
+                        ></el-button>
+                        <el-button
+                            v-if="dataForm.__data__['class_model'].id != null"
+                            type="primary"
+                            size="small"
+                            :icon="View"
+                            @click="do_lookup('class_model', dataForm.__data__['class_model'].id)"
+                        ></el-button>
+                    </template>
+                </el-input>				
 
 		</el-form-item>
-		<el-form-item :label="colsLabel['group_ids']">
-                <el-row>
-                    <el-button type="primary" @click="do_find('group_ids', 'multiple')">Add</el-button>
-                    <gp-m2m-list
-                        :metas="metas"
-                        :model="metas[model].meta.columns['group_ids'].obj"
-                        :tableData="dataForm.__m2m_containers__['group_ids']"
-                    ></gp-m2m-list>
-                </el-row>
+		<el-form-item :label="colsLabel['class_model_category']">
+                <el-input
+                    v-model="dataForm.__data__['class_model_category'].name"
+                    v-if="colsType['class_model_category'] == 'related'"
+                    @change="related_cache(dataForm, 'class_model_category', metas[model].meta.columns['class_model_category'].relatedy)"
+                    :readonly="readonly('class_model_category')"
+                >
+                    <template v-if="isCompute('class_model_category')" #prefix>
+                        <el-button type="primary" size="small" :icon="Monitor" />
+                    </template>
+                    <template #suffix>
+                        <el-button type="primary" size="small" :icon="Search" @click="do_find('class_model_category')"></el-button>
+                        <el-button
+                            type="primary"
+                            size="small"
+                            :icon="DocumentAdd"
+                            @click="do_add('class_model_category')"
+                        ></el-button>
+                        <el-button
+                            v-if="dataForm.__data__['class_model_category'].id != null"
+                            type="primary"
+                            size="small"
+                            :icon="Edit"
+                            @click="do_edit('class_model_category', dataForm.__data__['class_model_category'].id)"
+                        ></el-button>
+                        <el-button
+                            v-if="dataForm.__data__['class_model_category'].id != null"
+                            type="primary"
+                            size="small"
+                            :icon="View"
+                            @click="do_lookup('class_model_category', dataForm.__data__['class_model_category'].id)"
+                        ></el-button>
+                    </template>
+                </el-input>				
 
 		</el-form-item>
-		<el-form-item :label="colsLabel['states']">
+		<el-form-item :label="colsLabel['oom']">
+				<JsonViewer :value="dataForm.__data__['oom']" copyable boxed sort theme="jv-light"/>
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['columns']">
             <el-tabs type="border-card" v-if="o2mcols.length > 0">
                 <el-tab-pane :label="colsLabel[o2mcol]" v-for="o2mcol in o2mcols" :key="o2mcol">
                     <gp-o2m-components
@@ -304,7 +316,7 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-    name: 'gp-form-md-country',
+    name: 'gp-form-bc-models',
 })
 
 </script>
@@ -493,7 +505,7 @@ const cache = (item, name) => {
         context: proxy.$UserPreferences.Context
     }
     //console.log('cache:', r)
-    proxy.$websocket
+    proxy.$ws
         .sendAsync({
             _msg: [props.cid, '_cache', 'cache', guid.value, r]
         })
@@ -519,7 +531,7 @@ const m2o_cache = (item, name) => {
         'context': proxy.$UserPreferences.Context
     }
     //console.log('cache:',r);
-    proxy.$websocket.sendAsync({
+    proxy.$ws.sendAsync({
         '_msg': [props.cid, '_cache', 'm2ofind', guid.value, r]
     }).then((v) => {
         //console.log('m2ofind:', v);
@@ -560,7 +572,7 @@ const related_cache = (item, name, relatedy) => {
         'context': proxy.$UserPreferences.Context
     }
     //console.log('cache-related:',r);
-    proxy.$websocket.sendAsync({
+    proxy.$ws.sendAsync({
         '_msg': [props.cid, '_cache', 'relatedfind', guid.value, r]
     }).then((v) => {
         //console.log('relatedfind:', v);
@@ -607,7 +619,7 @@ const handleCurrentChange = val => {
     page.value = val
     let ctx = Object.assign({}, proxy.$UserPreferences.Context)
     ctx.cache = guid.value
-    proxy.$websocket.send({
+    proxy.$ws.sendAsync({
         _msg: [
             props.cid,
             'models',
@@ -618,9 +630,8 @@ const handleCurrentChange = val => {
                 context: ctx
             }
         ]
-    },
-        on_read
-    )
+    }
+    ).then(msg => on_read(msg))
 }
 
 const isCompute = col => {
@@ -716,7 +727,7 @@ const do_find = (col, mode = 'single', extcond = [], callbackopts = {}) => {
 }
 
 const do_search = event => {
-    proxy.$websocket.send({
+    proxy.$ws.sendAsync({
         _msg: [
             props.cid,
             'models',
@@ -729,8 +740,8 @@ const do_search = event => {
             }
         ]
     },
-        on_search
-    )
+        
+    ).then((msg) => on_search(msg) )
 }
 
 const on_search = msg => {
@@ -819,7 +830,7 @@ const do_lookup = (col, oid) => {
     do_modal_form(col, oid, 'lookup')
 }
 
-const onSubmit = () => {
+const onSubmit = async () => {
     (async () => {
         if (['new', 'edit', 'copy'].indexOf(mode.value) >= 0) {
             let msg = await proxy.$websocket.sendAsync({
@@ -847,7 +858,7 @@ const onSubmit = () => {
                         }, props.modal.callbackOpts)
                     emit('update:close');
                 } else {
-                    msg = proxy.$websocket.sendAsync({
+                    msg = await proxy.$websocket.sendAsync({
                         _msg: [
                             props.cid,
                             '_cache',
@@ -892,9 +903,9 @@ const onValidate = () => {
 const onClose = () => {
     emit('update:close');
 }
-const onCancel = () => {
+const onCancel = async () => {
     if (mode.value == 'new')
-        proxy.$websocket
+        proxy.$ws
             .sendAsync({
                 _msg: [
                     props.cid,
@@ -928,7 +939,7 @@ const on_read = msg => {
 
 onBeforeMount(async () => {
     if ('mode' in props.modal) mode.value = props.modal.mode;
-    let msg = await proxy.$websocket
+    let msg = await proxy.$ws
         .sendAsync({
             _msg: [
                 props.cid,
@@ -941,7 +952,7 @@ onBeforeMount(async () => {
         })
     if (msg && msg.length > 0) guid.value = msg[0]
     if (mode.value == 'new') {
-        msg = await proxy.$websocket
+        msg = await proxy.$ws
             .sendAsync({
                 _msg: [
                     props.cid,
@@ -986,7 +997,7 @@ onBeforeMount(async () => {
         //console.log('multipleSelection:', multipleSelection)
         let ctx = Object.assign({}, proxy.$UserPreferences.Context)
         ctx.cache = guid.value
-        proxy.$websocket.send({
+        proxy.$ws.sendAsync({
             _msg: [
                 props.cid,
                 'models',
@@ -997,9 +1008,8 @@ onBeforeMount(async () => {
                     context: ctx
                 }
             ]
-        },
-            on_read
-        )
+        }
+        ).then(msg => on_read(msg))
     }
     //console.log('fields:',fields);
 })
@@ -1007,28 +1017,31 @@ onBeforeMount(async () => {
 </script>
 <i18n lang="yaml">
 de:
-  Alpha2: Alpha2
-  Alpha3: Alpha3
-  Code: Code
-  Group: Group
+  Class Model: Class Model
+  Class Model Category: Class Model Category
+  Columns: Columns
+  Description: Description
+  Inherits: Inherits
+  Meta Of Object: Meta Of Object
+  Module: Module
   Name: Name
-  Short Name: Short Name
-  States: States
 en:
-  Alpha2: Alpha2
-  Alpha3: Alpha3
-  Code: Code
-  Group: Group
+  Class Model: Class Model
+  Class Model Category: Class Model Category
+  Columns: Columns
+  Description: Description
+  Inherits: Inherits
+  Meta Of Object: Meta Of Object
+  Module: Module
   Name: Name
-  Short Name: Short Name
-  States: States
 ru:
-  Alpha2: Alpha2
-  Alpha3: Alpha3
-  Code: Code
-  Group: Group
+  Class Model: Class Model
+  Class Model Category: Class Model Category
+  Columns: Columns
+  Description: Description
+  Inherits: Inherits
+  Meta Of Object: Meta Of Object
+  Module: Module
   Name: Name
-  Short Name: Short Name
-  States: States
 
 </i18n>

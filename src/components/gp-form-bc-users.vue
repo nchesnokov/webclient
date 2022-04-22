@@ -573,7 +573,7 @@ const handleCurrentChange = val => {
     page.value = val
     let ctx = Object.assign({}, proxy.$UserPreferences.Context)
     ctx.cache = guid.value
-    proxy.$ws.send({
+    proxy.$ws.sendAsync({
         _msg: [
             props.cid,
             'models',
@@ -584,9 +584,8 @@ const handleCurrentChange = val => {
                 context: ctx
             }
         ]
-    },
-        on_read
-    )
+    }
+    ).then(msg => on_read(msg))
 }
 
 const isCompute = col => {
@@ -682,7 +681,7 @@ const do_find = (col, mode = 'single', extcond = [], callbackopts = {}) => {
 }
 
 const do_search = event => {
-    proxy.$ws.send({
+    proxy.$ws.sendAsync({
         _msg: [
             props.cid,
             'models',
@@ -695,8 +694,8 @@ const do_search = event => {
             }
         ]
     },
-        on_search
-    )
+        
+    ).then((msg) => on_search(msg) )
 }
 
 const on_search = msg => {
@@ -952,7 +951,7 @@ onBeforeMount(async () => {
         //console.log('multipleSelection:', multipleSelection)
         let ctx = Object.assign({}, proxy.$UserPreferences.Context)
         ctx.cache = guid.value
-        proxy.$ws.send({
+        proxy.$ws.sendAsync({
             _msg: [
                 props.cid,
                 'models',
@@ -963,9 +962,8 @@ onBeforeMount(async () => {
                     context: ctx
                 }
             ]
-        },
-            on_read
-        )
+        }
+        ).then(msg => on_read(msg))
     }
     //console.log('fields:',fields);
 })

@@ -67,13 +67,13 @@ export default defineComponent({
 
         const handleCurrentChange = (val) => {
             page.value = val;
-            proxy.$websocket.send({
+            proxy.$ws.sendAsync({
                 _msg: [props.cid, 'models', props.model, 'read', {
                     'fields': fields,
                     'ids': multipleSelection[page.value - 1],
                     'context': proxy.$UserPreferences.Context
                 }]
-            }, on_read);
+            }).then(msg => on_read(msg) );
         };
 
         const fieldsBuild = (model, view) => {
@@ -109,14 +109,14 @@ export default defineComponent({
         };
 
         const do_search = (event) => {
-            proxy.$websocket.send({
+            proxy.$ws.sendAsync({
                 _msg: [props.cid, 'models', props.model, 'search', {
                     'cond': event.cond,
                     'context': proxy.$UserPreferences.Context,
                     'offset': event.offset.value,
                     'limit': event.limit.value
                 }]
-            }, on_search);
+            }).then(msg => on_search(msg));
 
         };
 
@@ -125,13 +125,13 @@ export default defineComponent({
             if (msg.length > 0) {
                 multipleSelection.splice(0, multipleSelection.length, ...msg);
                 showSearch.value = false;
-                proxy.$websocket.send({
+                proxy.$ws.sendAsync({
                     _msg: [props.cid, 'models', props.model, 'read', {
                         'fields': fields,
                         'ids': multipleSelection[page.value - 1],
                         'context': proxy.$UserPreferences.Context
                     }]
-                }, on_read);
+                }).then(msg => on_read(msg) );
 
             }
         };

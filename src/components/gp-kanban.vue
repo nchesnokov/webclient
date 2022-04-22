@@ -45,7 +45,7 @@ export default defineComponent({
 
         const do_search = (event) => {
             console.log('select data:', event);
-            proxy.$websocket.send({
+            proxy.$ws.sendAsync({
                 _msg: [props.cid, 'models', props.model, 'select', {
                     fields: Object.keys(props.metas[props.model].views.kanban.columns),
                     cond: event.cond,
@@ -53,7 +53,7 @@ export default defineComponent({
                     'offset': event.offset.value,
                     'limit': event.limit.value
                 }]
-            }, on_select_data)
+            } ).then(mag => on_select_data(msg))
         };
 
         const on_select_data = (msg) => {

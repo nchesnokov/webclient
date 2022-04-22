@@ -63,8 +63,8 @@ button.active {
                     @click="on_clicktab(tab)">{{ tab.split("-")[1] }}</el-button>
                 <component :is="currentTab" :cid="cid" :metas="metas" :model="model" />
             </template>
-        </el-main>
-        <div id="sv"></div>
+        </el-main >
+        <div id="sv" style="height: 500px"></div>
         <el-footer>
             {{
                 isLogged
@@ -181,7 +181,7 @@ const do_login = async (event) => {
                 ],
             }
         )
-        console.log('r:',r)
+        //console.log('r:',r)
         on_connect(r)
         
 

@@ -79,19 +79,19 @@
         >
 
 
-		<el-form-item :label="colsLabel['login']">
+		<el-form-item :label="colsLabel['name']">
                 <el-input
-                    v-model="dataForm.__data__['login']"
-                    :maxlength="colsSize['login']"
+                    v-model="dataForm.__data__['name']"
+                    :maxlength="colsSize['name']"
                     show-word-limit
-                    @change="cache(dataForm, 'login')"
-                    :readonly="readonly('login')"
+                    @change="cache(dataForm, 'name')"
+                    :readonly="readonly('name')"
                 >
-                    <template v-if="isCompute('login')" #prepend>
+                    <template v-if="isCompute('name')" #prepend>
                         <el-button type="primary" size="small" :icon="Monitor" />
-                        <el-dropdown v-if="colsTranslate['login']" @command="i18nCommand">
+                        <el-dropdown v-if="colsTranslate['name']" @command="i18nCommand">
                             <span class="el-dropdown-link">
-                                {{ colsLang['login'].toLowerCase() }}
+                                {{ colsLang['name'].toLowerCase() }}
                                 <i
                                     class="el-icon-arrow-down el-icon--right"
                                 ></i>
@@ -101,7 +101,7 @@
                                     <el-dropdown-item
                                         v-for="lang in $UserPreferences.langs"
                                         :key="lang.code"
-                                        :command="{ col: 'login', lang: lang.code }"
+                                        :command="{ col: 'name', lang: lang.code }"
                                     >{{ lang.description }}</el-dropdown-item>
                                 </el-dropdown-menu>
                             </template>
@@ -110,19 +110,19 @@
                 </el-input>		
 
 		</el-form-item>
-		<el-form-item :label="colsLabel['password']">
+		<el-form-item :label="colsLabel['street']">
                 <el-input
-                    v-model="dataForm.__data__['password']"
-                    :maxlength="colsSize['password']"
+                    v-model="dataForm.__data__['street']"
+                    :maxlength="colsSize['street']"
                     show-word-limit
-                    @change="cache(dataForm, 'password')"
-                    :readonly="readonly('password')"
+                    @change="cache(dataForm, 'street')"
+                    :readonly="readonly('street')"
                 >
-                    <template v-if="isCompute('password')" #prepend>
+                    <template v-if="isCompute('street')" #prepend>
                         <el-button type="primary" size="small" :icon="Monitor" />
-                        <el-dropdown v-if="colsTranslate['password']" @command="i18nCommand">
+                        <el-dropdown v-if="colsTranslate['street']" @command="i18nCommand">
                             <span class="el-dropdown-link">
-                                {{ colsLang['password'].toLowerCase() }}
+                                {{ colsLang['street'].toLowerCase() }}
                                 <i
                                     class="el-icon-arrow-down el-icon--right"
                                 ></i>
@@ -132,7 +132,7 @@
                                     <el-dropdown-item
                                         v-for="lang in $UserPreferences.langs"
                                         :key="lang.code"
-                                        :command="{ col: 'password', lang: lang.code }"
+                                        :command="{ col: 'street', lang: lang.code }"
                                     >{{ lang.description }}</el-dropdown-item>
                                 </el-dropdown-menu>
                             </template>
@@ -141,19 +141,19 @@
                 </el-input>		
 
 		</el-form-item>
-		<el-form-item :label="colsLabel['firstname']">
+		<el-form-item :label="colsLabel['street2']">
                 <el-input
-                    v-model="dataForm.__data__['firstname']"
-                    :maxlength="colsSize['firstname']"
+                    v-model="dataForm.__data__['street2']"
+                    :maxlength="colsSize['street2']"
                     show-word-limit
-                    @change="cache(dataForm, 'firstname')"
-                    :readonly="readonly('firstname')"
+                    @change="cache(dataForm, 'street2')"
+                    :readonly="readonly('street2')"
                 >
-                    <template v-if="isCompute('firstname')" #prepend>
+                    <template v-if="isCompute('street2')" #prepend>
                         <el-button type="primary" size="small" :icon="Monitor" />
-                        <el-dropdown v-if="colsTranslate['firstname']" @command="i18nCommand">
+                        <el-dropdown v-if="colsTranslate['street2']" @command="i18nCommand">
                             <span class="el-dropdown-link">
-                                {{ colsLang['firstname'].toLowerCase() }}
+                                {{ colsLang['street2'].toLowerCase() }}
                                 <i
                                     class="el-icon-arrow-down el-icon--right"
                                 ></i>
@@ -163,7 +163,7 @@
                                     <el-dropdown-item
                                         v-for="lang in $UserPreferences.langs"
                                         :key="lang.code"
-                                        :command="{ col: 'firstname', lang: lang.code }"
+                                        :command="{ col: 'street2', lang: lang.code }"
                                     >{{ lang.description }}</el-dropdown-item>
                                 </el-dropdown-menu>
                             </template>
@@ -172,19 +172,19 @@
                 </el-input>		
 
 		</el-form-item>
-		<el-form-item :label="colsLabel['lastname']">
+		<el-form-item :label="colsLabel['zip']">
                 <el-input
-                    v-model="dataForm.__data__['lastname']"
-                    :maxlength="colsSize['lastname']"
+                    v-model="dataForm.__data__['zip']"
+                    :maxlength="colsSize['zip']"
                     show-word-limit
-                    @change="cache(dataForm, 'lastname')"
-                    :readonly="readonly('lastname')"
+                    @change="cache(dataForm, 'zip')"
+                    :readonly="readonly('zip')"
                 >
-                    <template v-if="isCompute('lastname')" #prepend>
+                    <template v-if="isCompute('zip')" #prepend>
                         <el-button type="primary" size="small" :icon="Monitor" />
-                        <el-dropdown v-if="colsTranslate['lastname']" @command="i18nCommand">
+                        <el-dropdown v-if="colsTranslate['zip']" @command="i18nCommand">
                             <span class="el-dropdown-link">
-                                {{ colsLang['lastname'].toLowerCase() }}
+                                {{ colsLang['zip'].toLowerCase() }}
                                 <i
                                     class="el-icon-arrow-down el-icon--right"
                                 ></i>
@@ -194,7 +194,7 @@
                                     <el-dropdown-item
                                         v-for="lang in $UserPreferences.langs"
                                         :key="lang.code"
-                                        :command="{ col: 'lastname', lang: lang.code }"
+                                        :command="{ col: 'zip', lang: lang.code }"
                                     >{{ lang.description }}</el-dropdown-item>
                                 </el-dropdown-menu>
                             </template>
@@ -203,15 +203,167 @@
                 </el-input>		
 
 		</el-form-item>
-		<el-form-item :label="colsLabel['issuperuser']">
-                <el-switch
-                    v-model="dataForm.__data__['{0}']"
-                    @change="cache(dataForm, '{0}')"
-                    :disabled="readonly('{0}')"
-                ></el-switch>
+		<el-form-item :label="colsLabel['city']">
+                <el-input
+                    v-model="dataForm.__data__['city']"
+                    :maxlength="colsSize['city']"
+                    show-word-limit
+                    @change="cache(dataForm, 'city')"
+                    :readonly="readonly('city')"
+                >
+                    <template v-if="isCompute('city')" #prepend>
+                        <el-button type="primary" size="small" :icon="Monitor" />
+                        <el-dropdown v-if="colsTranslate['city']" @command="i18nCommand">
+                            <span class="el-dropdown-link">
+                                {{ colsLang['city'].toLowerCase() }}
+                                <i
+                                    class="el-icon-arrow-down el-icon--right"
+                                ></i>
+                            </span>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item
+                                        v-for="lang in $UserPreferences.langs"
+                                        :key="lang.code"
+                                        :command="{ col: 'city', lang: lang.code }"
+                                    >{{ lang.description }}</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                    </template>
+                </el-input>		
 
 		</el-form-item>
-		<el-form-item :label="colsLabel['preferences']">
+		<el-form-item :label="colsLabel['state_id']">
+                <el-input
+                    v-model="dataForm.__data__['state_id'].name"
+                    v-if="colsType['state_id'] == 'related'"
+                    @change="related_cache(dataForm, 'state_id', metas[model].meta.columns['state_id'].relatedy)"
+                    :readonly="readonly('state_id')"
+                >
+                    <template v-if="isCompute('state_id')" #prefix>
+                        <el-button type="primary" size="small" :icon="Monitor" />
+                    </template>
+                    <template #suffix>
+                        <el-button type="primary" size="small" :icon="Search" @click="do_find('state_id')"></el-button>
+                        <el-button
+                            type="primary"
+                            size="small"
+                            :icon="DocumentAdd"
+                            @click="do_add('state_id')"
+                        ></el-button>
+                        <el-button
+                            v-if="dataForm.__data__['state_id'].id != null"
+                            type="primary"
+                            size="small"
+                            :icon="Edit"
+                            @click="do_edit('state_id', dataForm.__data__['state_id'].id)"
+                        ></el-button>
+                        <el-button
+                            v-if="dataForm.__data__['state_id'].id != null"
+                            type="primary"
+                            size="small"
+                            :icon="View"
+                            @click="do_lookup('state_id', dataForm.__data__['state_id'].id)"
+                        ></el-button>
+                    </template>
+                </el-input>				
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['email']">
+                <el-input
+                    v-model="dataForm.__data__['email']"
+                    :maxlength="colsSize['email']"
+                    show-word-limit
+                    @change="cache(dataForm, 'email')"
+                    :readonly="readonly('email')"
+                >
+                    <template v-if="isCompute('email')" #prepend>
+                        <el-button type="primary" size="small" :icon="Monitor" />
+                        <el-dropdown v-if="colsTranslate['email']" @command="i18nCommand">
+                            <span class="el-dropdown-link">
+                                {{ colsLang['email'].toLowerCase() }}
+                                <i
+                                    class="el-icon-arrow-down el-icon--right"
+                                ></i>
+                            </span>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item
+                                        v-for="lang in $UserPreferences.langs"
+                                        :key="lang.code"
+                                        :command="{ col: 'email', lang: lang.code }"
+                                    >{{ lang.description }}</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                    </template>
+                </el-input>		
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['phone']">
+                <el-input
+                    v-model="dataForm.__data__['phone']"
+                    :maxlength="colsSize['phone']"
+                    show-word-limit
+                    @change="cache(dataForm, 'phone')"
+                    :readonly="readonly('phone')"
+                >
+                    <template v-if="isCompute('phone')" #prepend>
+                        <el-button type="primary" size="small" :icon="Monitor" />
+                        <el-dropdown v-if="colsTranslate['phone']" @command="i18nCommand">
+                            <span class="el-dropdown-link">
+                                {{ colsLang['phone'].toLowerCase() }}
+                                <i
+                                    class="el-icon-arrow-down el-icon--right"
+                                ></i>
+                            </span>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item
+                                        v-for="lang in $UserPreferences.langs"
+                                        :key="lang.code"
+                                        :command="{ col: 'phone', lang: lang.code }"
+                                    >{{ lang.description }}</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                    </template>
+                </el-input>		
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['bic']">
+                <el-input
+                    v-model="dataForm.__data__['bic']"
+                    :maxlength="colsSize['bic']"
+                    show-word-limit
+                    @change="cache(dataForm, 'bic')"
+                    :readonly="readonly('bic')"
+                >
+                    <template v-if="isCompute('bic')" #prepend>
+                        <el-button type="primary" size="small" :icon="Monitor" />
+                        <el-dropdown v-if="colsTranslate['bic']" @command="i18nCommand">
+                            <span class="el-dropdown-link">
+                                {{ colsLang['bic'].toLowerCase() }}
+                                <i
+                                    class="el-icon-arrow-down el-icon--right"
+                                ></i>
+                            </span>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item
+                                        v-for="lang in $UserPreferences.langs"
+                                        :key="lang.code"
+                                        :command="{ col: 'bic', lang: lang.code }"
+                                    >{{ lang.description }}</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                    </template>
+                </el-input>		
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['partners']">
             <el-tabs type="border-card" v-if="o2mcols.length > 0">
                 <el-tab-pane :label="colsLabel[o2mcol]" v-for="o2mcol in o2mcols" :key="o2mcol">
                     <gp-o2m-components
@@ -227,6 +379,20 @@
                     />
                 </el-tab-pane>
             </el-tabs>
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['inactive']">
+                <el-switch
+                    v-model="dataForm.__data__['inactive']"
+                    @change="cache(dataForm, 'inactive')"
+                    :disabled="readonly('inactive')"
+                ></el-switch>
+
+		</el-form-item>
+		<el-form-item :label="colsLabel['note']">
+                <el-input v-model="dataForm.__data__['note']" autosize type="textarea"
+                    @change="cache(dataForm, 'note')" :readonly="readonly('note')">
+                 </el-input>
 
 		</el-form-item>
 	        </el-form>
@@ -270,10 +436,11 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-    name: 'gp-form-bc-users'
+    name: 'gp-form-md-banks',
 })
 
-</script><script setup>
+</script>
+<script setup>
 import {
     defineAsyncComponent,
     onBeforeMount,
@@ -286,7 +453,7 @@ import {
 }
     from 'vue'
 
-import { on_modify_models } from './js/nf.js'
+import { on_modify_models } from '../js/nf.js'
 
 import { Monitor, Search, DocumentAdd, Edit, View } from '@element-plus/icons-vue'
 
@@ -340,12 +507,12 @@ const readonly = col => {
 }
 
 const required = (path, col) => {
-    console.log('required:', path, col)
+    //console.log('required:', path, col)
     return dataForm.__meta__.rq[col]
 }
 
 const visible = (path, col) => {
-    console.log('required:', path, col)
+    //console.log('required:', path, col)
     return !dataForm.__meta__.iv[col]
 }
 
@@ -376,7 +543,7 @@ const dataRowForm = (row) => {
 };
 
 const cache = (item, name) => {
-    console.log('cache-item:', name, item.__data__[name], item)
+    //console.log('cache-item:', name, item.__data__[name], item)
     let value
     switch (props.metas[props.model].meta.columns[name].type) {
         case 'integer':
@@ -457,19 +624,19 @@ const cache = (item, name) => {
         value: value,
         context: proxy.$UserPreferences.Context
     }
-    console.log('cache:', r)
-    proxy.$websocket
+    //console.log('cache:', r)
+    proxy.$ws
         .sendAsync({
             _msg: [props.cid, '_cache', 'cache', guid.value, r]
         })
         .then(v => {
-            console.log('cache:', v);
+            //console.log('cache:', v);
             on_modify_models(dataForm, v[0]);
         })
 }
 
 const m2o_cache = (item, name) => {
-    console.log('m2o_cache:', name, item.__data__[name], item)
+    //console.log('m2o_cache:', name, item.__data__[name], item)
     if (item.__data__[name].name.length == 0) {
         item.__data__[name].id = null
         item.__data__[name].name = null
@@ -484,10 +651,10 @@ const m2o_cache = (item, name) => {
         'context': proxy.$UserPreferences.Context
     }
     //console.log('cache:',r);
-    proxy.$websocket.sendAsync({
+    proxy.$ws.sendAsync({
         '_msg': [props.cid, '_cache', 'm2ofind', guid.value, r]
     }).then((v) => {
-        console.log('m2ofind:', v);
+        //console.log('m2ofind:', v);
         let f = v[0];
         if (f.__m2o_find__.__data__.v.length == 1) {
             dataForm.__data__[name] = f.__m2o_find__.__data__.v[0];
@@ -525,10 +692,10 @@ const related_cache = (item, name, relatedy) => {
         'context': proxy.$UserPreferences.Context
     }
     //console.log('cache-related:',r);
-    proxy.$websocket.sendAsync({
+    proxy.$ws.sendAsync({
         '_msg': [props.cid, '_cache', 'relatedfind', guid.value, r]
     }).then((v) => {
-        console.log('relatedfind:', v);
+        //console.log('relatedfind:', v);
         let f = v[0];
         if (f.__related_find__.__data__.v.length == 1) {
             dataForm.__data__[name] = f.__related_find__.__data__.v[0];
@@ -572,7 +739,7 @@ const handleCurrentChange = val => {
     page.value = val
     let ctx = Object.assign({}, proxy.$UserPreferences.Context)
     ctx.cache = guid.value
-    proxy.$websocket.send({
+    proxy.$ws.sendAsync({
         _msg: [
             props.cid,
             'models',
@@ -583,9 +750,8 @@ const handleCurrentChange = val => {
                 context: ctx
             }
         ]
-    },
-        on_read
-    )
+    }
+    ).then(msg => on_read(msg))
 }
 
 const isCompute = col => {
@@ -607,7 +773,7 @@ const _get_selections = s => {
 }
 
 const on_find_new = (value, opts) => {
-    console.log('on_find_new:', value, opts)
+    //console.log('on_find_new:', value, opts)
     if (
         ['new', 'edit'].indexOf(mode.value) >= 0 &&
         value.id &&
@@ -620,7 +786,7 @@ const on_find_new = (value, opts) => {
 }
 
 const on_find_m2m = (value, opts) => {
-    console.log('on_find_m2m:', value, opts)
+    //console.log('on_find_m2m:', value, opts)
     if (
         ['new', 'edit'].indexOf(mode.value) >= 0 &&
         value.length > 0
@@ -681,7 +847,7 @@ const do_find = (col, mode = 'single', extcond = [], callbackopts = {}) => {
 }
 
 const do_search = event => {
-    proxy.$websocket.send({
+    proxy.$ws.sendAsync({
         _msg: [
             props.cid,
             'models',
@@ -694,8 +860,8 @@ const do_search = event => {
             }
         ]
     },
-        on_search
-    )
+        
+    ).then((msg) => on_search(msg) )
 }
 
 const on_search = msg => {
@@ -784,14 +950,14 @@ const do_lookup = (col, oid) => {
     do_modal_form(col, oid, 'lookup')
 }
 
-const onSubmit = () => {
+const onSubmit = async () => {
     (async () => {
         if (['new', 'edit', 'copy'].indexOf(mode.value) >= 0) {
             let msg = await proxy.$websocket.sendAsync({
                 _msg: [props.cid, '_cache', mode.value == 'copy' ? 'copy' : 'save', guid.value, {}]
             })
             let action = msg[0], oid = msg[1];
-            console.log('action:', msg)
+            //console.log('action:', msg)
             if (action == 'commit') {
                 await proxy.$websocket.sendAsync({
                     _msg: [
@@ -812,7 +978,7 @@ const onSubmit = () => {
                         }, props.modal.callbackOpts)
                     emit('update:close');
                 } else {
-                    msg = proxy.$websocket.sendAsync({
+                    msg = await proxy.$websocket.sendAsync({
                         _msg: [
                             props.cid,
                             '_cache',
@@ -857,9 +1023,9 @@ const onValidate = () => {
 const onClose = () => {
     emit('update:close');
 }
-const onCancel = () => {
+const onCancel = async () => {
     if (mode.value == 'new')
-        proxy.$websocket
+        proxy.$ws
             .sendAsync({
                 _msg: [
                     props.cid,
@@ -873,7 +1039,7 @@ const onCancel = () => {
             })
             .then(msg => {
                 if (msg && msg.length > 0) Object.assign(dataForm, msg[0])
-                console.log('initialize:', msg)
+                //console.log('initialize:', msg)
             })
 }
 const init_metacache = () => {
@@ -881,19 +1047,19 @@ const init_metacache = () => {
 }
 
 const on_read = msg => {
-    console.log('on_read:', msg)
+    //console.log('on_read:', msg)
     if (msg && msg.length > 0) {
         init_metacache()
         //Object.assign(dataForm, msg[0])
         //dataRow(dataForm)
         Object.assign(dataForm, dataRowForm(msg[0]))
-        console.log('dataForm:', dataForm)
+        //console.log('dataForm:', dataForm)
     }
 }
 
 onBeforeMount(async () => {
     if ('mode' in props.modal) mode.value = props.modal.mode;
-    let msg = await proxy.$websocket
+    let msg = await proxy.$ws
         .sendAsync({
             _msg: [
                 props.cid,
@@ -906,7 +1072,7 @@ onBeforeMount(async () => {
         })
     if (msg && msg.length > 0) guid.value = msg[0]
     if (mode.value == 'new') {
-        msg = await proxy.$websocket
+        msg = await proxy.$ws
             .sendAsync({
                 _msg: [
                     props.cid,
@@ -918,7 +1084,7 @@ onBeforeMount(async () => {
                     }
                 ]
             })
-        console.log('onBeforeMount-msg-initialize:', msg);
+        //console.log('onBeforeMount-msg-initialize:', msg);
         if (msg && msg.length > 0) {
             init_metacache()
             Object.assign(dataForm, dataRowForm(msg[0]))
@@ -948,10 +1114,10 @@ onBeforeMount(async () => {
     if (mode.value !== 'new' && 'oid' in props.modal) {
         if (Array.isArray(props.modal.oid)) multipleSelection.splice(0, multipleSelection.length, ...props.modal.oid)
         else multipleSelection.splice(0, multipleSelection.length, props.modal.oid)
-        console.log('multipleSelection:', multipleSelection)
+        //console.log('multipleSelection:', multipleSelection)
         let ctx = Object.assign({}, proxy.$UserPreferences.Context)
         ctx.cache = guid.value
-        proxy.$websocket.send({
+        proxy.$ws.sendAsync({
             _msg: [
                 props.cid,
                 'models',
@@ -962,11 +1128,55 @@ onBeforeMount(async () => {
                     context: ctx
                 }
             ]
-        },
-            on_read
-        )
+        }
+        ).then(msg => on_read(msg))
     }
     //console.log('fields:',fields);
 })
 
 </script>
+<i18n lang="yaml">
+de:
+  Bank Identifier Code: Bank Identifier Code
+  City: City
+  Country: Country
+  Email: Email
+  Fed. State: Fed. State
+  Inactive: Inactive
+  Name: Name
+  Note: Note
+  Partners: Partners
+  Phone: Phone
+  Street: Street
+  Street2: Street2
+  ZIP: ZIP
+en:
+  Bank Identifier Code: Bank Identifier Code
+  City: City
+  Country: Country
+  Email: Email
+  Fed. State: Fed. State
+  Inactive: Inactive
+  Name: Name
+  Note: Note
+  Partners: Partners
+  Phone: Phone
+  Street: Street
+  Street2: Street2
+  ZIP: ZIP
+ru:
+  Bank Identifier Code: Bank Identifier Code
+  City: City
+  Country: Country
+  Email: Email
+  Fed. State: Fed. State
+  Inactive: Inactive
+  Name: Name
+  Note: Note
+  Partners: Partners
+  Phone: Phone
+  Street: Street
+  Street2: Street2
+  ZIP: ZIP
+
+</i18n>
