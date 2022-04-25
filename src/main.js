@@ -38,7 +38,7 @@ import JsonViewer from "vue3-json-viewer"
 import "vue3-json-viewer/dist/index.css";
 app.use(JsonViewer)
 
-import {createI18n} from 'vue3-i18n'
+import {createI18n} from 'vue-i18n'
 const VueI18n = createI18n({locale:'en'})
 app.use(VueI18n)
 

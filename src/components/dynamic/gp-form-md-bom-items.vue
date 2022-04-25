@@ -79,44 +79,13 @@
         >
 
 
-		<el-form-item :label="colsLabel['name']">
+		<el-form-item :label="t(colsLabel['bom_id'])">
                 <el-input
-                    v-model="dataForm.__data__['name']"
-                    :maxlength="colsSize['name']"
-                    show-word-limit
-                    @change="cache(dataForm, 'name')"
-                    :readonly="readonly('name')"
+                    v-model="dataForm.__data__['bom_id'].name"
+                    @change="m2o_cache(dataForm, 'bom_id')"
+                    :readonly="readonly('bom_id')"
                 >
-                    <template v-if="isCompute('name')" #prepend>
-                        <el-button type="primary" size="small" :icon="Monitor" />
-                        <el-dropdown v-if="colsTranslate['name']" @command="i18nCommand">
-                            <span class="el-dropdown-link">
-                                {{ colsLang['name'].toLowerCase() }}
-                                <i
-                                    class="el-icon-arrow-down el-icon--right"
-                                ></i>
-                            </span>
-                            <template #dropdown>
-                                <el-dropdown-menu>
-                                    <el-dropdown-item
-                                        v-for="lang in $UserPreferences.langs"
-                                        :key="lang.code"
-                                        :command="{ col: 'name', lang: lang.code }"
-                                    >{{ lang.description }}</el-dropdown-item>
-                                </el-dropdown-menu>
-                            </template>
-                        </el-dropdown>
-                    </template>
-                </el-input>		
-
-		</el-form-item>
-		<el-form-item :label="colsLabel['company']">
-                <el-input
-                    v-model="dataForm.__data__['company'].name"
-                    @change="m2o_cache(dataForm, 'company')"
-                    :readonly="readonly('company')"
-                >
-                    <template v-if="isCompute('company')" #prefix>
+                    <template v-if="isCompute('bom_id')" #prefix>
                         <el-button type="primary" size="mini" icon="el-icon-s-data" />
                     </template>
                     <template #suffix>
@@ -124,94 +93,33 @@
                             type="primary"
                             size="small"
                             :icon="Search"
-                            @click="do_find('company', 'single', [], { 'item': dataForm })"
+                            @click="do_find('bom_id', 'single', [], { 'item': dataForm })"
                         ></el-button>
                         <el-button
                             type="primary"
                             size="small"
                             :icon="DocumentAdd"
-                            @click="do_add('company')"
+                            @click="do_add('bom_id')"
                         ></el-button>
                         <el-button
-                            v-if="dataForm.__data__['company'].id != null"
+                            v-if="dataForm.__data__['bom_id'].id != null"
                             type="primary"
                             size="small"
                             :icon="Edit"
-                            @click="do_edit('company', dataForm.__data__['company'].id)"
+                            @click="do_edit('bom_id', dataForm.__data__['bom_id'].id)"
                         ></el-button>
                         <el-button
-                            v-if="dataForm.__data__['company'].id != null"
+                            v-if="dataForm.__data__['bom_id'].id != null"
                             type="primary"
                             size="small"
                             :icon="View"
-                            @click="do_lookup('company', dataForm.__data__['company'].id)"
+                            @click="do_lookup('bom_id', dataForm.__data__['bom_id'].id)"
                         ></el-button>
                     </template>
                 </el-input>					
 
 		</el-form-item>
-		<el-form-item :label="colsLabel['fullname']">
-                <el-input
-                    v-model="dataForm.__data__['fullname']"
-                    :maxlength="colsSize['fullname']"
-                    show-word-limit
-                    @change="cache(dataForm, 'fullname')"
-                    :readonly="readonly('fullname')"
-                >
-                    <template v-if="isCompute('fullname')" #prepend>
-                        <el-button type="primary" size="small" :icon="Monitor" />
-                        <el-dropdown v-if="colsTranslate['fullname']" @command="i18nCommand">
-                            <span class="el-dropdown-link">
-                                {{ colsLang['fullname'].toLowerCase() }}
-                                <i
-                                    class="el-icon-arrow-down el-icon--right"
-                                ></i>
-                            </span>
-                            <template #dropdown>
-                                <el-dropdown-menu>
-                                    <el-dropdown-item
-                                        v-for="lang in $UserPreferences.langs"
-                                        :key="lang.code"
-                                        :command="{ col: 'fullname', lang: lang.code }"
-                                    >{{ lang.description }}</el-dropdown-item>
-                                </el-dropdown-menu>
-                            </template>
-                        </el-dropdown>
-                    </template>
-                </el-input>		
-
-		</el-form-item>
-		<el-form-item :label="colsLabel['type']">
-                <el-select
-                    v-model="dataForm.__data__['type']"
-                    @change="cache(dataForm, 'type')"
-                    :disabled="readonly('type')"
-                >
-                    <el-option
-                        v-for="item in selOptions['type']"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value"
-                    ></el-option>
-                </el-select>
-
-		</el-form-item>
-		<el-form-item :label="colsLabel['usage']">
-                <el-select
-                    v-model="dataForm.__data__['usage']"
-                    @change="cache(dataForm, 'usage')"
-                    :disabled="readonly('usage')"
-                >
-                    <el-option
-                        v-for="item in selOptions['usage']"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value"
-                    ></el-option>
-                </el-select>
-
-		</el-form-item>
-		<el-form-item :label="colsLabel['product']">
+		<el-form-item :label="t(colsLabel['product'])">
                 <el-input
                     v-model="dataForm.__data__['product'].name"
                     @change="m2o_cache(dataForm, 'product')"
@@ -251,33 +159,64 @@
                 </el-input>					
 
 		</el-form-item>
-		<el-form-item :label="colsLabel['partition']">
+		<el-form-item :label="t(colsLabel['quantity'])">
                 <el-input
-                    v-model="dataForm.__data__['partition']"
-                    @change="cache(dataForm, 'partition')"
-                    :readonly="readonly('partition')"
+                    v-model="dataForm.__data__['quantity']"
+                    @change="cache(dataForm, 'quantity')"
+                    :readonly="readonly('quantity')"
                 >
-                    <template v-if="isCompute('partition')" #prefix>
+                    <template v-if="isCompute('quantity')" #prefix>
                         <el-button type="primary" size="small" :icon="Monitor" />
                     </template>
                 </el-input>
 
-		</el-form-item>            <el-tabs type="border-card" v-if="o2mcols.length > 0">
-                <el-tab-pane :label="colsLabel[o2mcol]" v-for="o2mcol in o2mcols" :key="o2mcol">
-                    <gp-o2m-components
-                        :cid="cid"
-                        :guid="guid"
-                        :root="proxy"
-                        :metas="metas"
-                        :model="metas[model].meta.columns[o2mcol].obj"
-                        :container="o2mcol + '.' + dataForm.__path__"
-                        :cdata="dataForm.__containers__[o2mcol + '.' + dataForm.__path__]"
-                        :mode="mode"
-                        :rel="metas[model].meta.columns[o2mcol].rel"
-                    />
-                </el-tab-pane>
-            </el-tabs>
+		</el-form-item>
+		<el-form-item :label="t(colsLabel['uom'])">
+                <el-input
+                    v-model="dataForm.__data__['uom'].name"
+                    @change="m2o_cache(dataForm, 'uom')"
+                    :readonly="readonly('uom')"
+                >
+                    <template v-if="isCompute('uom')" #prefix>
+                        <el-button type="primary" size="mini" icon="el-icon-s-data" />
+                    </template>
+                    <template #suffix>
+                        <el-button
+                            type="primary"
+                            size="small"
+                            :icon="Search"
+                            @click="do_find('uom', 'single', [], { 'item': dataForm })"
+                        ></el-button>
+                        <el-button
+                            type="primary"
+                            size="small"
+                            :icon="DocumentAdd"
+                            @click="do_add('uom')"
+                        ></el-button>
+                        <el-button
+                            v-if="dataForm.__data__['uom'].id != null"
+                            type="primary"
+                            size="small"
+                            :icon="Edit"
+                            @click="do_edit('uom', dataForm.__data__['uom'].id)"
+                        ></el-button>
+                        <el-button
+                            v-if="dataForm.__data__['uom'].id != null"
+                            type="primary"
+                            size="small"
+                            :icon="View"
+                            @click="do_lookup('uom', dataForm.__data__['uom'].id)"
+                        ></el-button>
+                    </template>
+                </el-input>					
 
+		</el-form-item>
+		<el-form-item :label="t(colsLabel['note'])">
+                <el-input v-model="dataForm.__data__['note']" autosize type="textarea"
+                    @change="cache(dataForm, 'note')" :readonly="readonly('note')">
+                 </el-input>
+
+		</el-form-item>
 	        </el-form>
     </slot>
     <slot name="footer">
@@ -319,7 +258,7 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-    name: 'gp-form-md-boms',
+    name: 'gp-form-md-bom-items',
 })
 
 </script>
@@ -339,6 +278,8 @@ import {
 import { on_modify_models } from '../js/nf.js'
 
 import { Monitor, Search, DocumentAdd, Edit, View } from '@element-plus/icons-vue'
+
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
     cid: {
@@ -384,6 +325,11 @@ const fields = reactive([])
 const cols = reactive([])
 const o2mcols = reactive([])
 const multipleSelection = reactive([])
+
+const { locale, t } = useI18n({
+    inheritLocale: true
+})
+
 
 const readonly = col => {
     return mode.value == 'lookup' || dataForm.__meta__.ro[col] || isCompute(col)
@@ -1019,31 +965,22 @@ onBeforeMount(async () => {
 </script>
 <i18n lang="yaml">
 de:
-  Company: Company
-  Full Name: Full Name
-  Input: Input
-  Name: Name
-  Partition: Partition
+  BoM: BoM
+  Note: Note
   Product: Product
-  Type: Type
-  Usage: Usage
+  Quantity: Quantity
+  UoM: UoM
 en:
-  Company: Company
-  Full Name: Full Name
-  Input: Input
-  Name: Name
-  Partition: Partition
+  BoM: BoM
+  Note: Note
   Product: Product
-  Type: Type
-  Usage: Usage
+  Quantity: Quantity
+  UoM: UoM
 ru:
-  Company: Company
-  Full Name: Full Name
-  Input: Input
-  Name: Name
-  Partition: Partition
+  BoM: BoM
+  Note: Note
   Product: Product
-  Type: Type
-  Usage: Usage
+  Quantity: Quantity
+  UoM: UoM
 
 </i18n>

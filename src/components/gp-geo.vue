@@ -10,7 +10,7 @@
 <slot>
     <el-row>{{ metas[model].meta.description }}</el-row>
     <el-row>
-        <el-button type="primary" size="mini" icon="el-icon-search" @click="do_action('find')"></el-button>
+        <el-button type="primary" size="small" :icon="Search" @click="do_action('find')"></el-button>
     </el-row>
     <el-pagination v-if="multipleSelection.length > 1" background layout="prev, pager, next" @current-change="handleCurrentChange" :page-size="pageSize" :total="multipleSelection.length">
     </el-pagination>
@@ -40,6 +40,8 @@ import {
     LMap, LTileLayer, LMarker, LIcon
 }
 from '@vue-leaflet/vue-leaflet';
+
+import { Search } from '@element-plus/icons-vue'
 
 export default defineComponent({
     name: 'gp-geo',
@@ -171,7 +173,8 @@ export default defineComponent({
             handleCurrentChange,
             multipleSelection,
             do_action,
-            do_search
+            do_search,
+            Search
         };
     },
 });

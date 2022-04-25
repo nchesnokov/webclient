@@ -3,8 +3,9 @@ const on_modify_models = (dataForm, values) => {
         if ('__update__' in diffs)
             for (let k in diffs.__update__)
                 for (let v in diffs.__update__[k]) {
-                    if (k in dataForm.__data__) dataForm.__data__[k][v] = diffs.__update__[k][v];
-                    //                    if (k == dataForm.__path__) dataForm.__data__[v] = diffs.__update__[k][v];
+                    //if (v in dataForm.__data__) dataForm.__data__[v] = diffs.__update__[k][v];
+                    //if (k in dataForm.__data__) dataForm.__data__[k][v] = diffs.__update__[k][v];
+                    if (k == dataForm.__path__) dataForm.__data__[v] = diffs.__update__[k][v];
                 }
 
     }
@@ -13,8 +14,8 @@ const on_modify_models = (dataForm, values) => {
         if ('__insert__' in diffs)
             for (let k in diffs.__insert__)
                 for (let v in diffs.__insert__[k]) {
-                    if (k in dataForm.__data__) dataForm.__data__[k][v] = diffs.__insert__[k][v];
-                    //                   if (k == dataForm.__path__) dataForm.__data__[v] = diffs.__insert__[k][v];
+                    //if (k in dataForm.__data__) dataForm.__data__[k][v] = diffs.__insert__[k][v];
+                    if (k == dataForm.__path__) dataForm.__data__[v] = diffs.__insert__[k][v];
                 }
 
     }
@@ -23,8 +24,8 @@ const on_modify_models = (dataForm, values) => {
         if ('__delete__' in diffs)
             for (let k in diffs.__delete__)
                 for (let v in diffs.__insert__[k]) {
-                    if (k in dataForm.__data__) delete dataForm.__data__[k][v];
-                    //                    if (k == self.item.__path__) delete self.item.__data__[v];
+                    //if (k in dataForm.__data__) delete dataForm.__data__[k][v];
+                    if (k == self.item.__path__) delete self.item.__data__[v];
                 }
 
     }
@@ -148,7 +149,7 @@ const on_modify_models = (dataForm, values) => {
     }
 
 
-    //console.log('on_modify_models:', dataForm, values);
+    console.log('on_modify_models:', dataForm, values);
 
     if ('__data__' in values) {
         let data = values.__data__;
@@ -177,4 +178,4 @@ const on_modify_models = (dataForm, values) => {
     }
 }
 
-export {on_modify_models};
+export { on_modify_models };

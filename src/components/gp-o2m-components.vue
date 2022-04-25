@@ -2,10 +2,12 @@
 
 <template>
 
-<el-row>
-    <el-button v-for="tab in tabs" :key="tab" :class="['tab-button', { active: currentTab === tab }]" @click="on_clicktab(tab)">{{ tab.split('-')[2] }}</el-button>
-</el-row>
-<component :is="currentTab" :cid="cid" :guid="guid" :root="root" :metas="metas" :model="model" :container="container" :cdata="cdata" :mode="mode" :rel="rel"/>
+    <el-row>
+        <el-button v-for="tab in tabs" :key="tab" :class="['tab-button', { active: currentTab === tab }]"
+            @click="on_clicktab(tab)">{{ tab.split('-')[2] }}</el-button>
+    </el-row>
+    <component :is="currentTab" :cid="cid" :guid="guid" :root="root" :metas="metas" :model="model"
+        :container="container" :cdata="cdata" :mode="mode" :rel="rel" />
 
 </template>
 
@@ -14,7 +16,7 @@
 import {
     defineComponent, ref, reactive, onMounted
 }
-from 'vue'
+    from 'vue'
 
 export default defineComponent({
     name: 'gp-o2m-components',
@@ -27,7 +29,7 @@ export default defineComponent({
         },
 
         'root': {
-            type:Object
+            type: Object
         },
         'metas': {
             type: Object
@@ -35,8 +37,8 @@ export default defineComponent({
         'model': {
             type: String
         },
-        'container':{
-            type:String
+        'container': {
+            type: String
         },
         'cdata': {
             type: Array
@@ -59,8 +61,12 @@ export default defineComponent({
 
         onMounted(() => {
             for (let i = 0; i < props.metas[props.model].allow.length; i++)
-            //if (['form', 'tree', 'graph', 'calendar', 'geo', 'kanban'].indexOf(metas[model.value].allow[i]) >= 0) tabs.push('gp-' + metas[model.value].allow[i]);
-                if (['form', 'list'].indexOf(props.metas[props.model].allow[i]) >= 0) tabs.push('gp-o2m-' + props.metas[props.model].allow[i]);
+                //if (['form', 'tree', 'graph', 'calendar', 'geo', 'kanban'].indexOf(metas[model.value].allow[i]) >= 0) tabs.push('gp-' + metas[model.value].allow[i]);
+                if (['form', 'list'].indexOf(props.metas[props.model].allow[i]) >= 0) {
+                    //if (['form'].indexOf(props.metas[props.model].allow[i]) >= 0) tabs.push("gp-o2m-" + props.metas[props.model].allow[i] + '-' + props.model.replaceAll(".", "-"))
+                    //else 
+                    tabs.push('gp-o2m-' + props.metas[props.model].allow[i]);
+                }
 
         });
         return {

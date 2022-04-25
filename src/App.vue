@@ -63,18 +63,18 @@ button.active {
                     @click="on_clicktab(tab)">{{ tab.split("-")[1] }}</el-button>
                 <component :is="currentTab" :cid="cid" :metas="metas" :model="model" />
             </template>
-        </el-main >
+        </el-main>
         <div id="sv" style="height: 500px"></div>
         <el-footer>
             {{
-                isLogged
-                    ? "&copy; GSRP5 2022 Slot: " +
-                    cinfo.slot +
-                    " User: " +
-                    cinfo.user +
-                    " " +
-                    timestampLogged
-                    : "&copy; GSRP5 2022"
+                    isLogged
+                        ? "&copy; GSRP5 2022 Slot: " +
+                        cinfo.slot +
+                        " User: " +
+                        cinfo.user +
+                        " " +
+                        timestampLogged
+                        : "&copy; GSRP5 2022"
             }}
         </el-footer>
     </el-container>
@@ -96,10 +96,7 @@ import { User, Menu } from "@element-plus/icons-vue";
 
 import { defineAsyncComponent, reactive, ref, getCurrentInstance } from "vue";
 
-import WebSocketAsPromised from 'websocket-as-promised';
-
 import { useI18n } from 'vue-i18n'
-
 
 const { proxy } = getCurrentInstance();
 const cid = ref(null);
@@ -111,7 +108,7 @@ const timestampLogged = ref("");
 const isLoginFormShow = ref(false);
 const isUserPreferencesFormShow = ref(false);
 const tabs = reactive([]);
-const currentTab = ref("gp-search");
+const currentTab = ref("");
 const menuData = reactive([]);
 const metas = reactive({});
 const model = ref(null);
@@ -119,12 +116,17 @@ const defaultProps = reactive({
     children: "childs_id",
 });
 
+const { locale, t } = useI18n({
+    inheritLocale: true
+})
+console.log('locale:', locale)
+
 const handleNodeClick = async (data) => {
     //console.log("handleNodeClick:", data);
     if (data.action_id.name !== null) {
         tabs.splice(0, tabs.length);
-        currentTab.value = "gp-search";
-        on_load_meta( await proxy.$ws.sendAsync(
+        //currentTab.value = "gp-search" + model.value.replaceAll(".", "-");
+        on_load_meta(await proxy.$ws.sendAsync(
             {
                 _msg: [
                     cid.value,
@@ -136,7 +138,7 @@ const handleNodeClick = async (data) => {
                     },
                 ],
             },
-            
+
         )
         )
     }
@@ -168,7 +170,7 @@ const on_login = () => {
 const do_login = async (event) => {
     if (event === "cancel") isLoginFormShow.value = false;
     else {
-         Object.assign(cinfo, event);
+        Object.assign(cinfo, event);
         let r = await proxy.$ws.sendAsync(
             {
                 _msg: [
@@ -183,7 +185,7 @@ const do_login = async (event) => {
         )
         //console.log('r:',r)
         on_connect(r)
-        
+
 
     }
 };
@@ -268,7 +270,7 @@ const on_except = (event) => {
 };
 
 const on_close_websocket = async (event) => {
-    //console.log("event:", event);
+    console.log("event:", event);
     isLogged.value = false;
     menuData.splice(0, menuData.length);
     tabs.splice(0, tabs.length);
@@ -276,6 +278,8 @@ const on_close_websocket = async (event) => {
         e.remove();
     });
     await proxy.$ws.close();
+    await proxy.$ws.open();
+
     await proxy.$message("Relogin");
     on_connect(await proxy.$ws.sendAsync(
         {
@@ -290,7 +294,7 @@ const on_close_websocket = async (event) => {
         },
 
     )
-        )
+    )
 };
 
 const on_connect = async (msg) => {
@@ -344,6 +348,7 @@ const on_service_login = async (msg) => {
             lang: proxy.$UserPreferences.lang,
             tz: proxy.$UserPreferences.timezone,
         };
+        locale.value = proxy.$UserPreferences.Context.lang;
         isLoginFormShow.value = false;
         timestampLogged.value = Date(); //.toLocaleDateString();
         on_menu_load(await proxy.$ws.sendAsync(
@@ -421,7 +426,7 @@ const registerViews = async (framework) => {
             "select",
             {
                 fields: ['model', 'vtype'],
-                cond: [{ __tuple__: ['vtype', '=', 'element-plus/form'] }],
+                cond: [{ __tuple__: ['vtype', 'in', ['element-plus/form', 'element-plus/search','element-plus/o2mform']] }],
                 context: proxy.$UserPreferences.Context,
             },
         ],
@@ -447,14 +452,18 @@ const on_load_meta = (msg) => {
     Object.assign(metas, msg[0].model.models);
     model.value = msg[0].model.root;
     tabs.splice(0, tabs.length);
+    currentTab.value = "gp-search-" + model.value.replaceAll(".", "-");
     for (let i = 0; i < metas[model.value].allow.length; i++)
         if (
             ["search", "form", "tree", "graph", "calendar", "geo", "kanban"].indexOf(
                 metas[model.value].allow[i]
             ) >= 0
         )
-            if (metas[model.value].allow[i] == 'form') tabs.push("gp-" + metas[model.value].allow[i] + '-' + model.value.replaceAll(".", "-"))
+            if (['form', 'search'].indexOf(metas[model.value].allow[i]) >= 0) tabs.push("gp-" + metas[model.value].allow[i] + '-' + model.value.replaceAll(".", "-"))
             else
                 tabs.push("gp-" + metas[model.value].allow[i]);
 };
+proxy.$ws.onClose.addListener(event => on_close_websocket(event));
+//proxy.$ws.onError.addListener(event => console.error(event));
+
 </script>

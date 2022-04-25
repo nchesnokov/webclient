@@ -1,15 +1,3 @@
-<i18n>
-{
-    en:{
-  hello: "hello world!"
-    },
-ja:
-  {
-      hello: "こんにちは、世界！"
-  }
-}
-</i18n>
-
 <template>
     <gp-selectable
         v-if="showSearch"
@@ -126,23 +114,18 @@ ja:
         :page-size="pageSize"
         :total="tableData.length"
     ></el-pagination>
-</template>
-
-<script>
-
+</template><script>
 import {
     defineComponent
 }
     from 'vue'
 
 export default defineComponent({
-    name: 'gp-search',
+    name: 'gp-search-bc-ui-view-model-types',
 })
 
 </script>
-
 <script setup>
-
 import {
     defineAsyncComponent,
     createVNode,
@@ -344,3 +327,24 @@ onMounted(() => {
 })
 
 </script>
+<i18n lang="yaml">
+de:
+  Code: Code
+  Exclude: Exclude
+  Full Name: Full Name
+  Note: Note
+  Web Framework: Web Framework
+en:
+  Code: Code
+  Exclude: Exclude
+  Full Name: Full Name
+  Note: Note
+  Web Framework: Web Framework
+ru:
+  Code: Code
+  Exclude: Exclude
+  Full Name: Full Name
+  Note: Note
+  Web Framework: Web Framework
+
+</i18n>

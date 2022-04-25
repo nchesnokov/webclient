@@ -1,15 +1,3 @@
-<i18n>
-{
-    en:{
-  hello: "hello world!"
-    },
-ja:
-  {
-      hello: "こんにちは、世界！"
-  }
-}
-</i18n>
-
 <template>
     <gp-selectable
         v-if="showSearch"
@@ -126,23 +114,18 @@ ja:
         :page-size="pageSize"
         :total="tableData.length"
     ></el-pagination>
-</template>
-
-<script>
-
+</template><script>
 import {
     defineComponent
 }
     from 'vue'
 
 export default defineComponent({
-    name: 'gp-search',
+    name: 'gp-search-md-banks',
 })
 
 </script>
-
 <script setup>
-
 import {
     defineAsyncComponent,
     createVNode,
@@ -344,3 +327,48 @@ onMounted(() => {
 })
 
 </script>
+<i18n lang="yaml">
+de:
+  Bank Identifier Code: Bank Identifier Code
+  City: City
+  Country: Country
+  Email: Email
+  Fed. State: Fed. State
+  Inactive: Inactive
+  Name: Name
+  Note: Note
+  Partners: Partners
+  Phone: Phone
+  Street: Street
+  Street2: Street2
+  ZIP: ZIP
+en:
+  Bank Identifier Code: Bank Identifier Code
+  City: City
+  Country: Country
+  Email: Email
+  Fed. State: Fed. State
+  Inactive: Inactive
+  Name: Name
+  Note: Note
+  Partners: Partners
+  Phone: Phone
+  Street: Street
+  Street2: Street2
+  ZIP: ZIP
+ru:
+  Bank Identifier Code: Bank Identifier Code
+  City: City
+  Country: Country
+  Email: Email
+  Fed. State: Fed. State
+  Inactive: Inactive
+  Name: Name
+  Note: Note
+  Partners: Partners
+  Phone: Phone
+  Street: Street
+  Street2: Street2
+  ZIP: ZIP
+
+</i18n>
