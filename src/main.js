@@ -42,26 +42,26 @@ import {createI18n} from 'vue-i18n'
 const VueI18n = createI18n({locale:'en'})
 app.use(VueI18n)
 
-app.component('gp-customizable',defineAsyncComponent(() => import('./components/gp-customizable.vue')));
-app.component('gp-selectable',defineAsyncComponent(() => import('./components/gp-selectable.vue')));
-app.component('gp-form-login',defineAsyncComponent(() => import('./components/gp-form-login.vue')));
-app.component('gp-user-preferences',defineAsyncComponent(() => import('./components/gp-user-preferences.vue')));
-app.component('gp-form',defineAsyncComponent(() => import('./components/gp-form.vue')));
-app.component('gp-search',defineAsyncComponent(() => import('./components/gp-search.vue')));
+app.component('gp-customizable',defineAsyncComponent(() => import('./components/static/gp-customizable.vue')));
+app.component('gp-selectable',defineAsyncComponent(() => import('./components/static/gp-selectable.vue')));
+app.component('gp-form-login',defineAsyncComponent(() => import('./components/static/gp-form-login.vue')));
+app.component('gp-user-preferences',defineAsyncComponent(() => import('./components/static/gp-user-preferences.vue')));
+app.component('gp-form',defineAsyncComponent(() => import('./components/static/gp-form.vue')));
+app.component('gp-search',defineAsyncComponent(() => import('./components/static/gp-search.vue')));
 //app.component('gp-find',defineAsyncComponent(() => import('./components/gp-find.vue')));
-app.component('gp-list',defineAsyncComponent(() => import('./components/gp-list.vue')));
-app.component('gp-m2m-list',defineAsyncComponent(() => import('./components/gp-m2mlist.vue')));
-app.component('gp-o2m-components',defineAsyncComponent(() => import('./components/gp-o2m-components.vue')));
-app.component('gp-o2m-list',defineAsyncComponent(() => import('./components/gp-o2m-list.vue')));
-app.component('gp-o2m-form',defineAsyncComponent(() => import('./components/gp-o2m-form.vue')));
+app.component('gp-list',defineAsyncComponent(() => import('./components/static/gp-list.vue')));
+app.component('gp-m2m-list',defineAsyncComponent(() => import('./components/static/gp-m2mlist.vue')));
+app.component('gp-o2m-components',defineAsyncComponent(() => import('./components/static/gp-o2m-components.vue')));
+app.component('gp-o2m-list',defineAsyncComponent(() => import('./components/static/gp-o2m-list.vue')));
+app.component('gp-o2m-form',defineAsyncComponent(() => import('./components/static/gp-o2m-form.vue')));
 
-app.component('gp-table',defineAsyncComponent(() => import('./components/gp-table.vue')));
-app.component('gp-tree',defineAsyncComponent(() => import('./components/gp-tree.vue')));
-app.component('gp-graph',defineAsyncComponent(() => import('./components/gp-graph.vue')));
-app.component('gp-calendar',defineAsyncComponent(() => import('./components/gp-calendar.vue')));
-app.component('gp-geo',defineAsyncComponent(() => import('./components/gp-geo.vue')));
-app.component('kanban-board',defineAsyncComponent(() => import('./components/Kanban.vue')));
-app.component('gp-kanban',defineAsyncComponent({loader:() => import('./components/gp-kanban.vue')}));
+app.component('gp-table',defineAsyncComponent(() => import('./components/static/gp-table.vue')));
+app.component('gp-tree',defineAsyncComponent(() => import('./components/static/gp-tree.vue')));
+app.component('gp-graph',defineAsyncComponent(() => import('./components/static/gp-graph.vue')));
+app.component('gp-calendar',defineAsyncComponent(() => import('./components/static/gp-calendar.vue')));
+app.component('gp-geo',defineAsyncComponent(() => import('./components/static/gp-geo.vue')));
+app.component('kanban-board',defineAsyncComponent(() => import('./components/static/Kanban.vue')));
+app.component('gp-kanban',defineAsyncComponent({loader:() => import('./components/static/gp-kanban.vue')}));
 
 app.config.globalProperties.$appcontext = app._context;
 //app.config.globalProperties.$emitter = emitter;
@@ -104,8 +104,10 @@ async function sendAsync(message,options={}){
 
 WebSocketAsPromised.prototype.sendAsync = sendAsync
 
+async function wsopen(){
 app.config.globalProperties.$ws = await WSP('ws://localhost:8100/ws');
 app.config.globalProperties.$wsp = await WSP('ws://localhost:9000/');
-
+}
+wsopen();
 
 app.mount('#app')

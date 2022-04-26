@@ -184,6 +184,7 @@ const do_login = async (event) => {
             }
         )
         //console.log('r:',r)
+        proxy.$ws.onClose.addListener(event => on_close_websocket(event));
         on_connect(r)
 
 
@@ -279,6 +280,7 @@ const on_close_websocket = async (event) => {
     });
     await proxy.$ws.close();
     await proxy.$ws.open();
+    proxy.$ws.onClose.addListener(event => on_close_websocket(event));
 
     await proxy.$message("Relogin");
     on_connect(await proxy.$ws.sendAsync(
@@ -463,7 +465,7 @@ const on_load_meta = (msg) => {
             else
                 tabs.push("gp-" + metas[model.value].allow[i]);
 };
-proxy.$ws.onClose.addListener(event => on_close_websocket(event));
+//proxy.$ws.onClose.addListener(event => on_close_websocket(event));
 //proxy.$ws.onError.addListener(event => console.error(event));
 
 </script>
