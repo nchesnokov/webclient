@@ -86,6 +86,12 @@ export default defineComponent({
         const formLabelWidth = ref('120px');
 
         const do_save = () => {
+            proxy.$UserPreferences.framework = form.framework;
+            proxy.$UserPreferences.lang = form.language;
+            proxy.$UserPreferences.country = form.country;
+            proxy.$UserPreferences.timezone = form.timezone;
+            proxy.$UserPreferences.Context.lang = form.language;
+            proxy.$UserPreferences.Context.tz = form.timezone;
             proxy.$emit('update:user-prefereces', {
                 framework: form.framework,
                 language: form.language,

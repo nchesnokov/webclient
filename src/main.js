@@ -4,9 +4,10 @@ import 'element-plus/dist/index.css'
 
 import App from './App.vue'
 
+import  {msgpack } from './js/msgpack.js'
+
 import VueApexCharts from "vue3-apexcharts";
 
-//import WebSocketVue from './js/vue3-async-websocket';
 import {v4 as uuidv4} from 'uuid'
 
 import WebSocketAsPromised from 'websocket-as-promised';
@@ -38,9 +39,9 @@ import JsonViewer from "vue3-json-viewer"
 import "vue3-json-viewer/dist/index.css";
 app.use(JsonViewer)
 
-import {createI18n} from 'vue-i18n'
-const VueI18n = createI18n({locale:'en'})
-app.use(VueI18n)
+// import {createI18n} from 'vue-i18n'
+// const VueI18n = createI18n({locale:'en'})
+// app.use(VueI18n)
 
 app.component('gp-customizable',defineAsyncComponent(() => import('./components/static/gp-customizable.vue')));
 app.component('gp-selectable',defineAsyncComponent(() => import('./components/static/gp-selectable.vue')));
@@ -69,8 +70,8 @@ app.config.globalProperties.$UserPreferences = reactive({});
 
 async function WSP(url){
 const wsp = new WebSocketAsPromised(url, {
-    packMessage: data => JSON.stringify(data),
-    unpackMessage: data => JSON.parse(data),
+    packMessage: data => msgpack.encode(data),
+    unpackMessage: data => msgpack.decode(data),
     attachRequestId: (data, requestId) => Object.assign({ id: requestId }, data), // attach requestId to message as `id` field
     extractRequestId: data => data && data.id,
 });
@@ -98,14 +99,15 @@ const _json_pickle = (obj) => {
 async function sendAsync(message,options={}){
     if (!( 'requestId' in options)) options.requestId = uuidv4()
     let res = await this.sendRequest(message,options);
-    if ('_msg' in res) return _json_pickle(res._msg);
+    //if ('_msg' in res) return _json_pickle(res._msg);
+	if ('_msg' in res) return res._msg;
     return null;
 }
 
 WebSocketAsPromised.prototype.sendAsync = sendAsync
 
 async function wsopen(){
-app.config.globalProperties.$ws = await WSP('ws://localhost:8100/ws');
+app.config.globalProperties.$ws = await WSP('ws://localhost:8170');
 app.config.globalProperties.$wsp = await WSP('ws://localhost:9000/');
 }
 wsopen();

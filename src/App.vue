@@ -116,10 +116,10 @@ const defaultProps = reactive({
     children: "childs_id",
 });
 
-const { locale, t } = useI18n({
-    inheritLocale: true
-})
-console.log('locale:', locale)
+// const { locale, t } = useI18n({
+//     inheritLocale: true
+// })
+//console.log('locale:', locale)
 
 const handleNodeClick = async (data) => {
     //console.log("handleNodeClick:", data);
@@ -350,7 +350,7 @@ const on_service_login = async (msg) => {
             lang: proxy.$UserPreferences.lang,
             tz: proxy.$UserPreferences.timezone,
         };
-        locale.value = proxy.$UserPreferences.Context.lang;
+        //locale.value = proxy.$UserPreferences.Context.lang;
         isLoginFormShow.value = false;
         timestampLogged.value = Date(); //.toLocaleDateString();
         on_menu_load(await proxy.$ws.sendAsync(
@@ -371,7 +371,7 @@ const on_service_login = async (msg) => {
 
 const on_menu_load = (msg) => {
     menuData.splice(0, menuData.length, ...msg);
-    registerViews(proxy.$UserPreferences.Context.framework);
+    //registerViews(proxy.$UserPreferences.Context.framework);
     isLogged.value = true;
 };
 
@@ -454,15 +454,16 @@ const on_load_meta = (msg) => {
     Object.assign(metas, msg[0].model.models);
     model.value = msg[0].model.root;
     tabs.splice(0, tabs.length);
-    currentTab.value = "gp-search-" + model.value.replaceAll(".", "-");
+    currentTab.value = "gp-search"
+    // + model.value.replaceAll(".", "-");
     for (let i = 0; i < metas[model.value].allow.length; i++)
         if (
             ["search", "form", "tree", "graph", "calendar", "geo", "kanban"].indexOf(
                 metas[model.value].allow[i]
             ) >= 0
         )
-            if (['form', 'search'].indexOf(metas[model.value].allow[i]) >= 0) tabs.push("gp-" + metas[model.value].allow[i] + '-' + model.value.replaceAll(".", "-"))
-            else
+            //if (['form', 'search'].indexOf(metas[model.value].allow[i]) >= 0) tabs.push("gp-" + metas[model.value].allow[i] + '-' + model.value.replaceAll(".", "-"))
+            //else
                 tabs.push("gp-" + metas[model.value].allow[i]);
 };
 //proxy.$ws.onClose.addListener(event => on_close_websocket(event));

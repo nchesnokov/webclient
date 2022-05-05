@@ -51,7 +51,7 @@ export default defineComponent({
         const isVisible = ref(false);
         const select = ref('ws://')
         const form = reactive({
-            url: 'localhost:8100/ws',
+            url: 'localhost:8170',
             slot: 'test003',
             user: 'admin',
             password: 'admin'
