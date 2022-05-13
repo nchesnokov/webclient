@@ -25,10 +25,146 @@ extensionCodec.register({
         }
     },
     decode: (data) => {
-        //console.log('decode:',data,decode(data))
         return decode(data)
     },
 })
+
+extensionCodec.register({
+    type: 10,
+    encode: (obj) => {
+        if (typeof obj == 'object' && !Array.isArray() && '__tuple__' in obj) {
+            return encode(new ExtData(10, encode(obj.__tuple__)))
+        }
+        else {
+            return null
+        }
+    },
+    decode: (data) => {
+        return decode(data)
+    },
+})
+
+extensionCodec.register({
+    type: 10,
+    encode: (obj) => {
+        if (typeof obj == 'object' && !Array.isArray() && '__tuple__' in obj) {
+            return encode(new ExtData(10, encode(obj.__tuple__)))
+        }
+        else {
+            return null
+        }
+    },
+    decode: (data) => {
+        return decode(data)
+    },
+})
+
+extensionCodec.register({
+    type: 10,
+    encode: (obj) => {
+        if (typeof obj == 'object' && !Array.isArray() && '__tuple__' in obj) {
+            return encode(new ExtData(10, encode(obj.__tuple__)))
+        }
+        else {
+            return null
+        }
+    },
+    decode: (data) => {
+        return decode(data)
+    },
+})
+
+extensionCodec.register({
+    type: 11,
+    encode: (obj) => {
+        if (typeof obj == 'object' && !Array.isArray() && '__datetime_tz__' in obj) {
+            return encode(new ExtData(11, encode(obj.__datetime_tz__)))
+        }
+        else {
+            return null
+        }
+    },
+    decode: (data) => {
+        return decode(data)
+    },
+})
+
+extensionCodec.register({
+    type: 12,
+    encode: (obj) => {
+        if (typeof obj == 'object' && !Array.isArray() && '__datetime__' in obj) {
+            return encode(new ExtData(12, encode(obj.__datetime__)))
+        }
+        else {
+            return null
+        }
+    },
+    decode: (data) => {
+        return decode(data)
+    },
+})
+
+extensionCodec.register({
+    type: 13,
+    encode: (obj) => {
+        if (typeof obj == 'object' && !Array.isArray() && '__date__' in obj) {
+            return encode(new ExtData(13, encode(obj.__date__)))
+        }
+        else {
+            return null
+        }
+    },
+    decode: (data) => {
+        return decode(data)
+    },
+})
+
+
+extensionCodec.register({
+    type: 14,
+    encode: (obj) => {
+        if (typeof obj == 'object' && !Array.isArray() && '__time_tz__' in obj) {
+            return encode(new ExtData(14, encode(obj.__time_tz__)))
+        }
+        else {
+            return null
+        }
+    },
+    decode: (data) => {
+        return decode(data)
+    },
+})
+
+extensionCodec.register({
+    type: 15,
+    encode: (obj) => {
+        if (typeof obj == 'object' && !Array.isArray() && '__time__' in obj) {
+            return encode(new ExtData(15, encode(obj.__time__)))
+        }
+        else {
+            return null
+        }
+    },
+    decode: (data) => {
+        return decode(data)
+    },
+})
+
+extensionCodec.register({
+    type: 16,
+    encode: (obj) => {
+        if (typeof obj == 'object' && !Array.isArray() && '__timedelta__' in obj) {
+            return encode(new ExtData(16, encode(obj.__timedelta__)))
+        }
+        else {
+            return null
+        }
+    },
+    decode: (data) => {
+        return decode(data)
+    },
+})
+
 
 extensionCodec.register({
     type: 17,
@@ -37,9 +173,56 @@ extensionCodec.register({
         else return null
     },
     decode: (data) => {
-        return decode(decode(data).data)
+        console.log('decimal:',decode(data))
+        return decode(data)
     },
 })
+
+extensionCodec.register({
+    type: 18,
+    encode: (obj) => {
+        if (typeof obj == 'object' && !Array.isArray() && '__binary__' in obj) {
+            return encode(new ExtData(19, encode(obj.__binary__)))
+        }
+        else {
+            return null
+        }
+    },
+    decode: (data) => {
+        return decode(data)
+    },
+})
+
+extensionCodec.register({
+    type: 19,
+    encode: (obj) => {
+        if (typeof obj == 'object' && !Array.isArray() && '__bytearray__' in obj) {
+            return encode(new ExtData(19, encode(obj.__bytearray__)))
+        }
+        else {
+            return null
+        }
+    },
+    decode: (data) => {
+        return decode(data)
+    },
+})
+
+extensionCodec.register({
+    type: 20,
+    encode: (obj) => {
+        if (typeof obj == 'object' && !Array.isArray() && '__exception__' in obj) {
+            return encode(new ExtData(19, encode(obj.__extepttion__)))
+        }
+        else {
+            return null
+        }
+    },
+    decode: (data) => {
+        return decode(data)
+    },
+})
+
 
 const msgpack = {
     encode: (obj) => encode(obj, { extensionCodec }),

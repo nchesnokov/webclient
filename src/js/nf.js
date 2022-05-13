@@ -43,12 +43,12 @@ const on_modify_models = (dataForm, values) => {
         if ('__m2m_remove__' in diffs)
             for (let i = 0; i < diffs.__m2m_remove__.length; i++) {
                 row = diffs.__m2m_remove__[i];
-                c = dataForm.__containers__[row.__container__];
+                c = dataForm.__m2m_containers__[row.__container__];
                 idx = -1;
                 for (let j = 0; j < c.length; j++)
                     if (c[j].__path__ == row.__path__) idx = j;
                 if (idx >= 0) {
-                    dataForm.__containers__[row.__container__].splice(idx, 1);
+                    dataForm.__m2m_containers__[row.__container__].splice(idx, 1);
                     delete dataForm.__data__[row.__path__];
                 }
 
@@ -59,12 +59,12 @@ const on_modify_models = (dataForm, values) => {
         //let row,c,idx;
         for (let i = 0, row, c, idx; i < rows.length; i++) {
             row = rows[i];
-            c = dataForm.__containers__[row.__container__];
+            c = dataForm.__m2m_containers__[row.__container__];
             idx = -1;
             for (let j = 0; j < c.length; j++)
                 if (c[j].__path__ == row.__path__) idx = j;
             if (idx >= 0) {
-                dataForm.__containers__[row.__container__].splice(idx, 1);
+                dataForm.__m2m_containers__[row.__container__].splice(idx, 1);
                 delete dataForm.__data__[row.__path__];
             }
 
@@ -77,12 +77,12 @@ const on_modify_models = (dataForm, values) => {
         if ('__o2m_remove__' in diffs)
             for (let i = 0, row, c, idx; i < diffs.__o2m_remove__.length; i++) {
                 row = diffs.__o2m_remove__[i];
-                c = dataForm.__containers__[row.__container__];
+                c = dataForm.__o2m_containers__[row.__container__];
                 idx = -1;
                 for (let j = 0; j < c.length; j++)
                     if (c[j].__path__ == row.__path__) idx = j;
                 if (idx >= 0) {
-                    dataForm.__containers__[row.__container__].splice(idx, 1);
+                    dataForm.__o2m_containers__[row.__container__].splice(idx, 1);
                     delete dataForm.__data__[row.__path__];
                     delete dataForm.__data__[row.__path__];
                 }
@@ -99,12 +99,12 @@ const on_modify_models = (dataForm, values) => {
         //let row,c,idx;
         for (let i = 0, row, c, idx; i < rows.length; i++) {
             row = rows[i];
-            c = dataForm.__containers__[row.__container__];
+            c = dataForm.__o2m_containers__[row.__container__];
             idx = -1;
             for (let j = 0; j < c.length; j++)
                 if (c[j].__path__ == row.__path__) idx = j;
             if (idx >= 0) {
-                dataForm.__containers__[row.__container__].splice(idx, 1);
+                dataForm.__o2m_containers__[row.__container__].splice(idx, 1);
                 delete dataForm.__data__[row.__path__];
                 delete dataForm.__meta__[row.__path__];
             }
@@ -121,8 +121,8 @@ const on_modify_models = (dataForm, values) => {
         if ('__m2m_append__' in diffs)
             for (let i = 0, row; i < diffs.__m2m_append__.length; i++) {
                 row = diffs.__m2m_append__[i];
-                if (!(row.__container__ in dataForm.__containers__)) dataForm.__containers__[row.__container__] = [];
-                dataForm.__containers__[row.__container__].push(row);
+                if (!(row.__m2m_container__ in dataForm.__m2m_containers__)) dataForm.__m2m_containers__[row.__m2m_container__] = [];
+                dataForm.__m2m_containers__[row.__container__].push(row);
             }
 
     }
@@ -131,7 +131,7 @@ const on_modify_models = (dataForm, values) => {
         if ('__o2m_append__' in diffs)
             for (let i = 0, row; i < diffs.__o2m_append__.length; i++) {
                 row = diffs.__o2m_append__[i];
-                dataForm.__containers__[row.__container__].push(row);
+                dataForm.__o2m_containers__[row.__container__].push(row);
             }
 
     }

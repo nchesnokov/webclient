@@ -32,7 +32,7 @@
 }
 
 button.active {
-    background-color: Aqua;
+    background-color: blue;
 }
 </style>
 
