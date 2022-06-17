@@ -150,6 +150,7 @@
       ></el-input>
       <el-date-picker
         v-model="cdata[page - 1].__data__[col]"
+        type="date"
         @change="cache(cdata[page - 1], col)"
         v-else-if="colsType[col] == 'date'"
         :readonly="readonly(col)"
@@ -217,7 +218,10 @@
           :metas="metas"
           :model="metas[model].meta.columns[o2mcol].obj"
           :container="o2mcol + '.' + cdata[page - 1].__path__"
-          :cdata="cdata[page - 1].__o2m_containers__[o2mcol]"
+          :cdata="
+            cdata[page - 1].__o2m_containers__[
+              o2mcol + '.' + cdata[page - 1].__path__]
+          "
           :mode="mode"
           :rel="metas[model].meta.columns[o2mcol].rel"
         />

@@ -47,7 +47,7 @@
                 :metas="metas"
                 :model="metas[model].meta.columns[o2mcol].obj"
                 :container="o2mcol + '.' + props.row.__path__"
-                :cdata="props.row.__o2m_containers__[o2mcol]"
+                :cdata="props.row.__o2m_containers__[o2mcol + '.' + cdata[page - 1].__path__]"
                 :mode="mode"
                 :rel="metas[model].meta.columns[o2mcol].rel"
               />

@@ -98,7 +98,7 @@ const _json_pickle = (obj) => {
 
 async function sendAsync(message,options={}){
     if (!( 'requestId' in options)) options.requestId = uuidv4()
-    let res = await this.sendRequest(message,options);
+    let res = await this.sendRequest('_msg' in message ? message:{_msg:message},options);
     //if ('_msg' in res) return _json_pickle(res._msg);
 	if ('_msg' in res) return res._msg;
     return null;
@@ -108,7 +108,7 @@ WebSocketAsPromised.prototype.sendAsync = sendAsync
 
 async function wsopen(){
 app.config.globalProperties.$ws = await WSP('ws://localhost:8170');
-app.config.globalProperties.$wsp = await WSP('ws://localhost:9000/');
+//app.config.globalProperties.$wsp = await WSP('ws://localhost:9000/');
 }
 wsopen();
 

@@ -269,13 +269,13 @@
           ></el-option>
         </el-select>
         <el-row v-else-if="colsType[col] == 'many2many'">
-          <el-button type="primary" @click="do_find(col, 'multiple')"
+          <el-button type="primary" @click="do_find(col, 'multiple',[],{'path': dataForm.__path__})"
             >Add</el-button
           >
           <gp-m2m-list
             :metas="metas"
             :model="metas[model].meta.columns[col].obj"
-            :tableData="dataForm.__m2m_containers__[col]"
+            :tableData="dataForm.__m2m_containers__[col + '.' + dataForm.__path__]"
           ></gp-m2m-list>
         </el-row>
         <el-switch
@@ -327,7 +327,9 @@
             :metas="metas"
             :model="metas[model].meta.columns[o2mcol].obj"
             :container="o2mcol + '.' + dataForm.__path__"
-            :cdata="dataForm.__o2m_containers__[o2mcol + '.' + dataForm.__path__]"
+            :cdata="
+              dataForm.__o2m_containers__[o2mcol + '.' + dataForm.__path__]
+            "
             :mode="mode"
             :rel="metas[model].meta.columns[o2mcol].rel"
           />
@@ -809,15 +811,44 @@ const on_find_new = (value, opts) => {
     Object.assign(dataForm.__data__[opts.col], value);
   cache(opts.item, opts.col);
 };
+const m2m_cache = (model,container,fields,obj,rel,id2,context) => {
+  proxy.$ws
+    .sendAsync({
+      _msg: [
+        props.cid,
+        "_cache",
+        "m2madd",
+        guid.value,
+        {
+          model: model,
+          container: container,
+          fields:fields,
+          obj:obj,
+          rel:rel,
+          id2:id2,
+          context: {}
+        },
+      ],
+    })
+    .then((msg) => on_modify_models(dataForm, msg[0]));
 
+};
 const on_find_m2m = (value, opts) => {
   console.log("on_find_m2m:", value, opts);
-  if (["new", "edit"].indexOf(mode.value) >= 0 && value.length > 0)
-    dataForm.__m2m_containers__[opts.col].splice(
-      dataForm.__m2m_containers__[opts.col].length,
-      0,
-      ...value
-    );
+  if (["new", "edit"].indexOf(mode.value) >= 0 && value.length > 0){ 
+  let model = dataForm.__model__;
+  let container = opts.col + '.' + opts.path;
+  let obj = props.metas[dataForm.__model__].meta.columns[opts.col].obj;
+  let fields = props.metas[obj].views.list.columns.map(f => f.col);
+  let rel = props.metas[dataForm.__model__].meta.columns[opts.col].rel;
+  let id2 = value.map(item => item.id);
+  m2m_cache(model,container,fields,obj,rel,id2,proxy.$UserPreferences.Context)
+  }
+    // dataForm.__m2m_containers__[opts.col + '.' + opts.path].splice(
+    //   dataForm.__m2m_containers__[opts.col + '.' + opts.path].length,
+    //   0,
+    //   ...value
+    // );
 };
 
 const fieldsBuild = (model, view) => {
@@ -847,7 +878,7 @@ const fieldsBuild = (model, view) => {
         k = {};
         k[columns[i]] = props.metas[
           props.metas[model].meta.columns[columns[i]].obj
-        ].views.m2mlist.columns.map((v) => v.col);
+        ].views.list.columns.map((v) => v.col);
         fcols.push(k);
         break;
       default:
@@ -1032,21 +1063,23 @@ const onSubmit = async () => {
               props.modal.callbackOpts
             );
           emit("update:close");
-        } else {
-          msg = await proxy.$ws.sendAsync({
-            _msg: [
-              props.cid,
-              "_cache",
-              "initialize",
-              guid.value,
-              {
-                model: props.model,
-                view: "form",
-              },
-            ],
-          });
-          Object.assign(dataForm, msg[0]);
         }
+        // } else {
+        //   msg = await proxy.$ws.sendAsync({
+        //     _msg: [
+        //       props.cid,
+        //       "_cache",
+        //       "initialize",
+        //       guid.value,
+        //       {
+        //         model: props.model,
+        //         view: "form",
+        //       },
+        //     ],
+        //   });
+        //   init_metacache();
+        //   Object.assign(dataForm, dataRowForm(msg[0]));
+        // }
         proxy.$notify({
           title: "Information",
           message: h(
@@ -1097,8 +1130,11 @@ const onCancel = () => {
         ],
       })
       .then((msg) => {
-        if (msg && msg.length > 0) Object.assign(dataForm, msg[0]);
-        console.log("initialize:", msg);
+        if (msg && msg.length > 0) {
+          init_metacache();
+          Object.assign(dataForm, dataRowForm(msg[0]));
+          console.log("initialize:", msg);
+        }
       });
 };
 const init_metacache = () => {
@@ -1147,6 +1183,7 @@ onBeforeMount(async () => {
     if (msg && msg.length > 0) {
       init_metacache();
       Object.assign(dataForm, dataRowForm(msg[0]));
+      console.log("dataForm:", dataForm);
       //Object.assign(dataForm, msg[0])
       //dataRow(dataForm)
     }
