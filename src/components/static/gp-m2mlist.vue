@@ -2,10 +2,9 @@
 </style>
 
 <template>
-    <el-container>
         <el-table
             @selection-change="handleSelectionChange"
-            :data="tableData"
+            :data="tableData.map(item => item.__data__)"
             style="width: 100%"
             fit
         >
@@ -25,7 +24,6 @@
                 </template>
             </el-table-column>
         </el-table>
-    </el-container>
     <el-pagination
         v-if="tableData.length > pageSize"
         background

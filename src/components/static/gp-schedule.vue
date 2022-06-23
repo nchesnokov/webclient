@@ -334,7 +334,7 @@
 import { send } from '../mixins/nf.js'
 
   export default {
-    name: 'gsrp5-schedule-view',
+    name: 'gp-schedule',
     props: ['metas','model'],
     data: () => ({
       fields:[],

@@ -479,6 +479,7 @@ const on_load_meta = (msg) => {
   currentTab.value = "gp-search";
   // + model.value.replaceAll(".", "-");
   for (let i = 0; i < metas[model.value].allow.length; i++)
+    // ,'mdx','gantt','schedule'
     if (
       ["search", "form", "tree", "graph", "calendar", "geo", "kanban"].indexOf(
         metas[model.value].allow[i]

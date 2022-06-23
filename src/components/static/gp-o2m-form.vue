@@ -672,6 +672,7 @@ const do_modal_form = (col, oid, mode) => {
   if (mode === "new") {
     rootProps.callback = on_find_new;
     rootProps.callbackOpts = {
+      item: props.cdata[page.value - 1],
       col: col,
       mode: "new",
     };

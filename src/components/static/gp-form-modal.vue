@@ -75,8 +75,8 @@ onBeforeMount(() => {
         {
           model: props.model,
           context: proxy.$UserPreferences.Context,
-        },
-      ],
+        }
+      ]
     })
     .then((msg) => {
       if (msg && msg.length > 0) {

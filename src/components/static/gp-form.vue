@@ -137,7 +137,7 @@
               type="primary"
               size="small"
               :icon="Search"
-              @click="do_find(col)"
+               @click="do_find(col, 'single', [], { item: dataForm })"
             ></el-button>
             <el-button
               type="primary"
@@ -269,14 +269,15 @@
           ></el-option>
         </el-select>
         <el-row v-else-if="colsType[col] == 'many2many'">
-          <el-button type="primary" @click="do_find(col, 'multiple',[],{'path': dataForm.__path__})"
-            >Add</el-button
-          >
+         
+         <el-button type="primary" @click="do_find(col, 'multiple',[],{'path': dataForm.__path__})"
+            >Add</el-button>
+            <br>
           <gp-m2m-list
             :metas="metas"
             :model="metas[model].meta.columns[col].obj"
-            :tableData="dataForm.__m2m_containers__[col + '.' + dataForm.__path__]"
-          ></gp-m2m-list>
+            :tableData="dataForm.__m2m_containers__[col + '.' + dataForm.__path__]">
+          </gp-m2m-list>
         </el-row>
         <el-switch
           v-model="dataForm.__data__[col]"
@@ -839,7 +840,7 @@ const on_find_m2m = (value, opts) => {
   let model = dataForm.__model__;
   let container = opts.col + '.' + opts.path;
   let obj = props.metas[dataForm.__model__].meta.columns[opts.col].obj;
-  let fields = props.metas[obj].views.list.columns.map(f => f.col);
+  let fields = props.metas[obj].views.m2mlist.columns.map(f => f.col);
   let rel = props.metas[dataForm.__model__].meta.columns[opts.col].rel;
   let id2 = value.map(item => item.id);
   m2m_cache(model,container,fields,obj,rel,id2,proxy.$UserPreferences.Context)
@@ -878,7 +879,7 @@ const fieldsBuild = (model, view) => {
         k = {};
         k[columns[i]] = props.metas[
           props.metas[model].meta.columns[columns[i]].obj
-        ].views.list.columns.map((v) => v.col);
+        ].views.m2mlist.columns.map((v) => v.col);
         fcols.push(k);
         break;
       default:
