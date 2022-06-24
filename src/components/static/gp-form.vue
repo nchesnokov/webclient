@@ -137,7 +137,7 @@
               type="primary"
               size="small"
               :icon="Search"
-               @click="do_find(col, 'single', [], { item: dataForm })"
+              @click="do_find(col, 'single', [], { item: dataForm })"
             ></el-button>
             <el-button
               type="primary"
@@ -269,14 +269,19 @@
           ></el-option>
         </el-select>
         <el-row v-else-if="colsType[col] == 'many2many'">
-         
-         <el-button type="primary" @click="do_find(col, 'multiple',[],{'path': dataForm.__path__})"
-            >Add</el-button>
-            <br>
+          <el-button
+            type="primary"
+            @click="do_find(col, 'multiple', [], { path: dataForm.__path__ })"
+            >Add</el-button
+          >
+          <br />
           <gp-m2m-list
             :metas="metas"
             :model="metas[model].meta.columns[col].obj"
-            :tableData="dataForm.__m2m_containers__[col + '.' + dataForm.__path__]">
+            :tableData="
+              dataForm.__m2m_containers__[col + '.' + dataForm.__path__]
+            "
+          >
           </gp-m2m-list>
         </el-row>
         <el-switch
@@ -324,13 +329,10 @@
           <gp-o2m-components
             :cid="cid"
             :guid="guid"
-            :root="proxy.dataForm"
+            :maps = "proxy.dataMaps"
             :metas="metas"
             :model="metas[model].meta.columns[o2mcol].obj"
             :container="o2mcol + '.' + dataForm.__path__"
-            :cdata="
-              dataForm.__o2m_containers__[o2mcol + '.' + dataForm.__path__]
-            "
             :mode="mode"
             :rel="metas[model].meta.columns[o2mcol].rel"
           />
@@ -439,6 +441,7 @@ const colsLabel = reactive({});
 const colsSize = reactive({});
 const colsTranslate = reactive({});
 const colsLang = reactive({});
+const dataMaps = reactive({ __ids__: {}, __containers__: {} });
 const dataForm = reactive({
   __data__: {},
   __meta__: {},
@@ -484,12 +487,32 @@ const addRow = () => {};
 //     dataRowContainer(row["__o2m_containers__"], row["__path__"]);
 // };
 
+const dataRowMaps = (row) => {
+  if ("__path__" in row && "__data__" in row)
+    dataMaps.__ids__[row.__path__] = row;
+  if ("__m2m_containers__" in row) {
+    for (let k in row.__m2m_containers__) {
+      dataMaps.__containers__[k] =
+        row.__m2m_containers__[k];
+      row.__m2m_containers__[k].map(dataRowMaps);
+    }
+  }
+  if ("__o2m_containers__" in row) {
+    for (let k in row.__o2m_containers__) {
+      dataMaps.__containers__[k] =
+        row.__o2m_containers__[k];
+      for(let i = 0;i < row.__o2m_containers__[k].length; i++) dataRowMaps(row.__o2m_containers__[k][i]);
+    }
+  }
+};
+
 const dataRowForm = (row) => {
   let value = reactive({});
   if ("__data__" in row) value.__data__ = row.__data__;
   if ("__meta__" in row) value.__meta__ = row.__meta__;
   if ("__path__" in row) value.__path__ = row.__path__;
   if ("__model__" in row) value.__model__ = row.__model__;
+  if ("__container__" in row) value.__container__ = row.__container__;
   if ("__m2m_containers__" in row || "__o2m_containers__" in row)
     if ("__m2m_containers__" in row) {
       value.__m2m_containers__ = reactive({});
@@ -600,7 +623,7 @@ const cache = (item, name) => {
     })
     .then((v) => {
       console.log("cache:", v);
-      on_modify_models(dataForm, v[0]);
+      on_modify_models(dataMaps, v[0]);
     });
 };
 
@@ -812,7 +835,7 @@ const on_find_new = (value, opts) => {
     Object.assign(dataForm.__data__[opts.col], value);
   cache(opts.item, opts.col);
 };
-const m2m_cache = (model,container,fields,obj,rel,id2,context) => {
+const m2m_cache = (model, container, fields, obj, rel, id2, context) => {
   proxy.$ws
     .sendAsync({
       _msg: [
@@ -823,33 +846,40 @@ const m2m_cache = (model,container,fields,obj,rel,id2,context) => {
         {
           model: model,
           container: container,
-          fields:fields,
-          obj:obj,
-          rel:rel,
-          id2:id2,
-          context: {}
+          fields: fields,
+          obj: obj,
+          rel: rel,
+          id2: id2,
+          context: {},
         },
       ],
     })
-    .then((msg) => on_modify_models(dataForm, msg[0]));
-
+    .then((msg) => on_modify_models(dataMaps, msg[0]));
 };
 const on_find_m2m = (value, opts) => {
   console.log("on_find_m2m:", value, opts);
-  if (["new", "edit"].indexOf(mode.value) >= 0 && value.length > 0){ 
-  let model = dataForm.__model__;
-  let container = opts.col + '.' + opts.path;
-  let obj = props.metas[dataForm.__model__].meta.columns[opts.col].obj;
-  let fields = props.metas[obj].views.m2mlist.columns.map(f => f.col);
-  let rel = props.metas[dataForm.__model__].meta.columns[opts.col].rel;
-  let id2 = value.map(item => item.id);
-  m2m_cache(model,container,fields,obj,rel,id2,proxy.$UserPreferences.Context)
+  if (["new", "edit"].indexOf(mode.value) >= 0 && value.length > 0) {
+    let model = dataForm.__model__;
+    let container = opts.col + "." + opts.path;
+    let obj = props.metas[dataForm.__model__].meta.columns[opts.col].obj;
+    let fields = props.metas[obj].views.m2mlist.columns.map((f) => f.col);
+    let rel = props.metas[dataForm.__model__].meta.columns[opts.col].rel;
+    let id2 = value.map((item) => item.id);
+    m2m_cache(
+      model,
+      container,
+      fields,
+      obj,
+      rel,
+      id2,
+      proxy.$UserPreferences.Context
+    );
   }
-    // dataForm.__m2m_containers__[opts.col + '.' + opts.path].splice(
-    //   dataForm.__m2m_containers__[opts.col + '.' + opts.path].length,
-    //   0,
-    //   ...value
-    // );
+  // dataForm.__m2m_containers__[opts.col + '.' + opts.path].splice(
+  //   dataForm.__m2m_containers__[opts.col + '.' + opts.path].length,
+  //   0,
+  //   ...value
+  // );
 };
 
 const fieldsBuild = (model, view) => {
@@ -1134,6 +1164,9 @@ const onCancel = () => {
         if (msg && msg.length > 0) {
           init_metacache();
           Object.assign(dataForm, dataRowForm(msg[0]));
+          dataRowMaps(dataForm);
+          console.log("dataRowMaps:", dataMaps);
+
           console.log("initialize:", msg);
         }
       });
@@ -1146,9 +1179,10 @@ const on_read = (msg) => {
   console.log("on_read:", msg);
   if (msg && msg.length > 0) {
     init_metacache();
-    //Object.assign(dataForm, msg[0])
-    //dataRow(dataForm)
     Object.assign(dataForm, dataRowForm(msg[0]));
+    dataRowMaps(dataForm);
+    console.log("dataRowMaps:", dataMaps);
+
     console.log("dataForm:", dataForm);
   }
 };
@@ -1183,10 +1217,12 @@ onBeforeMount(async () => {
     console.log("onBeforeMount-msg-initialize:", msg);
     if (msg && msg.length > 0) {
       init_metacache();
+
       Object.assign(dataForm, dataRowForm(msg[0]));
+      dataRowMaps(dataForm);
+      console.log("dataRowMaps:", dataMaps);
+
       console.log("dataForm:", dataForm);
-      //Object.assign(dataForm, msg[0])
-      //dataRow(dataForm)
     }
   }
 

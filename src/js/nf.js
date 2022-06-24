@@ -1,168 +1,170 @@
-const on_modify_models = (dataForm, values) => {
-    function _update(dataForm, diffs) {
+import {reactive} from 'vue'
+
+const on_modify_models = (maps, values) => {
+    function _update(maps, diffs) {
         if ('__update__' in diffs)
             for (let k in diffs.__update__)
                 for (let v in diffs.__update__[k]) {
-                    //if (v in dataForm.__data__) dataForm.__data__[v] = diffs.__update__[k][v];
-                    //if (k in dataForm.__data__) dataForm.__data__[k][v] = diffs.__update__[k][v];
-                    if (k == dataForm.__path__) dataForm.__data__[v] = diffs.__update__[k][v];
+                    maps.__ids__[k].__data__[v] = diffs.__update__[k][v];
                 }
 
     }
 
-    function _insert(dataForm, diffs) {
+    function _insert(maps, diffs) {
         if ('__insert__' in diffs)
             for (let k in diffs.__insert__)
                 for (let v in diffs.__insert__[k]) {
-                    //if (k in dataForm.__data__) dataForm.__data__[k][v] = diffs.__insert__[k][v];
-                    if (k == dataForm.__path__) dataForm.__data__[v] = diffs.__insert__[k][v];
+                    maps.__ids__[k].__data__[v] = diffs.__insert__[k][v];
                 }
 
     }
 
-    function _delete(dataForm, diffs) {
+    function _delete(maps, diffs) {
         if ('__delete__' in diffs)
             for (let k in diffs.__delete__)
-                for (let v in diffs.__insert__[k]) {
-                    //if (k in dataForm.__data__) delete dataForm.__data__[k][v];
-                    if (k == self.item.__path__) delete self.item.__data__[v];
+                for (let v in diffs.__delete__[k]) {
+                    if (v == diffs.__delete__[k][v]) delete maps.__ids__[k].__data__[v];
                 }
 
     }
 
-    function _meta_update(dataForm, diffs) {
+    function _meta_update(maps, diffs) {
         if ('__meta_update__' in diffs)
             for (let k in diffs.__meta_update__)
                 for (let a in diffs.__meta_update__[k])
                     for (let c in diffs.__meta_update__[k][a])
-                        dataForm.__meta__[k][a][c] = diffs.__meta_update__[k][a][c];
+                        maps.__ids__[k].__meta__[a][c] = diffs.__meta_update__[k][a][c];
     }
 
-    function _m2m_remove(dataForm, diffs) {
+    function _m2m_remove(maps, diffs) {
         let row, c, idx;
         if ('__m2m_remove__' in diffs)
             for (let i = 0; i < diffs.__m2m_remove__.length; i++) {
                 row = diffs.__m2m_remove__[i];
-                c = dataForm.__m2m_containers__[row.__container__];
+                c = maps.__m2m_containers__[row.__container__];
                 idx = -1;
                 for (let j = 0; j < c.length; j++)
                     if (c[j].__path__ == row.__path__) idx = j;
                 if (idx >= 0) {
-                    dataForm.__m2m_containers__[row.__container__].splice(idx, 1);
-                    delete dataForm.__data__[row.__path__];
+                    maps.__m2m_containers__[row.__container__].splice(idx, 1);
+                    delete maps.__data__[row.__path__];
                 }
 
             }
     }
 
-    function _m2m_recursive_remove(dataForm, rows) {
+    function _m2m_recursive_remove(maps, rows) {
         //let row,c,idx;
         for (let i = 0, row, c, idx; i < rows.length; i++) {
             row = rows[i];
-            c = dataForm.__m2m_containers__[row.__container__];
+            c = maps.__m2m_containers__[row.__container__];
             idx = -1;
             for (let j = 0; j < c.length; j++)
                 if (c[j].__path__ == row.__path__) idx = j;
             if (idx >= 0) {
-                dataForm.__m2m_containers__[row.__container__].splice(idx, 1);
-                delete dataForm.__data__[row.__path__];
+                maps.__m2m_containers__[row.__container__].splice(idx, 1);
+                delete maps.__data__[row.__path__];
             }
 
         }
     }
 
 
-    function _o2m_remove(dataForm, diffs) {
-        //let row,c,idx;
+    function _o2m_remove(maps, diffs) {
         if ('__o2m_remove__' in diffs)
-            for (let i = 0, row, c, idx; i < diffs.__o2m_remove__.length; i++) {
-                row = diffs.__o2m_remove__[i];
-                c = dataForm.__o2m_containers__[row.__container__];
-                idx = -1;
-                for (let j = 0; j < c.length; j++)
-                    if (c[j].__path__ == row.__path__) idx = j;
-                if (idx >= 0) {
-                    dataForm.__o2m_containers__[row.__container__].splice(idx, 1);
-                    delete dataForm.__data__[row.__path__];
-                    delete dataForm.__data__[row.__path__];
+            for (let i = 0; i < diffs.__o2m_remove__.length; i++) {
+                let path = diffs.__o2m_remove__[i].__path__;
+                let container = diffs.__o2m_remove__[i].__container__;
+                let index = maps.__containers__[container].findIndex((element, index, array) => element.__path__ === path);
+                if (index >= 0) {
+                    if ('__m2m_containers__' in diffs.__o2m_remove__[i])
+                        for (let k in diffs.__o2m_remove__[i].__m2m_containers__) _m2m_recursive_remove(maps, diffs.__o2m_remove__[i].__m2m_containers__[k]);
+                    if ('__o2m_containers__' in diffs.__o2m_remove__[i])
+                        for (let k in diffs.__o2m_remove__[i].__o2m_containers__) _o2m_recursive_remove(maps, diffs.__o2m_remove__[i].__o2m_containers__[k]);
+
+                    maps.__containers__[container].splice(index, 1);
+                    delete maps.__ids__[path];
+
                 }
-                if ('__m2m_containers__' in row)
-                    for (let k in row.__m2m_containers__) _m2m_recursive_remove(self, row.__m2m_containers__[k]);
-                if ('__o2m_containers__' in row)
-                    for (let k in row.__o2m_containers__) _o2m_recursive_remove(self, row.__o2m_containers__[k]);
-
             }
 
     }
 
-    function _o2m_recursive_remove(dataForm, rows) {
+    function _o2m_recursive_remove(maps, rows) {
         //let row,c,idx;
-        for (let i = 0, row, c, idx; i < rows.length; i++) {
-            row = rows[i];
-            c = dataForm.__o2m_containers__[row.__container__];
-            idx = -1;
-            for (let j = 0; j < c.length; j++)
-                if (c[j].__path__ == row.__path__) idx = j;
-            if (idx >= 0) {
-                dataForm.__o2m_containers__[row.__container__].splice(idx, 1);
-                delete dataForm.__data__[row.__path__];
-                delete dataForm.__meta__[row.__path__];
-            }
-            if ('__m2m_containers__' in row)
-                for (let k in row.__m2m_containers__) _m2m_recursive_remove(self, row.__m2m_containers__[k]);
-            if ('__o2m_containers__' in row)
-                for (let k in row.__o2m_containers__) _o2m_recursive_remove(self, row.__o2m_containers__[k]);
-        }
+        for (let i = 0; i < rows.length; i++) {
+            let path = rows[i].__path__;
+            let container = rows[i].__container__;
+            let index = maps.__containers__[container].findIndex((element, index, array) => element.__path__ === path);
 
+            if (index >= 0) {
+                if ('__m2m_containers__' in rows[i])
+                    for (let k in row.__m2m_containers__) _m2m_recursive_remove(maps, rows[i].__m2m_containers__[k]);
+                if ('__o2m_containers__' in rows[i])
+                    for (let k in row.__o2m_containers__) _o2m_recursive_remove(maps, rows[i].__o2m_containers__[k]);
+                maps.__containers__[container].splice(index, 1);
+                delete maps.__ids__[path];
+
+            }
+
+        }
     }
 
-
-    function _m2m_append(dataForm, diffs) {
+    function modify_maps(maps, row) {
+        if (!(row.__container__ in maps.__containers__)) maps.__containers__[row.__container__] = reactive([]);
+        maps.__containers__[row.__container__].push(row);
+        if ("__o2m_containers__" in row) for (let k in row.__o2m_containers__) for (let j = 0; j < row.__o2m_containers__[k].length; j++) modify_maps(maps, row.__o2m_containers__[k][j])
+    }
+    
+    function _m2m_append(maps, diffs) {
         if ('__m2m_append__' in diffs)
             for (let i = 0, row; i < diffs.__m2m_append__.length; i++) {
                 row = diffs.__m2m_append__[i];
-                if (!(row.__m2m_container__ in dataForm.__m2m_containers__)) dataForm.__m2m_containers__[row.__m2m_container__] = [];
-                dataForm.__m2m_containers__[row.__container__].push(row);
+                if (!(row.__container__ in maps.__containers__)) maps.__containers__[row.__container__] = reactive([]);
+                maps.__containers__[row.__container__].push(row);
             }
 
     }
 
-    function _o2m_append(dataForm, diffs) {
+    function _o2m_append(maps, diffs) {
         if ('__o2m_append__' in diffs)
             for (let i = 0, row; i < diffs.__o2m_append__.length; i++) {
                 row = diffs.__o2m_append__[i];
                 for (let k in row.__o2m_containers__) { row.__o2m_containers__[k + '.' + row.__path__] = row.__o2m_containers__[k]; delete row.__o2m_containers__[k]; }
-                dataForm.__o2m_containers__[row.__container__].push(row);
+                maps.__ids__[row.__path__] = row;
+                maps.__containers__[row.__container__].push(row);
+                if ("__o2m_containers__" in row) for (let k in row.__o2m_containers__) for (let j = 0; j < row.__o2m_containers__[k].length; j++) modify_maps(maps, row.__o2m_containers__[k][j])
+
             }
 
     }
 
 
-    function _apply_diffs(dataForm, diffs) {
-        _m2m_remove(dataForm, diffs);
-        _o2m_remove(dataForm, diffs)
-        _m2m_append(dataForm, diffs);
-        _o2m_append(dataForm, diffs)
-        _update(dataForm, diffs);
-        _insert(dataForm, diffs);
-        _delete(dataForm, diffs);
-        _meta_update(dataForm, diffs);
+    function _apply_diffs(maps, diffs) {
+        _m2m_remove(maps, diffs);
+        _o2m_remove(maps, diffs)
+        _m2m_append(maps, diffs);
+        _o2m_append(maps, diffs)
+        _update(maps, diffs);
+        _insert(maps, diffs);
+        _delete(maps, diffs);
+        _meta_update(maps, diffs);
     }
 
 
-    console.log('on_modify_models:', dataForm, values);
+    console.log('on_modify_models:', maps, values);
 
     if ('__data__' in values) {
         let data = values.__data__;
-        _apply_diffs(dataForm, data);
+        _apply_diffs(maps, data);
     }
     if ('__m2o_find__' in values) {
         let __m2o_find__ = values.__m2o_find__
         if (__m2o_find__.v.length == 1) {
-            dataForm.__data__[__m2o_find__.path][__m2o_find__.key]['id'] = __m2o_find__.v[0].id
-            dataForm.__data__[__m2o_find__.path][__m2o_find__.key]['name'] = __m2o_find__.v[0].name
+            maps.__ids__[__m2o_find__.path].__data__[__m2o_find__.key]['id'] = __m2o_find__.v[0].id
+            maps.__ids__[__m2o_find__.path].__data__[__m2o_find__.key]['name'] = __m2o_find__.v[0].name
         } else {
-            //on_find_many2one_update(this,dataForm.__data__[__m2o_find__.path],__m2o_find__.key,__m2o_find__.v);
+            //on_find_many2one_update(this,maps.__data__[__m2o_find__.path],__m2o_find__.key,__m2o_find__.v);
             return;
         }
     }
@@ -170,10 +172,10 @@ const on_modify_models = (dataForm, values) => {
     if ('__related_find__' in values) {
         let __related_find__ = values.__related_find__;
         if (__related_find__.v.length == 1) {
-            dataForm.__data__[__related_find__.path][__related_find__.key]['id'] = __related_find__.v[0].id
-            dataForm.__data__[__related_find__.path][__related_find__.key]['name'] = __related_find__.v[0].name
+            maps.__ids__[__related_find__.path].__data__[__related_find__.key]['id'] = __related_find__.v[0].id
+            maps.__ids__[__related_find__.path].__data__[__related_find__.key]['name'] = __related_find__.v[0].name
         } else {
-            //on_find_related_update(this,dataForm.__data__[__related_find__.path],__related_find__.key,__related_find__.v);
+            //on_find_related_update(this,maps.__data__[__related_find__.path],__related_find__.key,__related_find__.v);
             return;
         }
     }

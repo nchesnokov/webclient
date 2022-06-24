@@ -43,11 +43,10 @@
               <gp-o2m-components
                 :cid="cid"
                 :guid="guid"
-                :root="props.row"
+                :maps="maps"
                 :metas="metas"
                 :model="metas[model].meta.columns[o2mcol].obj"
                 :container="o2mcol + '.' + props.row.__path__"
-                :cdata="props.row.__o2m_containers__[o2mcol + '.' + cdata[page - 1].__path__]"
                 :mode="mode"
                 :rel="metas[model].meta.columns[o2mcol].rel"
               />
@@ -91,15 +90,15 @@
       </el-table-column>
     </el-table>
   </el-container>
-  <el-pagination
-    v-if="cdata.length > pageSize"
+  <!-- <el-pagination
+    v-if="maps.__containers__[container].length > pageSize"
     background
     layout="prev, pager, next"
     @current-change="handleCurrentChange"
     :page-size="pageSize"
-    :total="cdata.length"
+    :total="maps.__containers__[container].length"
   >
-  </el-pagination>
+  </el-pagination> -->
 </template>
 
 <script>
@@ -126,10 +125,9 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  root: {
+  maps: {
     type: Object,
   },
-
   metas: {
     type: Object,
   },
@@ -141,11 +139,6 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  cdata: {
-    type: Object,
-    required: true,
-  },
-
   mode: {
     type: String,
     required: true,
@@ -192,7 +185,7 @@ const add_row = (model, container, view) => {
         },
       ],
     })
-    .then((msg) => on_modify_models(props.root, msg[0]));
+    .then((msg) => on_modify_models(props.maps, msg[0]));
 };
 
 const remove_row = (path) => {
@@ -207,7 +200,7 @@ const remove_row = (path) => {
         { path: path, container: props.container, context: {} },
       ],
     })
-    .then((msg) => on_modify_models(props.root, msg[0]));
+    .then((msg) => on_modify_models(props.maps, msg[0]));
 };
 
 const remove_rows = () => {
@@ -228,7 +221,7 @@ const remove_rows = () => {
     })
     .then((msg) =>
       //console.log('on_removes:',msg[0]))
-      on_modify_models(props.root, msg[0])
+      on_modify_models(props.maps, msg[0])
     );
 };
 
@@ -247,9 +240,9 @@ const _get_selections = (s) => {
 };
 
 const tableDataDisplay = computed(() => {
-  if (props.cdata === null || props.cdata.length === 0) return reactive([]);
+  if (props.maps.__containers__[props.container] === null || props.maps.__containers__[props.container].length === 0) return reactive([]);
   else
-    return props.cdata.slice(
+    return props.maps.__containers__[props.container].slice(
       pageSize.value * page.value - pageSize.value,
       pageSize.value * page.value
     );
@@ -272,7 +265,7 @@ onMounted(() => {
     if (colsType[c[i]] == "one2many") o2mcols.push(c[i]);
     else cols.push(c[i]);
   }
-  //console.log('COLS:',colsType,colsLabel,cols,o2mcols,props.root,props.cdata);
-  console.log("PROPS-O2MLIST:", props.cdata);
+
+  console.log("PROPS-O2MLIST:", props.maps.__containers__[props.container]);
 });
 </script>
