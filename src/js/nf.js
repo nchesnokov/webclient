@@ -1,4 +1,28 @@
-import {reactive} from 'vue'
+import { reactive } from 'vue'
+
+const dataRowMaps = (maps, row) => {
+    let row1 = reactive({});
+    for (let k in row) if (['__o2m_containers__', '__m2m_containers__'].indexOf(k) < 0) row1[k] = row[k]
+
+    if ("__path__" in row && "__data__" in row)
+        maps.__ids__[row.__path__] = row1;
+    if ('__container__' in row) {
+        if (!(row.__container__ in maps.__containers__)) maps.__containers__[row.__container__] = reactive([]);
+        maps.__containers__[row.__container__].push(row1)
+    }
+    if ("__m2m_containers__" in row) {
+        for (let k in row.__m2m_containers__) {
+            maps.__containers__[k] = reactive([]);
+            for (let i = 0; i < row.__m2m_containers__[k].length; i++) dataRowMaps(maps, row.__m2m_containers__[k][i]);
+        }
+    }
+    if ("__o2m_containers__" in row) {
+        for (let k in row.__o2m_containers__) {
+            maps.__containers__[k] = reactive([]);
+            for (let i = 0; i < row.__o2m_containers__[k].length; i++) dataRowMaps(maps, row.__o2m_containers__[k][i]);
+        }
+    }
+};
 
 const on_modify_models = (maps, values) => {
     function _update(maps, diffs) {
@@ -110,33 +134,33 @@ const on_modify_models = (maps, values) => {
         }
     }
 
-    function modify_maps(maps, row) {
-        if (!(row.__container__ in maps.__containers__)) maps.__containers__[row.__container__] = reactive([]);
-        maps.__containers__[row.__container__].push(row);
-        if ("__o2m_containers__" in row) for (let k in row.__o2m_containers__) for (let j = 0; j < row.__o2m_containers__[k].length; j++) modify_maps(maps, row.__o2m_containers__[k][j])
-    }
-    
     function _m2m_append(maps, diffs) {
         if ('__m2m_append__' in diffs)
             for (let i = 0, row; i < diffs.__m2m_append__.length; i++) {
-                row = diffs.__m2m_append__[i];
-                if (!(row.__container__ in maps.__containers__)) maps.__containers__[row.__container__] = reactive([]);
-                maps.__containers__[row.__container__].push(row);
+                // row = diffs.__m2m_append__[i];
+                dataRowMaps(maps, diffs.__m2m_append__[i])
+                // if (!(row.__container__ in maps.__containers__)) maps.__containers__[row.__container__] = reactive([]);
+                // maps.__containers__[row.__container__].push(row);
             }
 
     }
 
     function _o2m_append(maps, diffs) {
-        if ('__o2m_append__' in diffs)
+        if ('__o2m_append__' in diffs) {
             for (let i = 0, row; i < diffs.__o2m_append__.length; i++) {
                 row = diffs.__o2m_append__[i];
                 for (let k in row.__o2m_containers__) { row.__o2m_containers__[k + '.' + row.__path__] = row.__o2m_containers__[k]; delete row.__o2m_containers__[k]; }
-                maps.__ids__[row.__path__] = row;
-                maps.__containers__[row.__container__].push(row);
-                if ("__o2m_containers__" in row) for (let k in row.__o2m_containers__) for (let j = 0; j < row.__o2m_containers__[k].length; j++) modify_maps(maps, row.__o2m_containers__[k][j])
+            }
+            for (let i = 0, row; i < diffs.__o2m_append__.length; i++) {
+                row = diffs.__o2m_append__[i];
+                dataRowMaps(maps, row)
+                // maps.__ids__[row.__path__] = row;
+                // maps.__containers__[row.__container__].push(row);
+                // if ("__o2m_containers__" in row) for (let k in row.__o2m_containers__) for (let j = 0; j < row.__o2m_containers__[k].length; j++) dataRowMaps(maps, row.__o2m_containers__[k][j])
 
             }
 
+        }
     }
 
 
@@ -181,4 +205,4 @@ const on_modify_models = (maps, values) => {
     }
 }
 
-export { on_modify_models };
+export { on_modify_models, dataRowMaps };

@@ -398,7 +398,7 @@ import {
   createVNode,
 } from "vue";
 
-import { on_modify_models } from "../../js/nf.js";
+import { on_modify_models, dataRowMaps } from "../../js/nf.js";
 
 import {
   Monitor,
@@ -487,24 +487,24 @@ const addRow = () => {};
 //     dataRowContainer(row["__o2m_containers__"], row["__path__"]);
 // };
 
-const dataRowMaps = (row) => {
-  if ("__path__" in row && "__data__" in row)
-    dataMaps.__ids__[row.__path__] = row;
-  if ("__m2m_containers__" in row) {
-    for (let k in row.__m2m_containers__) {
-      dataMaps.__containers__[k] =
-        row.__m2m_containers__[k];
-      row.__m2m_containers__[k].map(dataRowMaps);
-    }
-  }
-  if ("__o2m_containers__" in row) {
-    for (let k in row.__o2m_containers__) {
-      dataMaps.__containers__[k] =
-        row.__o2m_containers__[k];
-      for(let i = 0;i < row.__o2m_containers__[k].length; i++) dataRowMaps(row.__o2m_containers__[k][i]);
-    }
-  }
-};
+// const dataRowMaps = (row) => {
+//   if ("__path__" in row && "__data__" in row)
+//     dataMaps.__ids__[row.__path__] = row;
+//   if ("__m2m_containers__" in row) {
+//     for (let k in row.__m2m_containers__) {
+//       dataMaps.__containers__[k] =
+//         row.__m2m_containers__[k];
+//       row.__m2m_containers__[k].map(dataRowMaps);
+//     }
+//   }
+//   if ("__o2m_containers__" in row) {
+//     for (let k in row.__o2m_containers__) {
+//       dataMaps.__containers__[k] =
+//         row.__o2m_containers__[k];
+//       for(let i = 0;i < row.__o2m_containers__[k].length; i++) dataRowMaps(row.__o2m_containers__[k][i]);
+//     }
+//   }
+// };
 
 const dataRowForm = (row) => {
   let value = reactive({});
@@ -623,7 +623,7 @@ const cache = (item, name) => {
     })
     .then((v) => {
       console.log("cache:", v);
-      on_modify_models(dataMaps, v[0]);
+      if (v.length > 0) on_modify_models(dataMaps, v[0]);
     });
 };
 
@@ -1164,7 +1164,7 @@ const onCancel = () => {
         if (msg && msg.length > 0) {
           init_metacache();
           Object.assign(dataForm, dataRowForm(msg[0]));
-          dataRowMaps(dataForm);
+          dataRowMaps(dataMaps,dataForm);
           console.log("dataRowMaps:", dataMaps);
 
           console.log("initialize:", msg);
@@ -1180,7 +1180,7 @@ const on_read = (msg) => {
   if (msg && msg.length > 0) {
     init_metacache();
     Object.assign(dataForm, dataRowForm(msg[0]));
-    dataRowMaps(dataForm);
+    dataRowMaps(dataMaps,dataForm);
     console.log("dataRowMaps:", dataMaps);
 
     console.log("dataForm:", dataForm);
@@ -1219,7 +1219,7 @@ onBeforeMount(async () => {
       init_metacache();
 
       Object.assign(dataForm, dataRowForm(msg[0]));
-      dataRowMaps(dataForm);
+      dataRowMaps(dataMaps,dataForm);
       console.log("dataRowMaps:", dataMaps);
 
       console.log("dataForm:", dataForm);
