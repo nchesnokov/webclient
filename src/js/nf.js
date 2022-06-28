@@ -12,13 +12,13 @@ const dataRowMaps = (maps, row) => {
     }
     if ("__m2m_containers__" in row) {
         for (let k in row.__m2m_containers__) {
-            maps.__containers__[k] = reactive([]);
+            maps.__containers__[k + '.' + row.__path__] = reactive([]);
             for (let i = 0; i < row.__m2m_containers__[k].length; i++) dataRowMaps(maps, row.__m2m_containers__[k][i]);
         }
     }
     if ("__o2m_containers__" in row) {
         for (let k in row.__o2m_containers__) {
-            maps.__containers__[k] = reactive([]);
+            maps.__containers__[k + '.' + row.__path__] = reactive([]);
             for (let i = 0; i < row.__o2m_containers__[k].length; i++) dataRowMaps(maps, row.__o2m_containers__[k][i]);
         }
     }
@@ -147,10 +147,10 @@ const on_modify_models = (maps, values) => {
 
     function _o2m_append(maps, diffs) {
         if ('__o2m_append__' in diffs) {
-            for (let i = 0, row; i < diffs.__o2m_append__.length; i++) {
-                row = diffs.__o2m_append__[i];
-                for (let k in row.__o2m_containers__) { row.__o2m_containers__[k + '.' + row.__path__] = row.__o2m_containers__[k]; delete row.__o2m_containers__[k]; }
-            }
+            // for (let i = 0, row; i < diffs.__o2m_append__.length; i++) {
+            //     row = diffs.__o2m_append__[i];
+            //     for (let k in row.__o2m_containers__) { row.__o2m_containers__[k + '.' + row.__path__] = row.__o2m_containers__[k]; delete row.__o2m_containers__[k]; }
+            // }
             for (let i = 0, row; i < diffs.__o2m_append__.length; i++) {
                 row = diffs.__o2m_append__[i];
                 dataRowMaps(maps, row)

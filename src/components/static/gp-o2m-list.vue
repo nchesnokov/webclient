@@ -101,7 +101,7 @@
   </el-pagination> -->
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 
 export default defineComponent({
@@ -109,7 +109,7 @@ export default defineComponent({
 });
 </script>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, reactive, onMounted, computed, getCurrentInstance } from "vue";
 
 import { on_modify_models } from "../../js/nf";
@@ -266,6 +266,6 @@ onMounted(() => {
     else cols.push(c[i]);
   }
 
-  console.log("PROPS-O2MLIST:", props.maps.__containers__[props.container]);
+  // console.log("PROPS-O2MLIST:", props.maps.__containers__[props.container]);
 });
 </script>

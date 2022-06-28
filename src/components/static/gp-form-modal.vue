@@ -18,7 +18,7 @@
   </el-dialog>
 </template>
 
-<script lang="ts">
+<script>
 import { defineComponent } from "vue";
 
 export default defineComponent({
@@ -26,8 +26,8 @@ export default defineComponent({
 });
 </script>
 
-<script setup lang="ts">
-import { onBeforeMount, reactive, ref, getCurrentInstance } from "vue";
+<script setup>
+import { getCurrentInstance, onBeforeMount, reactive, ref } from "vue";
 
 const props = defineProps({
   cid: {
@@ -59,13 +59,13 @@ const props = defineProps({
     },
   },
 });
+
 const { proxy } = getCurrentInstance();
 const showDialog = ref(true);
 const metas = reactive({});
 const title = ref("Modal Form");
 
 onBeforeMount(() => {
-  //console.log("props:", props);
   proxy.$ws
     .sendAsync({
       _msg: [
@@ -75,8 +75,8 @@ onBeforeMount(() => {
         {
           model: props.model,
           context: proxy.$UserPreferences.Context,
-        }
-      ]
+        },
+      ],
     })
     .then((msg) => {
       if (msg && msg.length > 0) {

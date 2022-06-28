@@ -267,9 +267,11 @@ const props = defineProps({
   },
   maps: {
     type: Object,
+    required: true,
   },
   metas: {
     type: Object,
+    required: true,
   },
   model: {
     type: String,
@@ -473,11 +475,11 @@ const cache = (item, name) => {
     case "datetime":
       if (props.metas[props.model].meta.columns[name].timezone)
         value = {
-          __datetime_tz__: item.__data__[name].toJsonString(),
+          __datetime_tz__: item.__data__[name],
         };
       else
         value = {
-          __datetime__: item.__data__[name].toJsonString(),
+          __datetime__: item.__data__[name],
         };
       break;
     case "date":
@@ -726,6 +728,6 @@ onMounted(() => {
     else cols.push(c[i]);
   }
   fields.splice(0, fields.length, ...fieldsBuild(props.model, "form"));
-  console.log("PROPS-O2MFORM:", props.maps.__containers__[props.container]);
+  // console.log("PROPS-O2MFORM:", props.maps.__containers__[props.container]);
 });
 </script>
