@@ -74,11 +74,12 @@
     <el-form
       v-if="'__data__' in dataForm && Object.keys(dataForm.__data__).length > 0"
       :model="dataForm.__data__"
+      :rules="formRules"
       label-width="auto"
       status-icon
       inline-message
     >
-      <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
+      <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col" :prop="col">
         <el-input
           v-model="dataForm.__data__[col].name"
           v-if="['many2one', 'referenced'].indexOf(colsType[col]) >= 0"
@@ -171,7 +172,7 @@
               colsType[col]
             ) >= 0
           "
-          @change="cache(dataForm, col)"
+         @change="cache(dataForm, col)"
           :readonly="readonly(col)"
         >
           <template v-if="isCompute(col) || colsTranslate[col]" #prepend>
@@ -444,6 +445,7 @@ const colsLang = reactive({});
 const dataMaps = reactive({ __ids__: {}, __containers__: {} });
 const dataForm = reactive({});
 const selOptions = reactive({});
+const formRules = reactive({});
 const fields = reactive([]);
 const cols = reactive([]);
 const o2mcols = reactive([]);
@@ -1213,7 +1215,7 @@ onBeforeMount(async () => {
         },
       ],
     });
-    console.log("onBeforeMount-msg-initialize:", msg);
+    // console.log("onBeforeMount-msg-initialize:", msg);
     if (msg && msg.length > 0) {
       init_metacache();
 
@@ -1226,7 +1228,7 @@ onBeforeMount(async () => {
       console.log("dataForm:", dataForm);
     }
   }
-
+  let rules = {}
   for (
     let i = 0,
       c = props.metas[props.model].views.form.columns.map((v) => v.col),
@@ -1246,9 +1248,12 @@ onBeforeMount(async () => {
     colsTranslate[c[i]] =
       "translate" in meta[c[i]] ? meta[c[i]].translate : false;
     colsLang[c[i]] = proxy.$UserPreferences.lang;
+    if (meta[c[i]].required) rules[c[i]] = [{required: true, message: `Please input ${colsLabel[c[i]]}`, trigger: ['char', 'varchar', 'composite', 'decomposite', 'tree'].indexOf(colsType[c[i]])? 'blur':'change'}];
     if (colsType[c[i]] == "one2many") o2mcols.push(c[i]);
     else cols.push(c[i]);
   }
+    Object.assign(formRules,rules);
+    console.log('rules:',formRules);
 
   //console.log('translate:',colsTranslate,colsType)
   fields.splice(0, fields.length, ...fieldsBuild(props.model, "form"));

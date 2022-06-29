@@ -481,7 +481,7 @@ const on_load_meta = (msg) => {
   for (let i = 0; i < metas[model.value].allow.length; i++)
     // ,'mdx','gantt','schedule'
     if (
-      ["search", "form", "tree", "graph", "calendar", "geo", "kanban"].indexOf(
+      ["search", "form", "tree", "graph", "calendar", "geo", "kanban", "mdx","gantt",'schedule'].indexOf(
         metas[model.value].allow[i]
       ) >= 0
     )

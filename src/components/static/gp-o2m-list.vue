@@ -101,7 +101,7 @@
   </el-pagination> -->
 </template>
 
-<script lang="ts">
+<script>
 import { defineComponent } from "vue";
 
 export default defineComponent({
@@ -109,7 +109,7 @@ export default defineComponent({
 });
 </script>
 
-<script lang="ts" setup>
+<script setup>
 import { ref, reactive, onMounted, computed, getCurrentInstance } from "vue";
 
 import { on_modify_models } from "../../js/nf";

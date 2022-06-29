@@ -63,6 +63,9 @@ app.component('gp-calendar',defineAsyncComponent(() => import('./components/stat
 app.component('gp-geo',defineAsyncComponent(() => import('./components/static/gp-geo.vue')));
 app.component('kanban-board',defineAsyncComponent(() => import('./components/static/Kanban.vue')));
 app.component('gp-kanban',defineAsyncComponent({loader:() => import('./components/static/gp-kanban.vue')}));
+app.component('gp-mdx',defineAsyncComponent({loader:() => import('./components/static/gp-mdx.vue')}));
+app.component('gp-gantt',defineAsyncComponent({loader:() => import('./components/static/gp-gantt.vue')}));
+app.component('gp-schedule',defineAsyncComponent({loader:() => import('./components/static/gp-schedule.vue')}));
 
 app.config.globalProperties.$appcontext = app._context;
 //app.config.globalProperties.$emitter = emitter;

@@ -12,13 +12,13 @@ const dataRowMaps = (maps, row) => {
     }
     if ("__m2m_containers__" in row) {
         for (let k in row.__m2m_containers__) {
-            maps.__containers__[k + '.' + row.__path__] = reactive([]);
+            if (!(k + '.' + row.__path__ in maps.__containers__)) maps.__containers__[k + '.' + row.__path__] = reactive([]);
             for (let i = 0; i < row.__m2m_containers__[k].length; i++) dataRowMaps(maps, row.__m2m_containers__[k][i]);
         }
     }
     if ("__o2m_containers__" in row) {
         for (let k in row.__o2m_containers__) {
-            maps.__containers__[k + '.' + row.__path__] = reactive([]);
+            if (!(k + '.' + row.__path__ in maps.__containers__)) maps.__containers__[k + '.' + row.__path__] = reactive([]);
             for (let i = 0; i < row.__o2m_containers__[k].length; i++) dataRowMaps(maps, row.__o2m_containers__[k][i]);
         }
     }
@@ -61,37 +61,39 @@ const on_modify_models = (maps, values) => {
     }
 
     function _m2m_remove(maps, diffs) {
-        let row, c, idx;
         if ('__m2m_remove__' in diffs)
-            for (let i = 0; i < diffs.__m2m_remove__.length; i++) {
-                row = diffs.__m2m_remove__[i];
-                c = maps.__m2m_containers__[row.__container__];
-                idx = -1;
-                for (let j = 0; j < c.length; j++)
-                    if (c[j].__path__ == row.__path__) idx = j;
-                if (idx >= 0) {
-                    maps.__m2m_containers__[row.__container__].splice(idx, 1);
-                    delete maps.__data__[row.__path__];
+            for (let i = 0; i < diffs.__o2m_remove__.length; i++) {
+                let path = diffs.__m2m_remove__[i].__path__;
+                let container = diffs.__m2m_remove__[i].__container__;
+                let index = maps.__containers__[container].findIndex((element, index, array) => element.__path__ === path);
+                if (index >= 0) {
+                    // if ('__m2m_containers__' in diffs.__m2m_remove__[i])
+                    //     for (let k in diffs.__m2m_remove__[i].__m2m_containers__) _m2m_recursive_remove(maps, diffs.__o2m_remove__[i].__m2m_containers__[k]);
+                    // if ('__o2m_containers__' in diffs.__m2m_remove__[i])
+                    //     for (let k in diffs.__m2m_remove__[i].__o2m_containers__) _o2m_recursive_remove(maps, diffs.__o2m_remove__[i].__o2m_containers__[k]);
+
+                    maps.__containers__[container].splice(index, 1);
+                    delete maps.__ids__[path];
+
                 }
-
             }
     }
 
-    function _m2m_recursive_remove(maps, rows) {
-        //let row,c,idx;
-        for (let i = 0, row, c, idx; i < rows.length; i++) {
-            row = rows[i];
-            c = maps.__m2m_containers__[row.__container__];
-            idx = -1;
-            for (let j = 0; j < c.length; j++)
-                if (c[j].__path__ == row.__path__) idx = j;
-            if (idx >= 0) {
-                maps.__m2m_containers__[row.__container__].splice(idx, 1);
-                delete maps.__data__[row.__path__];
-            }
+    // function _m2m_recursive_remove(maps, rows) {
+    //     //let row,c,idx;
+    //     for (let i = 0, row, c, idx; i < rows.length; i++) {
+    //         row = rows[i];
+    //         c = maps.__m2m_containers__[row.__container__];
+    //         idx = -1;
+    //         for (let j = 0; j < c.length; j++)
+    //             if (c[j].__path__ == row.__path__) idx = j;
+    //         if (idx >= 0) {
+    //             maps.__m2m_containers__[row.__container__].splice(idx, 1);
+    //             delete maps.__data__[row.__path__];
+    //         }
 
-        }
-    }
+    //     }
+    // }
 
 
     function _o2m_remove(maps, diffs) {
