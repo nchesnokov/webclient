@@ -250,7 +250,7 @@ const do_action = action => {
 }
 
 const on_select_data = msg => {
-    //console.log('msg:', msg)
+    console.log('msg:', msg)
     if (msg.length > 0) showSearch.value = false
     tableData.splice(0, tableData.length, ...msg)
 }

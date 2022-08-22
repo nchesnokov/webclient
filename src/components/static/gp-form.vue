@@ -79,7 +79,12 @@
       status-icon
       inline-message
     >
-      <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col" :prop="col">
+      <el-form-item
+        :label="colsLabel[col]"
+        v-for="col in cols"
+        :key="col"
+        :prop="col"
+      >
         <el-input
           v-model="dataForm.__data__[col].name"
           v-if="['many2one', 'referenced'].indexOf(colsType[col]) >= 0"
@@ -172,7 +177,7 @@
               colsType[col]
             ) >= 0
           "
-         @change="cache(dataForm, col)"
+          @change="cache(dataForm, col)"
           :readonly="readonly(col)"
         >
           <template v-if="isCompute(col) || colsTranslate[col]" #prepend>
@@ -236,7 +241,34 @@
           v-else-if="['text', 'xml'].indexOf(colsType[col]) >= 0"
           @change="cache(dataForm, col)"
           :readonly="readonly(col)"
-        ></el-input>
+        >
+          <template v-if="isCompute(col) || colsTranslate[col]" #prepend>
+            <el-button
+              v-if="isCompute(col)"
+              type="primary"
+              size="small"
+              :icon="Monitor"
+            />
+            <el-dropdown v-if="colsTranslate[col]" @command="i18nCommand">
+              <span class="el-dropdown-link">
+                {{ colsLang[col].toLowerCase() }}
+                <el-icon class="el-icon--right">
+                  <arrow-down />
+                </el-icon>
+              </span>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item
+                    v-for="lang in $UserPreferences.langs"
+                    :key="lang.code"
+                    :command="{ col: col, lang: lang.code }"
+                    >{{ lang.description }}
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </template>
+        </el-input>
         <el-date-picker
           v-model="dataForm.__data__[col]"
           v-else-if="colsType[col] == 'date'"
@@ -279,9 +311,7 @@
           <gp-m2m-list
             :metas="metas"
             :model="metas[model].meta.columns[col].obj"
-            :tableData="
-              dataMaps.__containers__[col + '.' + dataForm.__path__]
-            "
+            :tableData="dataMaps.__containers__[col + '.' + dataForm.__path__]"
           >
           </gp-m2m-list>
         </el-row>
@@ -313,7 +343,7 @@
           ref="dataForm.__data__[col]"
           :data="dataForm.__data__[col]"
           list-type="picture"
-          action="https://jsonplaceholder.typicode.com/posts/"
+          action=""
           :auto-upload="false"
         >
           <template #trigger>
@@ -1181,7 +1211,7 @@ const on_read = (msg) => {
     // Object.assign(dataForm, dataRowForm(msg[0]));
     // dataRowMaps(dataMaps,dataForm);
     dataRowMaps(dataMaps, msg[0]);
-    Object.assign(dataForm, dataMaps.__ids__[msg[0].__path__])
+    Object.assign(dataForm, dataMaps.__ids__[msg[0].__path__]);
     console.log("dataRowMaps:", dataMaps);
 
     console.log("dataForm:", dataForm);
@@ -1222,13 +1252,13 @@ onBeforeMount(async () => {
       // Object.assign(dataForm, dataRowForm(msg[0]));
       // dataRowMaps(dataMaps,dataForm);
       dataRowMaps(dataMaps, msg[0]);
-      Object.assign(dataForm, dataMaps.__ids__[msg[0].__path__])
+      Object.assign(dataForm, dataMaps.__ids__[msg[0].__path__]);
       console.log("dataRowMaps:", dataMaps);
 
       console.log("dataForm:", dataForm);
     }
   }
-  let rules = {}
+  let rules = {};
   for (
     let i = 0,
       c = props.metas[props.model].views.form.columns.map((v) => v.col),
@@ -1248,12 +1278,27 @@ onBeforeMount(async () => {
     colsTranslate[c[i]] =
       "translate" in meta[c[i]] ? meta[c[i]].translate : false;
     colsLang[c[i]] = proxy.$UserPreferences.lang;
-    if (meta[c[i]].required) rules[c[i]] = [{required: true, message: `Please input ${colsLabel[c[i]]}`, trigger: ['char', 'varchar', 'composite', 'decomposite', 'tree'].indexOf(colsType[c[i]])? 'blur':'change'}];
+    if (meta[c[i]].required)
+      rules[c[i]] = [
+        {
+          required: true,
+          message: `Please input ${colsLabel[c[i]]}`,
+          trigger: [
+            "char",
+            "varchar",
+            "composite",
+            "decomposite",
+            "tree",
+          ].indexOf(colsType[c[i]])
+            ? "blur"
+            : "change",
+        },
+      ];
     if (colsType[c[i]] == "one2many") o2mcols.push(c[i]);
     else cols.push(c[i]);
   }
-    Object.assign(formRules,rules);
-    console.log('rules:',formRules);
+  Object.assign(formRules, rules);
+  console.log("rules:", formRules);
 
   //console.log('translate:',colsTranslate,colsType)
   fields.splice(0, fields.length, ...fieldsBuild(props.model, "form"));

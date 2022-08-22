@@ -28,7 +28,7 @@ import WebSocketAsPromised from 'websocket-as-promised';
 
 const app = createApp(App)
 
-app.use(ElementPlus)
+app.use(ElementPlus, { size: 'small', zIndex: 3000 })
 //installElementPlus(app)
 
 //app.use( WebSocketVue, url, defOptions );
@@ -83,20 +83,20 @@ return wsp
 }
 
 
-const _json_pickle = (obj) => {
-	if(typeof obj == 'object' && Array.isArray(obj)) for(let i = 0;i < obj.length;i++) obj[i] = _json_pickle(obj[i]);
-	else if (typeof obj == 'object'){
-		for(let k in obj) {
-			if (['__datetime_tz__','__datetime__','__time_tz__','__time__','__date__','__timedelta__','__decimal__','__tuple__'].indexOf(k) >= 0) {
-				if (k == '__decimal__') obj[k] = Number(obj[k]);
-				else obj = _json_pickle(obj[k]);
-			}
-			else obj[k] = _json_pickle(obj[k]);
-			}
-		return obj;
-		} 
-	return obj;
-}
+// const _json_pickle = (obj) => {
+// 	if(typeof obj == 'object' && Array.isArray(obj)) for(let i = 0;i < obj.length;i++) obj[i] = _json_pickle(obj[i]);
+// 	else if (typeof obj == 'object'){
+// 		for(let k in obj) {
+// 			if (['__datetime_tz__','__datetime__','__time_tz__','__time__','__date__','__timedelta__','__decimal__','__tuple__'].indexOf(k) >= 0) {
+// 				if (k == '__decimal__') obj[k] = Number(obj[k]);
+// 				else obj = _json_pickle(obj[k]);
+// 			}
+// 			else obj[k] = _json_pickle(obj[k]);
+// 			}
+// 		return obj;
+// 		} 
+// 	return obj;
+// }
 
 
 async function sendAsync(message,options={}){
