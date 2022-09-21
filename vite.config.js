@@ -23,13 +23,14 @@ const vueI18nPlugin = {
 // https://vitejs.dev/config/
 export default defineConfig({
   //server: {
-     //proxy: {
-     //'/views': {
-        //target:'http://localhost:8100/',
-        //changeOrigin: true
-        //}
-     //}
-     //},
-  plugins: [vue(),vueI18n({compositionOnly: true})]
+  //proxy: {
+  //'/views': {
+  //target:'http://localhost:8100/',
+  //changeOrigin: true
+  //}
+  //}
+  //},
+  plugins: [vue({
+    }), vueI18n({ compositionOnly: true })]
   //,vueI18n({ include: path.resolve(__dirname, './src/locales/**')})
 })

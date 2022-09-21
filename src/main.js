@@ -1,4 +1,4 @@
-import { createApp,defineAsyncComponent,reactive } from 'vue'
+import { createApp,defineAsyncComponent,defineComponent,defineCustomElement,reactive } from 'vue'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 
@@ -28,6 +28,9 @@ import WebSocketAsPromised from 'websocket-as-promised';
 
 const app = createApp(App)
 
+app.config.compilerOptions.isCustomElement = (tag) => tag.includes('-')
+
+
 app.use(ElementPlus, { size: 'small', zIndex: 3000 })
 //installElementPlus(app)
 
@@ -48,6 +51,7 @@ app.component('gp-selectable',defineAsyncComponent(() => import('./components/st
 app.component('gp-form-login',defineAsyncComponent(() => import('./components/static/gp-form-login.vue')));
 app.component('gp-user-preferences',defineAsyncComponent(() => import('./components/static/gp-user-preferences.vue')));
 app.component('gp-form',defineAsyncComponent(() => import('./components/static/gp-form.vue')));
+//customElements.define('gp-form',defineCustomElement(() => import('./components/static/gp-form.vue')));
 app.component('gp-search',defineAsyncComponent(() => import('./components/static/gp-search.vue')));
 //app.component('gp-find',defineAsyncComponent(() => import('./components/gp-find.vue')));
 app.component('gp-list',defineAsyncComponent(() => import('./components/static/gp-list.vue')));
