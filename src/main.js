@@ -1,8 +1,10 @@
 import { createApp,defineAsyncComponent,defineComponent,defineCustomElement,reactive } from 'vue'
+import router from "./router/index"
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 
-import App from './App.vue'
+//import App from './App.vue'
+import App from './el.vue'
 
 import  {msgpack } from './js/msgpack.js'
 
@@ -27,6 +29,7 @@ import WebSocketAsPromised from 'websocket-as-promised';
 //const emitter = mitt();
 
 const app = createApp(App)
+app.use(router)
 
 app.config.compilerOptions.isCustomElement = (tag) => tag.includes('-')
 
