@@ -1,11 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import App from '../App.vue'
+import AppEL from '../AppEL.vue'
+import AppPV from '../AppPV.vue'
 
 const routes = [
     {
         path: '/el',
         name: 'ElementPlus',
-        component: App,
+        component: AppEL,
+    },
+    {
+        path: '/pv',
+        name: 'PrimeVue',
+        component: AppPV,
     },
     {
         path: '/:pathMatch(.*)*',

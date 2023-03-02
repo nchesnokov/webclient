@@ -234,6 +234,7 @@
             <el-button type="primary" size="small" :icon="Monitor" />
           </template>
         </el-input>
+        <QuillEditor v-model:context="dataForm.__data__[col]" theme="snow" v-else-if="colsType[col] == 'richtext'"/>
         <el-input
           v-model="dataForm.__data__[col]"
           autosize
@@ -360,7 +361,7 @@
           <gp-o2m-components
             :cid="cid"
             :guid="guid"
-            :maps="proxy.dataMaps"
+            :maps="dataMaps"
             :metas="metas"
             :model="metas[model].meta.columns[o2mcol].obj"
             :container="o2mcol + '.' + dataForm.__path__"
