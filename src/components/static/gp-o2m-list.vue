@@ -30,6 +30,7 @@
       :data="tableDataDisplay"
       style="width: 100%"
       fit
+      height="250"
     >
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column type="expand" v-if="o2mcols.length > 0">

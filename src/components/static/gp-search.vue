@@ -42,7 +42,7 @@
             <el-button type="primary" size="small" :icon="Setting" @click="do_action('setting')"></el-button>
         </el-tooltip>
     </el-row>
-    <el-table @selection-change="handleSelectionChange" :data="tableDataDisplay">
+    <el-table @selection-change="handleSelectionChange" :data="tableDataDisplay" height="750">
         <el-table-column type="selection" width="55" />
         <el-table-column :prop="col" :label="colsLabel[col]" v-for="col in cols" :key="col">
             <template v-if="colsType[col] == 'selection'" #default="scope">{{ selOptions[col][scope.row[col]]
@@ -100,7 +100,7 @@ const {
 } = getCurrentInstance()
 //const {t} = useI18n()
 const page = ref(1)
-const pageSize = ref(15)
+const pageSize = ref(80)
 const showSearch = ref(false)
 const cols = reactive([])
 const o2mcols = reactive([])

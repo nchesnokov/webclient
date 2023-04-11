@@ -1,94 +1,50 @@
 <template>
-  <DxGantt
-    :task-list-width="500"
-    :height="700"
-    scale-type="weeks"
+  <g-gantt-chart
+    chart-start="2021-07-12 12:00"
+    chart-end="2021-08-14 12:00"
+    precision="day"
+    bar-start="myBeginDate"
+    bar-end="myEndDate"
   >
-
-    <DxTasks :data-source="tasks"/>
-    <DxDependencies :data-source="dependencies"/>
-    <DxResources :data-source="resources"/>
-    <DxResourceAssignments :data-source="resourceAssignments"/>
-
-    <DxToolbar>
-      <DxItem name="undo"/>
-      <DxItem name="redo"/>
-      <DxItem name="separator"/>
-      <DxItem name="collapseAll"/>
-      <DxItem name="expandAll"/>
-      <DxItem name="separator"/>
-      <DxItem name="addTask"/>
-      <DxItem name="deleteTask"/>
-      <DxItem name="separator"/>
-      <DxItem name="zoomIn"/>
-      <DxItem name="zoomOut"/>
-    </DxToolbar>
-
-    <DxEditing :enabled="true"/>
-    <DxValidation :auto-update-parent-tasks="true"/>
-
-    <DxColumn
-      :width="300"
-      data-field="title"
-      caption="Subject"
+    <g-gantt-row
+      label="My row 1"
+      :bars="row1BarList"
     />
-    <DxColumn
-      data-field="start"
-      caption="Start Date"
+    <g-gantt-row
+      label="My row 2"
+      :bars="row2BarList"
     />
-    <DxColumn
-      data-field="end"
-      caption="End Date"
-    />
-  </DxGantt>
+  </g-gantt-chart>
 </template>
 
-<script>
-import {
-  DxGantt,
-  DxTasks,
-  DxDependencies,
-  DxResources,
-  DxResourceAssignments,
-  DxColumn,
-  DxEditing,
-  DxValidation,
-  DxToolbar,
-  DxItem,
-} from 'devextreme-vue/gantt';
+<script setup>
 
-import {
-  tasks,
-  dependencies,
-  resources,
-  resourceAssignments,
-} from './data1.js';
+import { ref } from "vue"
 
-export default {
-  components: {
-    DxGantt,
-    DxTasks,
-    DxDependencies,
-    DxResources,
-    DxResourceAssignments,
-    DxColumn,
-    DxEditing,
-    DxValidation,
-    DxToolbar,
-    DxItem,
-  },
-  data() {
-    return {
-      tasks,
-      dependencies,
-      resources,
-      resourceAssignments,
-    };
-  },
-};
-</script>
-<style>
-  #gantt {
-    height: 700px;
+const row1BarList = ref([
+  {
+    myBeginDate: "2021-07-13 13:00",
+    myEndDate: "2021-08-13 19:00",
+    ganttBarConfig: {    // each bar must have a nested ganttBarConfig object ...
+      id: "unique-id-1", // ... and a unique "id" property
+      label: "Lorem ipsum dolor"
+    }
   }
-</style>
+])
+const row2BarList = ref([
+  {
+    myBeginDate: "2021-07-13 00:00",
+    myEndDate: "2021-09-14 02:00",
+    ganttBarConfig: {
+      id: "another-unique-id-2",
+      hasHandles: true,
+      label: "Hey, look at me",
+      style: {     // arbitrary CSS styling for your bar
+        background: "#e09b69",
+        borderRadius: "20px",
+        color: "black"
+      }
+    }
+  }
+])
+</script>

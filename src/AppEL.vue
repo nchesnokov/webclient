@@ -156,6 +156,8 @@ import { useI18n } from "vue-i18n";
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 
+import ganttastic from '@infectoone/vue-ganttastic'
+
 const { proxy, root } = getCurrentInstance();
 
 // var app = root.appContext.app
@@ -168,7 +170,7 @@ root.appContext.app.use(VueApexCharts);
 root.appContext.app.use(JsonViewer)
 
 
-
+root.appContext.app.use(ganttastic)
 root.appContext.app.component('gp-customizable',defineAsyncComponent(() => import('./components/static/gp-customizable.vue')));
 root.appContext.app.component('gp-selectable',defineAsyncComponent(() => import('./components/static/gp-selectable.vue')));
 root.appContext.app.component('gp-form-login',defineAsyncComponent(() => import('./components/static/gp-form-login.vue')));

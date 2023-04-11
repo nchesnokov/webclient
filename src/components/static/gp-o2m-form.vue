@@ -16,10 +16,15 @@
     inline-message
   >
     <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
-      <el-input
+      <el-autocomplete
+        :fetch-suggestions="querySearch"
+        clearable
+        :trigger-on-focus="false"
+        @focus="setAutocomleteCol(col)"
+        :value-key="col"
         v-model="maps.__containers__[container][page - 1].__data__[col].name"
-        @change="m2o_cache(maps.__containers__[container][page - 1], col)"
         v-if="['many2one', 'referenced'].indexOf(colsType[col]) >= 0"
+        @select="handleSelect"
         :prefix-icon="isCompute(col) ? Monitor : ''"
         :readonly="readonly(col)"
       >
@@ -69,7 +74,7 @@
             "
           ></el-button>
         </template>
-      </el-input>
+      </el-autocomplete>
       <el-input
         v-model="maps.__containers__[container][page - 1].__data__[col].name"
         @change="related_cache(maps.__containers__[container][page - 1], col)"
@@ -393,6 +398,7 @@ const props = defineProps({
 //const emit = defineEmits(['update:close'])
 
 const { proxy } = getCurrentInstance();
+const autoCompleteCol = ref("");
 const page = ref(1);
 const pageSize = ref(1);
 const showSearch = ref(false);
@@ -408,6 +414,55 @@ const multipleSelection = reactive([]);
 
 const readonly = (col) => {
   return props.mode == "lookup" || isCompute(col);
+};
+
+const setAutocomleteCol = (col) => {
+  console.log("autocomplete:", col);
+  autoCompleteCol.value = col;
+};
+const querySearch = (queryString, cb) => {
+  if (queryString.length > 3 || queryString.search("%") >= 0) {
+    console.log("querySearch:", queryString, cb, autoCompleteCol.value);
+    let obj = props.metas[props.model].meta.columns[autoCompleteCol.value].obj;
+    let rec_name =
+      props.metas[
+        props.metas[props.model].meta.columns[autoCompleteCol.value].obj
+      ].meta["names"]["rec_name"];
+    proxy.$ws
+      .sendAsync({
+        _msg: [
+          props.cid,
+          "models",
+          obj,
+          "select",
+          {
+            fields: [rec_name],
+            cond: [{ __tuple__: [rec_name, "like", queryString + "%"] }],
+            context: proxy.$UserPreferences.Context,
+            limit: 10,
+          },
+        ],
+      })
+      .then((msg) => {
+        let result = [];
+        for (let i = 0, v; i < msg.length; i++) {
+          v = {};
+          v.id = msg[i].id;
+          v[autoCompleteCol.value] = msg[i][rec_name];
+          result.push(v);
+        }
+        console.log("Result:", result);
+        cb(result);
+      });
+  }
+};
+
+const handleSelect = (item) => {
+  console.log("handleSelect:", item,props.maps.__containers__[props.container][page.value - 1]);
+  m2o_cache(
+    props.maps.__containers__[props.container][page.value - 1],
+    autoCompleteCol.value
+  );
 };
 
 const i18nCommand = (command) => {
@@ -676,19 +731,19 @@ const on_find_new = (value, opts) => {
     value.name &&
     value.name.length > 0
   )
-    dataForm.__data__[opts.col] = value;
+    // dataForm.__data__[opts.col] = value;
   opts.item.__data__[opts.col] = value;
   cache(opts.item, opts.col);
 };
 
 const on_find_m2m = (value, opts) => {
   console.log("on_find_m2m:", value, opts);
-  if (["new", "edit"].indexOf(mode.value) >= 0 && value.length > 0)
-    dataForm.__m2m_containers__[opts.col].splice(
-      dataForm.__m2m_containers__[opts.col].length,
-      0,
-      ...value
-    );
+  // if (["new", "edit"].indexOf(mode.value) >= 0 && value.length > 0)
+    // dataForm.__m2m_containers__[opts.col].splice(
+    //   dataForm.__m2m_containers__[opts.col].length,
+    //   0,
+    //   ...value
+    // );
 };
 
 const fieldsBuild = (model, view) => {

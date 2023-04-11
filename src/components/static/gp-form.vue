@@ -85,10 +85,15 @@
         :key="col"
         :prop="col"
       >
-        <el-input
+        <el-autocomplete
+          :fetch-suggestions="querySearch"
+          clearable
+          :trigger-on-focus="false"
+          @focus="setAutocomleteCol(col)"
+          :value-key="col"
           v-model="dataForm.__data__[col].name"
           v-if="['many2one', 'referenced'].indexOf(colsType[col]) >= 0"
-          @change="m2o_cache(dataForm, col)"
+          @select="handleSelect"
           :readonly="readonly(col)"
         >
           <template v-if="isCompute(col)" #prefix>
@@ -122,7 +127,7 @@
               @click="do_lookup(col, dataForm.__data__[col].id)"
             ></el-button>
           </template>
-        </el-input>
+        </el-autocomplete>
         <el-input
           v-model="dataForm.__data__[col].name"
           v-if="colsType[col] == 'related'"
@@ -234,7 +239,11 @@
             <el-button type="primary" size="small" :icon="Monitor" />
           </template>
         </el-input>
-        <QuillEditor v-model:context="dataForm.__data__[col]" theme="snow" v-else-if="colsType[col] == 'richtext'"/>
+        <QuillEditor
+          v-model:context="dataForm.__data__[col]"
+          theme="snow"
+          v-else-if="colsType[col] == 'richtext'"
+        />
         <el-input
           v-model="dataForm.__data__[col]"
           autosize
@@ -463,6 +472,7 @@ const props = defineProps({
 const emit = defineEmits(["update:close"]);
 
 const { proxy } = getCurrentInstance();
+const autoCompleteCol = ref("");
 const mode = ref("new");
 const guid = ref(null);
 const page = ref(1);
@@ -496,6 +506,51 @@ const visible = (path, col) => {
   return !dataForm.__meta__.iv[col];
 };
 
+const setAutocomleteCol = (col) => {
+  console.log("autocomplete:", col);
+  autoCompleteCol.value = col;
+};
+const querySearch = (queryString, cb) => {
+  if (queryString.length > 3 || queryString.search("%") >= 0) {
+    console.log("querySearch:", queryString, cb, autoCompleteCol.value);
+    let obj = props.metas[props.model].meta.columns[autoCompleteCol.value].obj;
+    let rec_name =
+      props.metas[
+        props.metas[props.model].meta.columns[autoCompleteCol.value].obj
+      ].meta["names"]["rec_name"];
+    proxy.$ws
+      .sendAsync({
+        _msg: [
+          props.cid,
+          "models",
+          obj,
+          "select",
+          {
+            fields: [rec_name],
+            cond: [{ __tuple__: [rec_name, "like", queryString + "%"] }],
+            context: proxy.$UserPreferences.Context,
+            limit: 10,
+          },
+        ],
+      })
+      .then((msg) => {
+        let result = [];
+        for (let i = 0, v; i < msg.length; i++) {
+          v = {};
+          v.id = msg[i].id;
+          v[autoCompleteCol.value] = msg[i][rec_name];
+          result.push(v);
+        }
+        console.log("Result:", result);
+        cb(result);
+      });
+  }
+};
+
+const handleSelect = (item) => {
+  console.log("handleSelect:", item);
+  m2o_cache(dataForm, autoCompleteCol.value);
+};
 const addRow = () => {};
 
 // const dataRowContainer = (containers, parent) => {
@@ -578,11 +633,11 @@ const cache = (item, name) => {
     case "datetime":
       if (props.metas[props.model].meta.columns[name].timezone)
         value = {
-          __datetime_tz__: item.__data__[name].toJsonString(),
+          __datetime_tz__: item.__data__[name],
         };
       else
         value = {
-          __datetime__: item.__data__[name].toJsonString(),
+          __datetime__: item.__data__[name],
         };
       break;
     case "date":

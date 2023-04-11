@@ -163,6 +163,7 @@ onBeforeMount(async () => {
         rowFields.push({
           label: props.metas[props.model].meta.columns[vfields[i]].label,
           getter: new Function("item", "return item." + vfields[i]),
+          // getter: item => item[vfields[i]],
         });
         break;
       case "many2one":
@@ -202,7 +203,7 @@ onBeforeMount(async () => {
     }
   }
   rfield.value = rfields[0];
-  reducer.value = new Function("sum", "item", "return sum + item." + rfield);
+  reducer.value = new Function("sum", "item", "return sum + item." + rfield.value);
 
   onMDX(
     await proxy.$ws.sendAsynvc({
