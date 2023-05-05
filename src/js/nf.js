@@ -188,7 +188,8 @@ const on_modify_models = (maps, values) => {
         let __m2o_find__ = values.__m2o_find__
         if (__m2o_find__.v.length == 1) {
             maps.__ids__[__m2o_find__.path].__data__[__m2o_find__.key]['id'] = __m2o_find__.v[0].id
-            maps.__ids__[__m2o_find__.path].__data__[__m2o_find__.key]['name'] = __m2o_find__.v[0].name
+            // let k_name = Object.keys(__m2o_find__.v[0]).filter(function(e) { return e !== 'id' })[0]
+            // maps.__ids__[__m2o_find__.path].__data__[__m2o_find__.key]['name'] = __m2o_find__.v[0][k_name]
         } else {
             //on_find_many2one_update(this,maps.__data__[__m2o_find__.path],__m2o_find__.key,__m2o_find__.v);
             return;

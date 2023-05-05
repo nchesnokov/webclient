@@ -101,19 +101,21 @@
           </template>
           <template #suffix>
             <el-button
+              v-if="mode != 'lookup'"
               type="primary"
               size="small"
               :icon="Search"
               @click="do_find(col, 'single', [], { item: dataForm })"
             ></el-button>
             <el-button
+              v-if="mode != 'lookup'"
               type="primary"
               size="small"
               :icon="DocumentAdd"
               @click="do_add(col)"
             ></el-button>
             <el-button
-              v-if="dataForm.__data__[col].id != null"
+              v-if="dataForm.__data__[col].id != null && mode != 'lookup'"
               type="primary"
               size="small"
               :icon="Edit"
@@ -145,19 +147,21 @@
           </template>
           <template #suffix>
             <el-button
+              v-if="mode != 'lookup'"  
               type="primary"
               size="small"
               :icon="Search"
               @click="do_find(col, 'single', [], { item: dataForm })"
             ></el-button>
             <el-button
+              v-if="mode != 'lookup'"  
               type="primary"
               size="small"
               :icon="DocumentAdd"
               @click="do_add(col)"
             ></el-button>
             <el-button
-              v-if="dataForm.__data__[col].id != null"
+              v-if="dataForm.__data__[col].id != null && mode != 'lookup'"
               type="primary"
               size="small"
               :icon="Edit"
@@ -396,7 +400,7 @@
       </template>
     </el-popconfirm>
     <el-popconfirm
-      v-if="Object.keys(modal).length > 0"
+      v-if="Object.keys(modal).length > 0 && mode != 'lookup'"
       confirmButtonText="OK"
       cancelButtonText="No, Thanks"
       icon="el-icon-info"
@@ -408,7 +412,7 @@
         <el-button type="danger">Close</el-button>
       </template>
     </el-popconfirm>
-
+    <el-button v-else type="danger" @click="onClose">Close</el-button>
     <el-button type="success" @click="onValidate" :disabled="mode == 'lookup'"
       >Validate</el-button
     >
@@ -493,7 +497,7 @@ const o2mcols = reactive([]);
 const multipleSelection = reactive([]);
 
 const readonly = (col) => {
-  return mode.value == "lookup" || dataForm.__meta__.ro[col] || isCompute(col);
+  return mode.value == "lookup" || dataForm.__meta__.ro[col] || isCompute(col) || colsType[col] == 'related' && isRelatedEmpry(col);
 };
 
 const required = (path, col) => {
@@ -506,17 +510,23 @@ const visible = (path, col) => {
   return !dataForm.__meta__.iv[col];
 };
 
+const isRelatedEmpry = (col) => {
+  console.log('isRelatedEmpry:',col)
+  return props.metas[props.model].meta.columns[col].relatedy.every((v) => ['many2one','related','referenced'].indexOf(props.metas[props.model].meta.columns[col].type) >= 0 && dataForm.__data__[v[0]].id == null || dataForm.__data__[v[0]] == null )
+}
+
 const setAutocomleteCol = (col) => {
   console.log("autocomplete:", col);
-  autoCompleteCol.value = col;
+  let obj = props.metas[props.model].meta.columns[col].obj, rec_name = props.metas[obj].meta.names.rec_name, sz = props.metas[obj].meta.columns[rec_name].size; 
+  autoCompleteCol.value = {col:col,sz:sz};
 };
 const querySearch = (queryString, cb) => {
-  if (queryString.length > 3 || queryString.search("%") >= 0) {
+  if (queryString.length > 3 || queryString.search("%") >= 0 || autoCompleteCol.value.sz < 4) {
     console.log("querySearch:", queryString, cb, autoCompleteCol.value);
-    let obj = props.metas[props.model].meta.columns[autoCompleteCol.value].obj;
+    let obj = props.metas[props.model].meta.columns[autoCompleteCol.value.col].obj;
     let rec_name =
       props.metas[
-        props.metas[props.model].meta.columns[autoCompleteCol.value].obj
+        props.metas[props.model].meta.columns[autoCompleteCol.value.col].obj
       ].meta["names"]["rec_name"];
     proxy.$ws
       .sendAsync({
@@ -538,7 +548,7 @@ const querySearch = (queryString, cb) => {
         for (let i = 0, v; i < msg.length; i++) {
           v = {};
           v.id = msg[i].id;
-          v[autoCompleteCol.value] = msg[i][rec_name];
+          v[autoCompleteCol.value.col] = msg[i][rec_name];
           result.push(v);
         }
         console.log("Result:", result);
@@ -549,7 +559,7 @@ const querySearch = (queryString, cb) => {
 
 const handleSelect = (item) => {
   console.log("handleSelect:", item);
-  m2o_cache(dataForm, autoCompleteCol.value);
+  m2o_cache(dataForm, autoCompleteCol.value.col);
 };
 const addRow = () => {};
 
@@ -734,7 +744,8 @@ const m2o_cache = (item, name) => {
       console.log("m2ofind:", v);
       let f = v[0];
       if (f.__m2o_find__.__data__.v.length == 1) {
-        dataForm.__data__[name] = f.__m2o_find__.__data__.v[0];
+        dataForm.__data__[name].id = f.__m2o_find__.__data__.v[0].id;
+        dataForm.__data__[name].name = f.__m2o_find__.__data__.v[0][Object.keys(f.__m2o_find__.__data__.v[0]).filter(function(e) { return e !== 'id' })[0]];
         cache(item, name);
       } else {
         let extcond = [];

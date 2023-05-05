@@ -413,20 +413,26 @@ const o2mcols = reactive([]);
 const multipleSelection = reactive([]);
 
 const readonly = (col) => {
-  return props.mode == "lookup" || isCompute(col);
+  return props.mode == "lookup" || isCompute(col)  || colsType[col] == 'related' && isRelatedEmpry(col);
 };
+
+const isRelatedEmpry = (col) => {
+  console.log('isRelatedEmpry:',col)
+  return props.metas[props.model].meta.columns[col].relatedy.every((v) => ['many2one','related','referenced'].indexOf(colsType[col]) >= 0 && props.maps.__containers__[props.container][page.value - 1].__data__[v[0]].id == null || props.maps.__containers__[props.container][page.value - 1].__data__[v[0]][v[0]] == null )
+}
 
 const setAutocomleteCol = (col) => {
   console.log("autocomplete:", col);
-  autoCompleteCol.value = col;
+  let obj = props.metas[props.model].meta.columns[col].obj, rec_name = props.metas[obj].meta.names.rec_name, sz = props.metas[obj].meta.columns[rec_name].size; 
+  autoCompleteCol.value = {col:col,sz:sz};
 };
 const querySearch = (queryString, cb) => {
   if (queryString.length > 3 || queryString.search("%") >= 0) {
     console.log("querySearch:", queryString, cb, autoCompleteCol.value);
-    let obj = props.metas[props.model].meta.columns[autoCompleteCol.value].obj;
+    let obj = props.metas[props.model].meta.columns[autoCompleteCol.value.col].obj;
     let rec_name =
       props.metas[
-        props.metas[props.model].meta.columns[autoCompleteCol.value].obj
+        props.metas[props.model].meta.columns[autoCompleteCol.value.col].obj
       ].meta["names"]["rec_name"];
     proxy.$ws
       .sendAsync({
@@ -448,7 +454,7 @@ const querySearch = (queryString, cb) => {
         for (let i = 0, v; i < msg.length; i++) {
           v = {};
           v.id = msg[i].id;
-          v[autoCompleteCol.value] = msg[i][rec_name];
+          v[autoCompleteCol.value.col] = msg[i][rec_name];
           result.push(v);
         }
         console.log("Result:", result);
@@ -461,7 +467,7 @@ const handleSelect = (item) => {
   console.log("handleSelect:", item,props.maps.__containers__[props.container][page.value - 1]);
   m2o_cache(
     props.maps.__containers__[props.container][page.value - 1],
-    autoCompleteCol.value
+    autoCompleteCol.value.col
   );
 };
 
@@ -732,7 +738,8 @@ const on_find_new = (value, opts) => {
     value.name.length > 0
   )
     // dataForm.__data__[opts.col] = value;
-  opts.item.__data__[opts.col] = value;
+    Object.assign(props.maps[props.container][page.value-1].__data__[opts.col], value);
+  // opts.item.__data__[opts.col] = value;
   cache(opts.item, opts.col);
 };
 
