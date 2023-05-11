@@ -739,18 +739,51 @@ const on_find_new = (value, opts) => {
   )
     // dataForm.__data__[opts.col] = value;
     Object.assign(props.maps[props.container][page.value-1].__data__[opts.col], value);
-  // opts.item.__data__[opts.col] = value;
+  opts.item.__data__[opts.col] = value;
   cache(opts.item, opts.col);
 };
 
 const on_find_m2m = (value, opts) => {
   console.log("on_find_m2m:", value, opts);
-  // if (["new", "edit"].indexOf(mode.value) >= 0 && value.length > 0)
-    // dataForm.__m2m_containers__[opts.col].splice(
-    //   dataForm.__m2m_containers__[opts.col].length,
-    //   0,
-    //   ...value
-    // );
+  if (["new", "edit"].indexOf(mode.value) >= 0 && value.length > 0) {
+    let model = props.maps[props.container][page.value-1].__model__;
+    let container = opts.col + "." + opts.path;
+    let obj = props.metas[model].meta.columns[opts.col].obj;
+    let fields = props.metas[obj].views.m2mlist.columns.map((f) => f.col);
+    let rel = props.metas[model].meta.columns[opts.col].rel;
+    let id2 = value.map((item) => item.id);
+    m2m_cache(
+      model,
+      container,
+      fields,
+      obj,
+      rel,
+      id2,
+      proxy.$UserPreferences.Context
+    );
+  }
+}
+
+const m2m_cache = (model, container, fields, obj, rel, id2, context) => {
+  proxy.$ws
+    .sendAsync({
+      _msg: [
+        props.cid,
+        "_cache",
+        "m2madd",
+        guid.value,
+        {
+          model: model,
+          container: container,
+          fields: fields,
+          obj: obj,
+          rel: rel,
+          id2: id2,
+          context: proxy.$UserPreferences.Context,
+        },
+      ],
+    })
+    .then((msg) => on_modify_models(props.maps, msg[0]));
 };
 
 const fieldsBuild = (model, view) => {
