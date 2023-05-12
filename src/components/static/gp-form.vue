@@ -147,14 +147,14 @@
           </template>
           <template #suffix>
             <el-button
-              v-if="mode != 'lookup'"  
+              v-if="mode != 'lookup'"
               type="primary"
               size="small"
               :icon="Search"
               @click="do_find(col, 'single', [], { item: dataForm })"
             ></el-button>
             <el-button
-              v-if="mode != 'lookup'"  
+              v-if="mode != 'lookup'"
               type="primary"
               size="small"
               :icon="DocumentAdd"
@@ -497,7 +497,12 @@ const o2mcols = reactive([]);
 const multipleSelection = reactive([]);
 
 const readonly = (col) => {
-  return mode.value == "lookup" || dataForm.__meta__.ro[col] || isCompute(col) || colsType[col] == 'related' && isRelatedEmpry(col);
+  return (
+    mode.value == "lookup" ||
+    dataForm.__meta__.ro[col] ||
+    isCompute(col) ||
+    (colsType[col] == "related" && isRelatedEmpry(col))
+  );
 };
 
 const required = (path, col) => {
@@ -506,24 +511,48 @@ const required = (path, col) => {
 };
 
 const visible = (path, col) => {
-  console.log("required:", path, col);
+  console.log("visible:", path, col);
   return !dataForm.__meta__.iv[col];
 };
 
-const isRelatedEmpry = (col) => {
-  console.log('isRelatedEmpry:',col)
-  return props.metas[props.model].meta.columns[col].relatedy.every((v) => ['many2one','related','referenced'].indexOf(props.metas[props.model].meta.columns[col].type) >= 0 && dataForm.__data__[v[0]].id == null || dataForm.__data__[v[0]] == null )
+const listRelatedFields = (col) => {
+let fields = [];
+for(let i = 0, cols = props.metas[props.model].meta.columns[col].relatedy; i < cols.length; i++ ){
+  if (Array.isArray(cols[i])) fields.push(cols[i][0])
+  else if (typeof cols[i] === 'string') fields.push(cols[i])
+  return fields
 }
+}
+const isRelatedEmpry = (col) => {
+  console.log("isRelatedEmpry:", col);
+  return listRelatedFields(col).every(
+    (v) => {
+      if (["many2one","referenced","related"].indexOf(
+        props.metas[props.model].meta.columns[col].type
+      ) >= 0 &&
+        dataForm.__data__[v].id == null) return true
+      else if (dataForm.__data__[v] == null) return true
+      return false
+    }
+  );
+};
 
 const setAutocomleteCol = (col) => {
   console.log("autocomplete:", col);
-  let obj = props.metas[props.model].meta.columns[col].obj, rec_name = props.metas[obj].meta.names.rec_name, sz = props.metas[obj].meta.columns[rec_name].size; 
-  autoCompleteCol.value = {col:col,sz:sz};
+  let obj = props.metas[props.model].meta.columns[col].obj,
+    rec_name = props.metas[obj].meta.names.rec_name,
+    sz = props.metas[obj].meta.columns[rec_name].size;
+  autoCompleteCol.value = { col: col, sz: sz };
 };
 const querySearch = (queryString, cb) => {
-  if (queryString.length > 3 || queryString.search("%") >= 0 || autoCompleteCol.value.sz < 4) {
+  if (
+    queryString.length > 3 ||
+    queryString.search("%") >= 0 ||
+    autoCompleteCol.value.sz < 4
+  ) {
     console.log("querySearch:", queryString, cb, autoCompleteCol.value);
-    let obj = props.metas[props.model].meta.columns[autoCompleteCol.value.col].obj;
+    let obj =
+      props.metas[props.model].meta.columns[autoCompleteCol.value.col].obj;
     let rec_name =
       props.metas[
         props.metas[props.model].meta.columns[autoCompleteCol.value.col].obj
@@ -562,65 +591,6 @@ const handleSelect = (item) => {
   m2o_cache(dataForm, autoCompleteCol.value.col);
 };
 const addRow = () => {};
-
-// const dataRowContainer = (containers, parent) => {
-//   for (let k in containers) {
-//     if (!(k + "." + parent in proxy.dataForm.__containers__))
-//       dataForm.__containers__[k + "." + parent] = containers[k];
-//     for (let i = 0; i < containers[k].length; i++) dataRow(containers[k][i]);
-//   }
-// };
-// const dataRow = (row) => {
-//   if ("__data__" in row) dataForm.__data__[row.__path__] = row.__data__;
-//   if ("__meta__" in row) dataForm.__meta__[row.__path__] = row.__meta__;
-//   if ("__model__" in row) dataForm.__model__[row.__path__] = row.__model__;
-//   if ("__m2m_containers__" in row)
-//     dataRowContainer(row["__m2m_containers__"], row["__path__"]);
-//   if ("__o2m_containers__" in row)
-//     dataRowContainer(row["__o2m_containers__"], row["__path__"]);
-// };
-
-// const dataRowMaps = (row) => {
-//   if ("__path__" in row && "__data__" in row)
-//     dataMaps.__ids__[row.__path__] = row;
-//   if ("__m2m_containers__" in row) {
-//     for (let k in row.__m2m_containers__) {
-//       dataMaps.__containers__[k] =
-//         row.__m2m_containers__[k];
-//       row.__m2m_containers__[k].map(dataRowMaps);
-//     }
-//   }
-//   if ("__o2m_containers__" in row) {
-//     for (let k in row.__o2m_containers__) {
-//       dataMaps.__containers__[k] =
-//         row.__o2m_containers__[k];
-//       for(let i = 0;i < row.__o2m_containers__[k].length; i++) dataRowMaps(row.__o2m_containers__[k][i]);
-//     }
-//   }
-// };
-
-// const dataRowForm = (row) => {
-//   let value = reactive({});
-//   if ("__data__" in row) value.__data__ = row.__data__;
-//   if ("__meta__" in row) value.__meta__ = row.__meta__;
-//   if ("__path__" in row) value.__path__ = row.__path__;
-//   if ("__model__" in row) value.__model__ = row.__model__;
-//   if ("__container__" in row) value.__container__ = row.__container__;
-//   if ("__m2m_containers__" in row || "__o2m_containers__" in row)
-//     if ("__m2m_containers__" in row) {
-//       value.__m2m_containers__ = reactive({});
-//       for (let m2mkey in row["__m2m_containers__"])
-//         value.__m2m_containers__[m2mkey + "." + row["__path__"]] =
-//           row["__m2m_containers__"][m2mkey].map(dataRowForm);
-//     }
-//   if ("__o2m_containers__" in row) {
-//     value.__o2m_containers__ = reactive({});
-//     for (let o2mkey in row["__o2m_containers__"])
-//       value.__o2m_containers__[o2mkey + "." + row["__path__"]] =
-//         row["__o2m_containers__"][o2mkey].map(dataRowForm);
-//   }
-//   return value;
-// };
 
 const cache = (item, name) => {
   console.log("cache-item:", name, item.__data__[name], item);
@@ -745,7 +715,12 @@ const m2o_cache = (item, name) => {
       let f = v[0];
       if (f.__m2o_find__.__data__.v.length == 1) {
         dataForm.__data__[name].id = f.__m2o_find__.__data__.v[0].id;
-        dataForm.__data__[name].name = f.__m2o_find__.__data__.v[0][Object.keys(f.__m2o_find__.__data__.v[0]).filter(function(e) { return e !== 'id' })[0]];
+        dataForm.__data__[name].name =
+          f.__m2o_find__.__data__.v[0][
+            Object.keys(f.__m2o_find__.__data__.v[0]).filter(function (e) {
+              return e !== "id";
+            })[0]
+          ];
         cache(item, name);
       } else {
         let extcond = [];
@@ -969,11 +944,6 @@ const on_find_m2m = (value, opts) => {
       proxy.$UserPreferences.Context
     );
   }
-  // dataForm.__m2m_containers__[opts.col + '.' + opts.path].splice(
-  //   dataForm.__m2m_containers__[opts.col + '.' + opts.path].length,
-  //   0,
-  //   ...value
-  // );
 };
 
 const fieldsBuild = (model, view) => {
@@ -1189,22 +1159,6 @@ const onSubmit = async () => {
             );
           emit("update:close");
         }
-        // } else {
-        //   msg = await proxy.$ws.sendAsync({
-        //     _msg: [
-        //       props.cid,
-        //       "_cache",
-        //       "initialize",
-        //       guid.value,
-        //       {
-        //         model: props.model,
-        //         view: "form",
-        //       },
-        //     ],
-        //   });
-        //   init_metacache();
-        //   Object.assign(dataForm, dataRowForm(msg[0]));
-        // }
         proxy.$notify({
           title: "Information",
           message: h(
@@ -1275,12 +1229,9 @@ const on_read = (msg) => {
   console.log("on_read:", msg);
   if (msg && msg.length > 0) {
     init_metacache();
-    // Object.assign(dataForm, dataRowForm(msg[0]));
-    // dataRowMaps(dataMaps,dataForm);
     dataRowMaps(dataMaps, msg[0]);
     Object.assign(dataForm, dataMaps.__ids__[msg[0].__path__]);
     console.log("dataRowMaps:", dataMaps);
-
     console.log("dataForm:", dataForm);
   }
 };
@@ -1312,12 +1263,9 @@ onBeforeMount(async () => {
         },
       ],
     });
-    // console.log("onBeforeMount-msg-initialize:", msg);
     if (msg && msg.length > 0) {
       init_metacache();
 
-      // Object.assign(dataForm, dataRowForm(msg[0]));
-      // dataRowMaps(dataMaps,dataForm);
       dataRowMaps(dataMaps, msg[0]);
       Object.assign(dataForm, dataMaps.__ids__[msg[0].__path__]);
       console.log("dataRowMaps:", dataMaps);
@@ -1392,6 +1340,5 @@ onBeforeMount(async () => {
       })
       .then((msg) => on_read(msg));
   }
-  //console.log('fields:',fields);
 });
 </script>
