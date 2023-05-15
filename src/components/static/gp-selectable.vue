@@ -1,78 +1,162 @@
 
 
 <template>
-
-<el-form :model="dataForm" label-width="200px">
+  <el-form :model="dataForm" label-width="200px">
     <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
-        <el-input v-model="dataForm[col].name" v-if="['many2one','referenced','related'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
-            <template #suffix>
-                <el-button type="primary" size="small" :icon="Search" @click="do_search(col)"></el-button>
-            </template>
-        </el-input>
-        <el-input v-model="dataForm[col]" v-if="['char','varchar','composite','i18n','tree','integer','float','decimal','numeric','timedelta'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)">
-            <template #ffix>
-                <el-button type="primary" size="small" :icon="Monitor" v-if="isCompute(col)"></el-button>
-            </template>
-        </el-input>
-        <el-input v-model="dataForm[col]" type="textarea" v-if="['text','xml'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? 'el-icon-s-data':''" :readonly="readonly(col)"></el-input>
-        <el-date-picker v-model="dataForm[col]" v-if="colsType[col] == 'date'" :readonly="readonly(col)"></el-date-picker>
-        <el-time-picker v-model="dataForm[col]" v-if="colsType[col] == 'time'" :readonly="readonly(col)"></el-time-picker>
-        <el-date-picker v-model="dataForm[col]" type="datetime" v-if="colsType[col] == 'datetime'" :readonly="readonly(col)"></el-date-picker>
-        <el-select v-model="dataForm[col]" multiple v-if="colsType[col] == 'selection'" :readonly="readonly(col)">
-            <el-option v-for="item in selOptions[col]" :key="item.value" :label="item.label" :value="item.value">
-            </el-option>
-        </el-select>
-        <el-checkbox v-model="dataForm[col]" v-if="colsType[col] == 'boolean'" :readonly="readonly(col)">{{ colsLabel[col] }}</el-checkbox>
+      <el-input
+        v-model="dataForm[col].name"
+        v-if="['many2one', 'referenced', 'related'].indexOf(colsType[col]) >= 0"
+        :prefix-icon="isCompute(col) ? 'el-icon-s-data' : ''"
+        :readonly="readonly(col)"
+      >
+        <template #suffix>
+          <el-button
+            type="primary"
+            size="small"
+            :icon="Search"
+            @click="do_search(col)"
+          ></el-button>
+        </template>
+      </el-input>
+      <el-input
+        v-model="dataForm[col]"
+        v-if="
+          [
+            'char',
+            'varchar',
+            'composite',
+            'i18n',
+            'tree',
+            'integer',
+            'float',
+            'decimal',
+            'numeric',
+            'timedelta',
+          ].indexOf(colsType[col]) >= 0
+        "
+        :prefix-icon="isCompute(col) ? 'el-icon-s-data' : ''"
+        :readonly="readonly(col)"
+      >
+        <template #ffix>
+          <el-button
+            type="primary"
+            size="small"
+            :icon="Monitor"
+            v-if="isCompute(col)"
+          ></el-button>
+        </template>
+      </el-input>
+      <el-input
+        v-model="dataForm[col]"
+        type="textarea"
+        v-if="['text', 'xml'].indexOf(colsType[col]) >= 0"
+        :prefix-icon="isCompute(col) ? 'el-icon-s-data' : ''"
+        :readonly="readonly(col)"
+      ></el-input>
+      <el-date-picker
+        v-model="dataForm[col]"
+        v-if="colsType[col] == 'date'"
+        :readonly="readonly(col)"
+      ></el-date-picker>
+      <el-time-picker
+        v-model="dataForm[col]"
+        v-if="colsType[col] == 'time'"
+        :readonly="readonly(col)"
+      ></el-time-picker>
+      <el-date-picker
+        v-model="dataForm[col]"
+        type="datetime"
+        v-if="colsType[col] == 'datetime'"
+        :readonly="readonly(col)"
+      ></el-date-picker>
+      <el-select
+        v-model="dataForm[col]"
+        multiple
+        v-if="colsType[col] == 'selection'"
+        :readonly="readonly(col)"
+      >
+        <el-option
+          v-for="item in selOptions[col]"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value"
+        >
+        </el-option>
+      </el-select>
+      <el-checkbox
+        v-model="dataForm[col]"
+        v-if="colsType[col] == 'boolean'"
+        :readonly="readonly(col)"
+        >{{ colsLabel[col] }}</el-checkbox
+      >
     </el-form-item>
     <el-form-item>
-        <el-button type="primary" @click="onSearch">Search</el-button>
-        <el-button type="info" @click="onCancel">Cancel</el-button>
+      <el-button type="primary" @click="onSearch">Search</el-button>
+      <el-button type="info" @click="onCancel">Cancel</el-button>
     </el-form-item>
     <el-row>
-        <el-form-item label="Offset">
-            <el-input-number v-model="offset" :min="0" :max="999999"></el-input-number>
-        </el-form-item>
-        <el-form-item label="Limit">
-            <el-input-number v-model="limit" :min="1" :max="999999"></el-input-number>
-        </el-form-item>
+      <el-form-item label="Offset">
+        <el-input-number
+          v-model="offset"
+          :min="0"
+          :max="999999"
+        ></el-input-number>
+      </el-form-item>
+      <el-form-item label="Limit">
+        <el-input-number
+          v-model="limit"
+          :min="1"
+          :max="999999"
+        ></el-input-number>
+      </el-form-item>
     </el-row>
-</el-form>
-
+  </el-form>
 </template>
 
 <script>
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  name: "gp-selectable",
+});
+</script>
+<script setup>
 
 import {
-    defineComponent, defineAsyncComponent, createVNode, render, ref, reactive, onMounted, getCurrentInstance
+    defineAsyncComponent, createVNode, render, ref, reactive, onMounted, getCurrentInstance
 }
 from 'vue';
 
 import { Monitor, Search } from '@element-plus/icons-vue'
 
-export default defineComponent({
-    name: 'gp-selectable',
-    props: {
-        'cid': {
-            type: String
-        },
-        'model': {
-            type: String
-        },
-        'columns': {
-            type: Object
-        },
-        'names': {
-            type: Object
-        },
-        'extcond': {
-            type: Array,
-            default: function() {
-                return [];
-            }
-        }
+const props = defineProps({
+  cid: {
+    type: String,
+    required: true,
+  },
+  model: {
+    type: String,
+//    required: true
+  },
+  columns: {
+    type: Object,
+    required: true,
+  },
+  names: {
+    type: Object,
+    required: true,
+  },
+  extcond: {
+    type: Object,
+    default: function () {
+      return {};
     },
-    emits: ['update:search', 'update:search-cancel'],
-    setup(props) {
+  }
+  ,
+});
+const emit = defineEmits(['update:search', 'update:search-cancel']);
+
+
         const {
             proxy
         } = getCurrentInstance();
@@ -213,24 +297,6 @@ export default defineComponent({
                             __tuple__: [k, dataForm[k].match(/%/g) ? 'like' : '=', dataForm[k]]
                         });
                 }
-            // if ('domain' in props.columns[k] && props.columns[k].domain != null) {
-            //     let extcond = [];
-            //     for (let i = 0, domain = props.columns[k].domain; i < domain.length; i++) extcond.push({
-            //         '__tuple__': domain[i]
-            //     });
-            //     cond.splice(0,0, ...extcond);
-            // }
-
-            // if (props.columns[k].type == 'related') {
-            //     let extcond = [];
-            //     for (let i = 0, relatedy = props.columns[k].relatedy; i < relatedy.length; i++) extcond.push({
-            //         '__tuple__': [relatedy[i], '=', ['many2one','related'].indexOf(colsType[relatedy[i]]) >= 0 ? dataForm[relatedy[i]].name : dataForm[relatedy[i]]]
-            //     });
-            //     cond.splice(0, 0, ...extcond);
-                
-
-
-            //}
             
             }
             console.log('cond:', cond);
@@ -289,26 +355,5 @@ export default defineComponent({
                             else dataForm[c[i]] = '';
                     }
                 }
-                //console.log('colstype:',colsType)
         });
-        return {
-            readonly,
-            cols,
-            colsType,
-            colsLabel,
-            dataForm,
-            selOptions,
-            cond,
-            offset,
-            limit,
-            do_search,
-            onSearch,
-            onCancel,
-            isCompute,
-            Search,
-            Monitor
-        };
-    }
-});
-
 </script>
