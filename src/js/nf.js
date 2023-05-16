@@ -24,7 +24,7 @@ const dataRowMaps = (maps, row) => {
     }
 };
 
-const on_modify_models = (maps, values) => {
+const on_modify_models = (maps, results) => {
     function _update(maps, diffs) {
         if ('__update__' in diffs)
             for (let k in diffs.__update__)
@@ -178,8 +178,11 @@ const on_modify_models = (maps, values) => {
     }
 
 
-    console.log('on_modify_models:', maps, values);
-
+    console.log('on_modify_models:', maps, results);
+for(let key in results){
+    switch(key) {
+        case '__models__':
+            let values = results.__models__
     if ('__data__' in values) {
         let data = values.__data__;
         _apply_diffs(maps, data);
@@ -207,5 +210,6 @@ const on_modify_models = (maps, values) => {
         }
     }
 }
-
+}
+}
 export { on_modify_models, dataRowMaps };

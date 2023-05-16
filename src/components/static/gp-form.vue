@@ -453,6 +453,7 @@ import {
   View,
   ArrowDown,
 } from "@element-plus/icons-vue";
+// import { classType } from "element-plus/es/components/table-v2/src/common.js";
 
 const props = defineProps({
   cid: {
@@ -516,25 +517,30 @@ const visible = (path, col) => {
 };
 
 const listRelatedFields = (col) => {
-let fields = [];
-for(let i = 0, cols = props.metas[props.model].meta.columns[col].relatedy; i < cols.length; i++ ){
-  if (Array.isArray(cols[i])) fields.push(cols[i][0])
-  else if (typeof cols[i] === 'string') fields.push(cols[i])
-  return fields
-}
-}
+  let fields = [];
+  for (
+    let i = 0, cols = props.metas[props.model].meta.columns[col].relatedy;
+    i < cols.length;
+    i++
+  ) {
+    if (Array.isArray(cols[i])) fields.push(cols[i][0]);
+    else if (typeof cols[i] === "string") fields.push(cols[i]);
+    return fields;
+  }
+};
 const isRelatedEmpry = (col) => {
   console.log("isRelatedEmpry:", col);
-  return listRelatedFields(col).every(
-    (v) => {
-      if (["many2one","referenced","related"].indexOf(
+  return listRelatedFields(col).every((v) => {
+    if (
+      ["many2one", "referenced", "related"].indexOf(
         props.metas[props.model].meta.columns[col].type
       ) >= 0 &&
-        dataForm.__data__[v].id == null) return true
-      else if (dataForm.__data__[v] == null) return true
-      return false
-    }
-  );
+      dataForm.__data__[v].id == null
+    )
+      return true;
+    else if (dataForm.__data__[v] == null) return true;
+    return false;
+  });
 };
 
 const setAutocomleteCol = (col) => {
@@ -557,6 +563,27 @@ const querySearch = (queryString, cb) => {
       props.metas[
         props.metas[props.model].meta.columns[autoCompleteCol.value.col].obj
       ].meta["names"]["rec_name"];
+    let cond = [
+      {
+        __tuple__: [
+          rec_name,
+          "like",
+          queryString.search("%") >= 0 ? queryString : queryString + "%",
+        ],
+      },
+    ];
+    if (
+      props.metas[props.model].meta.columns[autoCompleteCol.value.col].domain != null
+    )
+      for (
+        let i = 0,
+          domain =
+            props.metas[props.model].meta.columns[autoCompleteCol.value.col]
+              .domain;
+        i < domain.length;
+        i++
+      )
+        cond.push({ __tuple__: domain[i] });
     proxy.$ws
       .sendAsync({
         _msg: [
@@ -566,7 +593,7 @@ const querySearch = (queryString, cb) => {
           "select",
           {
             fields: [rec_name],
-            cond: [{ __tuple__: [rec_name, "like", queryString + "%"] }],
+            cond: cond,
             context: proxy.$UserPreferences.Context,
             limit: 10,
           },
@@ -580,7 +607,11 @@ const querySearch = (queryString, cb) => {
           v[autoCompleteCol.value.col] = msg[i][rec_name];
           result.push(v);
         }
-        console.log("Result:", result);
+        console.log(
+          "Result:",
+          result,
+          cond,
+        );
         cb(result);
       });
   }
@@ -987,7 +1018,9 @@ const do_find = (col, mode = "single", extcond = [], callbackopts = {}) => {
     loader: () => import("./gp-find.vue"),
     suspensible: false,
   });
-
+  if (colsType[col]=='related') for(let i = 0, relatedy = listRelatedFields(col); i < relatedy.length; i++) extcond.push({__tuple__:[relatedy[i],'=',dataForm.__data__[relatedy[i]].name]});
+  if (props.metas[props.model].meta.columns[col].domain !== null) for(let i = 0, domain = props.metas[props.model].meta.columns[col].domain; i < domain.length; i++) extcond.push({__tuple__:domain[i]})
+  console.log('Extcond:',extcond)
   const rootProps = {
     cid: props.cid,
     model: props.metas[props.model].meta.columns[col].obj,
