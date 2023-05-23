@@ -121,6 +121,12 @@ const props = defineProps({
   callbackOpts: {
     type: Object,
   },
+  domaincond: {
+    type: Array,
+    default: function () {
+      return [];
+    },
+  },
   extcond: {
     type: Array,
     default: function () {
@@ -200,6 +206,11 @@ const do_search = (event) => {
   if (props.extcond.length > 0)
     for (let i = 0; i < props.extcond.length; i++)
       event.cond.push(props.extcond[i]);
+  if (props.domaincond.length > 0 && props.extcond.length > 0)
+    event.cond.push(props.domaincond);
+  if (props.domaincond.length > 0 && props.extcond.length == 0)
+    for (let i = 0; i < props.domaincond.length; i++)
+      event.cond.push(props.domaincond[i]);
   proxy.$ws
     .sendAsync({
       _msg: [

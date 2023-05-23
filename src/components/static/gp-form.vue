@@ -516,21 +516,15 @@ const visible = (path, col) => {
   return !dataForm.__meta__.iv[col];
 };
 
-const listRelatedFields = (col) => {
-  let fields = [];
-  for (
-    let i = 0, cols = props.metas[props.model].meta.columns[col].relatedy;
-    i < cols.length;
-    i++
-  ) {
-    if (Array.isArray(cols[i])) fields.push(cols[i][0]);
-    else if (typeof cols[i] === "string") fields.push(cols[i]);
-    return fields;
-  }
+const listRelatedFields = (relatedy) => {
+  return relatedy.map((v) => {
+    return Array.isArray(v) ? v[0] : v;
+  });
 };
+
 const isRelatedEmpry = (col) => {
   console.log("isRelatedEmpry:", col);
-  return listRelatedFields(col).every((v) => {
+  return listRelatedFields(props.metas[props.model].meta.columns[col].relatedy).every((v) => {
     if (
       ["many2one", "referenced", "related"].indexOf(
         props.metas[props.model].meta.columns[col].type
@@ -547,7 +541,10 @@ const setAutocomleteCol = (col) => {
   console.log("autocomplete:", col);
   let obj = props.metas[props.model].meta.columns[col].obj,
     rec_name = props.metas[obj].meta.names.rec_name,
-    sz = props.metas[obj].meta.columns[rec_name].size;
+    sz =
+      props.metas[obj].meta.columns[rec_name].size == null
+        ? 32767
+        : props.metas[obj].meta.columns[rec_name].size;
   autoCompleteCol.value = { col: col, sz: sz };
 };
 const querySearch = (queryString, cb) => {
@@ -573,17 +570,15 @@ const querySearch = (queryString, cb) => {
       },
     ];
     if (
-      props.metas[props.model].meta.columns[autoCompleteCol.value.col].domain != null
+      props.metas[props.model].meta.columns[autoCompleteCol.value.col].domain !=
+      null
     )
-      for (
-        let i = 0,
-          domain =
-            props.metas[props.model].meta.columns[autoCompleteCol.value.col]
-              .domain;
-        i < domain.length;
-        i++
-      )
-        cond.push({ __tuple__: domain[i] });
+      cond.push(
+        domainConditions(
+          props.metas[props.model].meta.columns[autoCompleteCol.value.col]
+            .domain
+        )
+      );
     proxy.$ws
       .sendAsync({
         _msg: [
@@ -607,11 +602,7 @@ const querySearch = (queryString, cb) => {
           v[autoCompleteCol.value.col] = msg[i][rec_name];
           result.push(v);
         }
-        console.log(
-          "Result:",
-          result,
-          cond,
-        );
+        console.log("Result:", result, cond);
         cb(result);
       });
   }
@@ -745,13 +736,10 @@ const m2o_cache = (item, name) => {
       console.log("m2ofind:", v);
       let f = v[0];
       if (f.__m2o_find__.__data__.v.length == 1) {
-        dataForm.__data__[name].id = f.__m2o_find__.__data__.v[0].id;
-        dataForm.__data__[name].name =
-          f.__m2o_find__.__data__.v[0][
-            Object.keys(f.__m2o_find__.__data__.v[0]).filter(function (e) {
-              return e !== "id";
-            })[0]
-          ];
+        for (let key in f.__m2o_find__.__data__.v[0])
+          if (key == "id")
+            dataForm.__data__[name].id = f.__m2o_find__.__data__.v[0].id;
+          else dataForm.__data__[name].name = f.__m2o_find__.__data__.v[0][key];
         cache(item, name);
       } else {
         let extcond = [];
@@ -764,9 +752,11 @@ const m2o_cache = (item, name) => {
             i < d.length;
             i++
           )
-            extcond.push({
-              __tuple__: d[i],
-            });
+            if (Array.isArray(d[i]))
+              extcond.push({
+                __tuple__: d[i],
+              });
+            else extcond.push(d[i]);
         if (f.__m2o_find__.__data__.v.length > 1)
           extcond.push({
             __tuple__: ["id", "in", f.__m2o_find__.__data__.v],
@@ -1013,19 +1003,51 @@ const fieldsBuild = (model, view) => {
   return fcols;
 };
 
+const domainConditions = (domain) => {
+  return domain.map((v) => {
+    return Array.isArray(v) ? { __tuple__: v } : v;
+  });
+};
+
+const relatedyConditions = (col) => {
+  let cond = [];
+  for (let i = 0, relatedy = listRelatedFields(props.metas[props.model].meta.columns[col].relatedy); i < relatedy.length; i++)
+    cond.push({
+      __tuple__: [
+        relatedy[i],
+        "=",
+        ["many2one", "referenced", "related"].indexOf(
+          props.metas[props.model].meta.columns[relatedy[i]].type
+        ) >= 0
+          ? dataForm.__data__[relatedy[i]].name
+          : dataForm.__data__[relatedy[i]],
+      ],
+    });
+return cond
+  };
 const do_find = (col, mode = "single", extcond = [], callbackopts = {}) => {
   const rootComponent = defineAsyncComponent({
     loader: () => import("./gp-find.vue"),
     suspensible: false,
   });
-  if (colsType[col]=='related') for(let i = 0, relatedy = listRelatedFields(col); i < relatedy.length; i++) extcond.push({__tuple__:[relatedy[i],'=',dataForm.__data__[relatedy[i]].name]});
-  if (props.metas[props.model].meta.columns[col].domain !== null) for(let i = 0, domain = props.metas[props.model].meta.columns[col].domain; i < domain.length; i++) extcond.push({__tuple__:domain[i]})
-  console.log('Extcond:',extcond)
+  if (colsType[col] == "related")
+      extcond.push(...relatedyConditions(col))
+  // if (props.metas[props.model].meta.columns[col].domain !== null)
+  //   for (
+  //     let i = 0, domain = props.metas[props.model].meta.columns[col].domain;
+  //     i < domain.length;
+  //     i++
+  //   )
+  //     if (Array.isArray(domain[i])) extcond.push({ __tuple__: domain[i] });
+  //     else extcond.push(domain[i]);
+  console.log("Extcond:", extcond);
+  let domaincond = props.metas[props.model].meta.columns[col].domain != null ? (domainConditions(props.metas[props.model].meta.columns[col].domain)):[]
   const rootProps = {
     cid: props.cid,
     model: props.metas[props.model].meta.columns[col].obj,
     mode: mode,
     callback: mode == "single" ? on_find_new : on_find_m2m,
+    domaincond: domaincond,
     extcond: extcond,
     callbackOpts: {
       ...callbackopts,

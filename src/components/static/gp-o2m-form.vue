@@ -413,27 +413,67 @@ const o2mcols = reactive([]);
 const multipleSelection = reactive([]);
 
 const readonly = (col) => {
-  return props.mode == "lookup" || isCompute(col)  || colsType[col] == 'related' && isRelatedEmpry(col);
+  return (
+    props.mode == "lookup" ||
+    isCompute(col) ||
+    (colsType[col] == "related" && isRelatedEmpry(col))
+  );
 };
 
 const isRelatedEmpry = (col) => {
-  console.log('isRelatedEmpry:',col)
-  return props.metas[props.model].meta.columns[col].relatedy.every((v) => ['many2one','related','referenced'].indexOf(colsType[col]) >= 0 && props.maps.__containers__[props.container][page.value - 1].__data__[v[0]].id == null || props.maps.__containers__[props.container][page.value - 1].__data__[v[0]][v[0]] == null )
-}
+  console.log("isRelatedEmpry:", col);
+  return props.metas[props.model].meta.columns[col].relatedy.every(
+    (v) =>
+      (["many2one", "related", "referenced"].indexOf(colsType[col]) >= 0 &&
+        props.maps.__containers__[props.container][page.value - 1].__data__[
+          v[0]
+        ].id == null) ||
+      props.maps.__containers__[props.container][page.value - 1].__data__[v[0]][
+        v[0]
+      ] == null
+  );
+};
 
 const setAutocomleteCol = (col) => {
   console.log("autocomplete:", col);
-  let obj = props.metas[props.model].meta.columns[col].obj, rec_name = props.metas[obj].meta.names.rec_name, sz = props.metas[obj].meta.columns[rec_name].size; 
-  autoCompleteCol.value = {col:col,sz:sz};
+  let obj = props.metas[props.model].meta.columns[col].obj,
+    rec_name = props.metas[obj].meta.names.rec_name,
+    sz = props.metas[obj].meta.columns[rec_name].size == null? 32767:props.metas[obj].meta.columns[rec_name].size;
+  autoCompleteCol.value = { col: col, sz: sz };
 };
 const querySearch = (queryString, cb) => {
   if (queryString.length > 3 || queryString.search("%") >= 0) {
     console.log("querySearch:", queryString, cb, autoCompleteCol.value);
-    let obj = props.metas[props.model].meta.columns[autoCompleteCol.value.col].obj;
+    let obj =
+      props.metas[props.model].meta.columns[autoCompleteCol.value.col].obj;
     let rec_name =
       props.metas[
         props.metas[props.model].meta.columns[autoCompleteCol.value.col].obj
       ].meta["names"]["rec_name"];
+    let cond = [
+      {
+        __tuple__: [
+          rec_name,
+          "like",
+          queryString.search("%") >= 0 ? queryString : queryString + "%",
+        ],
+      },
+    ];
+    if (
+      props.metas[props.model].meta.columns[autoCompleteCol.value.col].domain !=
+      null
+    )
+      for (
+        let i = 0,
+          domain =
+            props.metas[props.model].meta.columns[autoCompleteCol.value.col]
+              .domain;
+        i < domain.length;
+        i++
+      )
+        if (Array.isArray(domain[i])) cond.push({ __tuple__: domain[i] });
+        else cond.push(domain[i]);
+
     proxy.$ws
       .sendAsync({
         _msg: [
@@ -464,7 +504,11 @@ const querySearch = (queryString, cb) => {
 };
 
 const handleSelect = (item) => {
-  console.log("handleSelect:", item,props.maps.__containers__[props.container][page.value - 1]);
+  console.log(
+    "handleSelect:",
+    item,
+    props.maps.__containers__[props.container][page.value - 1]
+  );
   m2o_cache(
     props.maps.__containers__[props.container][page.value - 1],
     autoCompleteCol.value.col
@@ -486,7 +530,10 @@ const handleCurrentChange = (val) => {
 
 const m2o_cache = (item, name) => {
   console.log("m2o_cache:", name, item.__data__[name], item);
-  if (item.__data__[name].name.length == 0) {
+  if (
+    item.__data__[name].name == null ||
+    item.__data__[name].name.length == 0
+  ) {
     item.__data__[name].id = null;
     item.__data__[name].name = null;
     cache(item, name);
@@ -508,9 +555,15 @@ const m2o_cache = (item, name) => {
       console.log("m2ofind:", v);
       let f = v[0];
       if (f.__m2o_find__.__data__.v.length == 1) {
-        props.maps.__containers__[props.container][page.value - 1].__data__[
-          name
-        ] = f.__m2o_find__.__data__.v[0];
+        for (let key in f.__m2o_find__.__data__.v[0])
+          if (key == "id")
+            props.maps.__containers__[props.container][page.value - 1].__data__[
+              name
+            ].id = f.__m2o_find__.__data__.v[0].id;
+          else
+            props.maps.__containers__[props.container][page.value - 1].__data__[
+              name
+            ].id.name = f.__m2o_find__.__data__.v[0][key];
         cache(item, name);
       } else {
         let extcond = [];
@@ -738,7 +791,10 @@ const on_find_new = (value, opts) => {
     value.name.length > 0
   )
     // dataForm.__data__[opts.col] = value;
-    Object.assign(props.maps[props.container][page.value-1].__data__[opts.col], value);
+    Object.assign(
+      props.maps[props.container][page.value - 1].__data__[opts.col],
+      value
+    );
   opts.item.__data__[opts.col] = value;
   cache(opts.item, opts.col);
 };
@@ -746,7 +802,7 @@ const on_find_new = (value, opts) => {
 const on_find_m2m = (value, opts) => {
   console.log("on_find_m2m:", value, opts);
   if (["new", "edit"].indexOf(mode.value) >= 0 && value.length > 0) {
-    let model = props.maps[props.container][page.value-1].__model__;
+    let model = props.maps[props.container][page.value - 1].__model__;
     let container = opts.col + "." + opts.path;
     let obj = props.metas[model].meta.columns[opts.col].obj;
     let fields = props.metas[obj].views.m2mlist.columns.map((f) => f.col);
@@ -762,7 +818,7 @@ const on_find_m2m = (value, opts) => {
       proxy.$UserPreferences.Context
     );
   }
-}
+};
 
 const m2m_cache = (model, container, fields, obj, rel, id2, context) => {
   proxy.$ws
@@ -824,17 +880,26 @@ const fieldsBuild = (model, view) => {
   return fcols;
 };
 
+const domainConditions = (domain) => {
+  return domain.map((v) => {
+    return Array.isArray(v) ? { __tuple__: v } : v;
+  });
+};
+
+
 const do_find = (col, mode = "single", extcond = [], callbackopts = {}) => {
   const rootComponent = defineAsyncComponent({
     loader: () => import("../static/gp-find.vue"),
     suspensible: false,
   });
+  let domaincond = props.metas[props.model].meta.columns[col].domain != null ? (domainConditions(props.metas[props.model].meta.columns[col].domain)):[]
   const rootProps = {
     cid: props.cid,
     model: props.metas[props.model].meta.columns[col].obj,
     mode: mode,
     callback: mode == "single" ? on_find_new : on_find_m2m,
     extcond: extcond,
+    domaincond: domaincond,
     callbackOpts: {
       ...callbackopts,
       col: col,
