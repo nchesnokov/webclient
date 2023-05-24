@@ -75,12 +75,16 @@
           ></el-button>
         </template>
       </el-autocomplete>
-      <el-input
-        v-model="maps.__containers__[container][page - 1].__data__[col].name"
-        @change="related_cache(maps.__containers__[container][page - 1], col)"
-        v-if="['related'].indexOf(colsType[col]) >= 0"
-        :prefix-icon="isCompute(col) ? Monitor : ''"
-        :readonly="readonly(col)"
+      <el-autocomplete
+      :fetch-suggestions="querySearch"
+          clearable
+          :trigger-on-focus="false"
+          @focus="setAutocomleteCol(col)"
+          :value-key="col"
+          v-model="maps.__containers__[container][page - 1].__data__[col].name"
+          v-if="colsType[col] == 'related'"
+          @select="handleSelect"
+          :readonly="readonly(col)"
       >
         <template #suffix>
           <el-button
@@ -128,7 +132,7 @@
             "
           ></el-button>
         </template>
-      </el-input>
+      </el-autocomplete>
       <json-viewer
         v-if="colsType[col] == 'json'"
         :value="maps.__containers__[container][page - 1].__data__[col]"
@@ -442,7 +446,11 @@ const setAutocomleteCol = (col) => {
   autoCompleteCol.value = { col: col, sz: sz };
 };
 const querySearch = (queryString, cb) => {
-  if (queryString.length > 3 || queryString.search("%") >= 0) {
+  if (
+    queryString.length > 3 ||
+    queryString.search("%") >= 0 ||
+    autoCompleteCol.value.sz < 5
+  ) {
     console.log("querySearch:", queryString, cb, autoCompleteCol.value);
     let obj =
       props.metas[props.model].meta.columns[autoCompleteCol.value.col].obj;
@@ -460,20 +468,37 @@ const querySearch = (queryString, cb) => {
       },
     ];
     if (
+      props.metas[props.model].meta.columns[autoCompleteCol.value.col].type ==
+      "related"
+    )
+      for (
+        let i = 0, r = relatedyConditions(autoCompleteCol.value.col);
+        i < r.length;
+        i++
+      )
+        cond.push(r[i]);
+    if (
       props.metas[props.model].meta.columns[autoCompleteCol.value.col].domain !=
       null
     )
-      for (
-        let i = 0,
-          domain =
+      if (cond.length > 0)
+        cond.push(
+          domainConditions(
             props.metas[props.model].meta.columns[autoCompleteCol.value.col]
-              .domain;
-        i < domain.length;
-        i++
-      )
-        if (Array.isArray(domain[i])) cond.push({ __tuple__: domain[i] });
-        else cond.push(domain[i]);
-
+              .domain
+          )
+        );
+      else
+        for (
+          let i = 0,
+            d = domainConditions(
+              props.metas[props.model].meta.columns[autoCompleteCol.value.col]
+                .domain
+            );
+          i < d.length;
+          i++
+        )
+          cond.push(d[i]);
     proxy.$ws
       .sendAsync({
         _msg: [
@@ -483,7 +508,7 @@ const querySearch = (queryString, cb) => {
           "select",
           {
             fields: [rec_name],
-            cond: [{ __tuple__: [rec_name, "like", queryString + "%"] }],
+            cond: cond,
             context: proxy.$UserPreferences.Context,
             limit: 10,
           },
@@ -497,13 +522,81 @@ const querySearch = (queryString, cb) => {
           v[autoCompleteCol.value.col] = msg[i][rec_name];
           result.push(v);
         }
-        console.log("Result:", result);
+        console.log("Result:", result, cond);
         cb(result);
       });
   }
 };
+// const querySearch1 = (queryString, cb) => {
+//   if (queryString.length > 3 || queryString.search("%") >= 0) {
+//     console.log("querySearch:", queryString, cb, autoCompleteCol.value);
+//     let obj =
+//       props.metas[props.model].meta.columns[autoCompleteCol.value.col].obj;
+//     let rec_name =
+//       props.metas[
+//         props.metas[props.model].meta.columns[autoCompleteCol.value.col].obj
+//       ].meta["names"]["rec_name"];
+//     let cond = [
+//       {
+//         __tuple__: [
+//           rec_name,
+//           "like",
+//           queryString.search("%") >= 0 ? queryString : queryString + "%",
+//         ],
+//       },
+//     ];
+//     if (
+//       props.metas[props.model].meta.columns[autoCompleteCol.value.col].domain !=
+//       null
+//     )
+//       for (
+//         let i = 0,
+//           domain =
+//             props.metas[props.model].meta.columns[autoCompleteCol.value.col]
+//               .domain;
+//         i < domain.length;
+//         i++
+//       )
+//         if (Array.isArray(domain[i])) cond.push({ __tuple__: domain[i] });
+//         else cond.push(domain[i]);
+
+//     proxy.$ws
+//       .sendAsync({
+//         _msg: [
+//           props.cid,
+//           "models",
+//           obj,
+//           "select",
+//           {
+//             fields: [rec_name],
+//             cond: [{ __tuple__: [rec_name, "like", queryString + "%"] }],
+//             context: proxy.$UserPreferences.Context,
+//             limit: 10,
+//           },
+//         ],
+//       })
+//       .then((msg) => {
+//         let result = [];
+//         for (let i = 0, v; i < msg.length; i++) {
+//           v = {};
+//           v.id = msg[i].id;
+//           v[autoCompleteCol.value.col] = msg[i][rec_name];
+//           result.push(v);
+//         }
+//         console.log("Result:", result);
+//         cb(result);
+//       });
+//   }
+// };
 
 const handleSelect = (item) => {
+  console.log("handleSelect:", item);
+  if (props.metas[props.model].meta.columns[autoCompleteCol.value.col].type == "related") related_cache(props.maps.__containers__[props.container][page.value - 1],autoCompleteCol.value.col,props.metas[props.model].meta.columns[autoCompleteCol.value.col].relatedy)
+  else  m2o_cache(props.maps.__containers__[props.container][page.value - 1], autoCompleteCol.value.col);
+};
+
+
+const handleSelect1 = (item) => {
   console.log(
     "handleSelect:",
     item,
@@ -563,7 +656,7 @@ const m2o_cache = (item, name) => {
           else
             props.maps.__containers__[props.container][page.value - 1].__data__[
               name
-            ].id.name = f.__m2o_find__.__data__.v[0][key];
+            ].name = f.__m2o_find__.__data__.v[0][key];
         cache(item, name);
       } else {
         let extcond = [];
@@ -884,6 +977,30 @@ const domainConditions = (domain) => {
   return domain.map((v) => {
     return Array.isArray(v) ? { __tuple__: v } : v;
   });
+};
+
+const relatedyConditions = (col) => {
+  let cond = [];
+  for (
+    let i = 0,
+      relatedy = listRelatedFields(
+        props.metas[props.model].meta.columns[col].relatedy
+      );
+    i < relatedy.length;
+    i++
+  )
+    cond.push({
+      __tuple__: [
+        relatedy[i],
+        "=",
+        ["many2one", "referenced", "related"].indexOf(
+          props.metas[props.model].meta.columns[relatedy[i]].type
+        ) >= 0
+          ? dataForm.__data__[relatedy[i]].name
+          : dataForm.__data__[relatedy[i]],
+      ],
+    });
+  return cond;
 };
 
 
