@@ -88,6 +88,7 @@
         <el-autocomplete
           :fetch-suggestions="querySearch"
           clearable
+          fit-input-width
           :trigger-on-focus="false"
           @focus="setAutocomleteCol(col)"
           :value-key="col"
@@ -134,6 +135,7 @@
           :fetch-suggestions="querySearch"
           clearable
           :trigger-on-focus="false"
+          fit-input-width
           @focus="setAutocomleteCol(col)"
           :value-key="col"
           v-model="dataForm.__data__[col].name"
