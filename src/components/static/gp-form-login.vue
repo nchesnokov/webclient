@@ -52,7 +52,7 @@ export default defineComponent({
         const select = ref('ws://')
         const form = reactive({
             url: 'localhost:8170',
-            slot: 'test002',
+            slot: 'test003',
             user: 'admin',
             password: 'admin'
         });

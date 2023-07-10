@@ -1,32 +1,35 @@
 <template>
-  <div>
-    <el-layout row>
-      <v-flex xs2 sm2 md2 lg2 xl2>
-        <v-select label="Criteria" :items="rfields" v-model="rfield" />
-      </v-flex>
-      <v-flex xs1 sm1 md1 lg1 xl1> </v-flex>
-      <v-flex xs2 sm2 md2 lg2 xl2>
-        <el-select v-model="aggregate">
-          <el-option
-            v-for="item in aggregates"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          ></el-option>
-        </el-select>
-      </v-flex>
-    </el-layout>
-    <pivot
-      :data="data"
-      :fields="fields"
-      :row-fields="rowFields"
-      :col-fields="colFields"
-      :reducer="reducer"
-      ref="pivot"
-    >
-      <!-- Optional slots can be used for formatting, see documentation below -->
-    </pivot>
-  </div>
+  <el-row>
+    <el-col>
+      <el-select label="Criteria" v-model="rfield">
+        <el-option
+          v-for="item in rfields"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value"
+        ></el-option>
+      </el-select>
+    </el-col>
+    <el-col>
+      <el-select v-model="aggregate">
+        <el-option
+          v-for="item in aggregates"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value"
+        ></el-option>
+      </el-select>
+    </el-col>
+  </el-row>
+  <pivot v-if="data.length > 0"
+    :data="data"
+    :fields="fields"
+    :row-fields="rowFields"
+    :col-fields="colFields"
+    :reducer="reducer"
+    ref="pivot"
+  >
+  </pivot>
 </template>
 
 
@@ -203,10 +206,14 @@ onBeforeMount(async () => {
     }
   }
   rfield.value = rfields[0];
-  reducer.value = new Function("sum", "item", "return sum + item." + rfield.value);
+  reducer.value = new Function(
+    "sum",
+    "item",
+    "return sum + item." + rfield.value
+  );
 
   onMDX(
-    await proxy.$ws.sendAsynvc({
+    await proxy.$ws.sendAsync({
       _msg: [
         props.cid,
         "models",

@@ -33,6 +33,7 @@
     "element-plus": "^2.0.1",
     "gantt-elastic": "^1.0.12",
     "gantt-elastic-header": "^0.1.11",
+    "gantt-schedule-timeline-calendar": "^3.33.15",
     "jsx": "^0.9.89",
     "leaflet": "^1.8.0",
     "mitt": "^3.0.0",

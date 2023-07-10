@@ -233,6 +233,7 @@ const handleNodeClick = async (data) => {
         "uis",
         "action",
         {
+          type_obj:data.type_obj.name,
           action_id: data.action_id.name,
           context: proxy.$UserPreferences.Context,
         },
