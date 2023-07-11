@@ -656,7 +656,7 @@ const m2o_cache = (item, name) => {
           else
             props.maps.__containers__[props.container][page.value - 1].__data__[
               name
-            ].name = f.__m2o_find__.__data__.v[0][key];
+            ].  name = f.__m2o_find__.__data__.v[0][key];
         cache(item, name);
       } else {
         let extcond = [];

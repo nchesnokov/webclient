@@ -37,7 +37,7 @@
         :prefix-icon="isCompute(col) ? 'el-icon-s-data' : ''"
         :readonly="readonly(col)"
       >
-        <template #ffix>
+        <template #prefix>
           <el-button
             type="primary"
             size="small"
@@ -211,15 +211,19 @@ const do_search = (col) => {
       i < relatedy.length;
       i++
     )
+    {  
+    let rf =Array.isArray(relatedy[i]) ? rf = relatedy[i][0]:relatedy[i];
+      
       extcond.push({
         __tuple__: [
-          relatedy[i],
+          rf,
           "=",
-          ["many2one", "related"].indexOf(colsType[relatedy[i]]) >= 0
-            ? dataForm[relatedy[i]].name
-            : dataForm[relatedy[i]],
+          ["many2one", "related","referenced"].indexOf(colsType[rf]) >= 0
+            ? dataForm[rf].name
+            : dataForm[rf],
         ],
       });
+    }
     if ("extcond" in rootProps) rootProps.extcond.splice(0, 0, ...extcond);
     else rootProps.extcond = extcond;
   }
