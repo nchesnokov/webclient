@@ -216,7 +216,7 @@
             </el-dropdown>
           </template>
         </el-input>
-
+<!--
         <json-viewer
           v-if="colsType[col] == 'json'"
           :value="dataForm.__data__[col]"
@@ -224,6 +224,14 @@
           boxed
           sort
         />
+ -->
+<JsonEditor  v-if="colsType[col] == 'json'"
+    :options="{
+        confirmText: 'confirm',
+        cancelText: 'cancel',
+    }"
+	v-model:objData="dataForm.__data__[col]"
+	/>
         <el-input
           v-model="dataForm.__data__[col]"
           v-else-if="
@@ -454,7 +462,8 @@ import {
   ArrowDown,
 } from "@element-plus/icons-vue";
 // import { classType } from "element-plus/es/components/table-v2/src/common.js";
-
+import JsonEditor from "vue3-json-edit";
+import "vue3-json-edit/dist/style.css";
 const props = defineProps({
   cid: {
     type: String,
@@ -507,12 +516,12 @@ const readonly = (col) => {
 };
 
 const required = (path, col) => {
-  console.log("required:", path, col);
+  // console.log("required:", path, col);
   return dataForm.__meta__.rq[col];
 };
 
 const visible = (path, col) => {
-  console.log("visible:", path, col);
+  // console.log("visible:", path, col);
   return !dataForm.__meta__.iv[col];
 };
 
@@ -523,7 +532,7 @@ const listRelatedFields = (relatedy) => {
 };
 
 const isRelatedEmpry = (col) => {
-  console.log("isRelatedEmpry:", col);
+  // console.log("isRelatedEmpry:", col);
   return listRelatedFields(
     props.metas[props.model].meta.columns[col].relatedy
   ).every((v) => {
@@ -540,7 +549,7 @@ const isRelatedEmpry = (col) => {
 };
 
 const setAutocomleteCol = (col) => {
-  console.log("autocomplete:", col);
+  // console.log("autocomplete:", col);
   let obj = props.metas[props.model].meta.columns[col].obj,
     rec_name = props.metas[obj].meta.names.rec_name,
     sz =
@@ -555,7 +564,7 @@ const querySearch = (queryString, cb) => {
     queryString.search("%") >= 0 ||
     autoCompleteCol.value.sz < 5
   ) {
-    console.log("querySearch:", queryString, cb, autoCompleteCol.value);
+    // console.log("querySearch:", queryString, cb, autoCompleteCol.value);
     let obj =
       props.metas[props.model].meta.columns[autoCompleteCol.value.col].obj;
     let rec_name =
@@ -633,14 +642,14 @@ const querySearch = (queryString, cb) => {
 };
 
 const handleSelect = (item) => {
-  console.log("handleSelect:", item);
+  // console.log("handleSelect:", item);
   if (props.metas[props.model].meta.columns[autoCompleteCol.value.col].type == "related") related_cache(dataForm,autoCompleteCol.value.col,props.metas[props.model].meta.columns[autoCompleteCol.value.col].relatedy)
   else  m2o_cache(dataForm, autoCompleteCol.value.col);
 };
 const addRow = () => {};
 
 const cache = (item, name) => {
-  console.log("cache-item:", name, item.__data__[name], item);
+  // console.log("cache-item:", name, item.__data__[name], item);
   let value;
   switch (props.metas[props.model].meta.columns[name].type) {
     case "integer":
@@ -726,19 +735,19 @@ const cache = (item, name) => {
     value: value,
     context: proxy.$UserPreferences.Context,
   };
-  console.log("cache:", r);
+  // console.log("cache:", r);
   proxy.$ws
     .sendAsync({
       _msg: [props.cid, "_cache", "cache", guid.value, r],
     })
     .then((v) => {
-      console.log("cache:", v);
+      // console.log("cache:", v);
       if (v.length > 0) on_modify_models(dataMaps, v[0]);
     });
 };
 
 const m2o_cache = (item, name) => {
-  console.log("m2o_cache:", name, item.__data__[name], item);
+  // console.log("m2o_cache:", name, item.__data__[name], item);
   if (item.__data__[name].name.length == 0) {
     item.__data__[name].id = null;
     item.__data__[name].name = null;
@@ -752,13 +761,13 @@ const m2o_cache = (item, name) => {
     value: item.__data__[name],
     context: proxy.$UserPreferences.Context,
   };
-  console.log("cache:", r);
+  // console.log("cache:", r);
   proxy.$ws
     .sendAsync({
       _msg: [props.cid, "_cache", "m2ofind", guid.value, r],
     })
     .then((v) => {
-      console.log("m2ofind:", v);
+      // console.log("m2ofind:", v);
       let f = v[0];
       if (f.__m2o_find__.__data__.v.length == 1) {
         for (let key in f.__m2o_find__.__data__.v[0])
@@ -815,7 +824,7 @@ const related_cache = (item, name, relatedy) => {
       _msg: [props.cid, "_cache", "relatedfind", guid.value, r],
     })
     .then((v) => {
-      console.log("relatedfind:", v);
+      // console.log("relatedfind:", v);
       let f = v[0];
       if (f.__related_find__.__data__.v.length == 1) {
         dataForm.__data__[name] = f.__related_find__.__data__.v[0];
@@ -872,7 +881,7 @@ const related_cache = (item, name, relatedy) => {
 };
 
 const i18nCommand = (command) => {
-  console.log("command-18n:", command);
+  // console.log("command-18n:", command);
   colsLang[command.col] = command.lang;
   let ctx = Object.assign({}, proxy.$UserPreferences.Context);
   ctx.lang = command.lang;
@@ -939,7 +948,7 @@ const _get_selections = (s) => {
 };
 
 const on_find_new = (value, opts) => {
-  console.log("on_find_new:", value, opts);
+  // console.log("on_find_new:", value, opts);
   if (
     ["new", "edit"].indexOf(mode.value) >= 0 &&
     value.id &&
@@ -972,7 +981,7 @@ const m2m_cache = (model, container, fields, obj, rel, id2, context) => {
     .then((msg) => on_modify_models(dataMaps, msg[0]));
 };
 const on_find_m2m = (value, opts) => {
-  console.log("on_find_m2m:", value, opts);
+  // console.log("on_find_m2m:", value, opts);
   if (["new", "edit"].indexOf(mode.value) >= 0 && value.length > 0) {
     let model = dataForm.__model__;
     let container = opts.col + "." + opts.path;
@@ -1071,7 +1080,7 @@ const do_find = (col, mode = "single", extcond = [], callbackopts = {}) => {
   //   )
   //     if (Array.isArray(domain[i])) extcond.push({ __tuple__: domain[i] });
   //     else extcond.push(domain[i]);
-  console.log("Extcond:", extcond);
+  // console.log("Extcond:", extcond);
   let domaincond =
     props.metas[props.model].meta.columns[col].domain != null
       ? domainConditions(props.metas[props.model].meta.columns[col].domain)
@@ -1215,7 +1224,7 @@ const onSubmit = async () => {
       });
       let action = msg[0],
         oid = msg[1];
-      console.log("action:", msg);
+      // console.log("action:", msg);
       if (action == "commit") {
         await proxy.$ws.sendAsync({
           _msg: [
@@ -1304,9 +1313,9 @@ const onClear = () => {
           // dataRowMaps(dataMaps,dataForm);
           dataRowMaps(dataMaps, msg[0]);
           Object.assign(dataForm, dataMaps.__ids__[msg[0].__path__]);
-          console.log("dataRowMaps:", dataMaps);
+          // console.log("dataRowMaps:", dataMaps);
 
-          console.log("initialize:", msg);
+          // console.log("initialize:", msg);
         }
       });
 };
@@ -1315,13 +1324,13 @@ const init_metacache = () => {
 };
 
 const on_read = (msg) => {
-  console.log("on_read:", msg);
+  // console.log("on_read:", msg);
   if (msg && msg.length > 0) {
     init_metacache();
     dataRowMaps(dataMaps, msg[0]);
     Object.assign(dataForm, dataMaps.__ids__[msg[0].__path__]);
-    console.log("dataRowMaps:", dataMaps);
-    console.log("dataForm:", dataForm);
+    // console.log("dataRowMaps:", dataMaps);
+    // console.log("dataForm:", dataForm);
   }
 };
 
@@ -1357,13 +1366,12 @@ onBeforeMount(async () => {
 
       dataRowMaps(dataMaps, msg[0]);
       Object.assign(dataForm, dataMaps.__ids__[msg[0].__path__]);
-      console.log("dataRowMaps:", dataMaps);
+      // console.log("dataRowMaps:", dataMaps);
 
-      console.log("dataForm:", dataForm);
+      // console.log("dataForm:", dataForm);
     }
   }
-  let rules = {};
-  for (
+    for (
     let i = 0,
       c = props.metas[props.model].views.form.columns.map((v) => v.col),
       meta = props.metas[props.model].meta.columns;
@@ -1383,7 +1391,7 @@ onBeforeMount(async () => {
       "translate" in meta[c[i]] ? meta[c[i]].translate : false;
     colsLang[c[i]] = proxy.$UserPreferences.lang;
     if (meta[c[i]].required)
-      rules[c[i]] = [
+      formRules[c[i]] = [
         {
           required: true,
           message: `Please input ${colsLabel[c[i]]}`,
@@ -1401,7 +1409,7 @@ onBeforeMount(async () => {
     if (colsType[c[i]] == "one2many") o2mcols.push(c[i]);
     else cols.push(c[i]);
   }
-  Object.assign(formRules, rules);
+  //Object.assign(formRules, rules);
   console.log("rules:", formRules);
 
   //console.log('translate:',colsTranslate,colsType)
@@ -1410,7 +1418,7 @@ onBeforeMount(async () => {
     if (Array.isArray(props.modal.oid))
       multipleSelection.splice(0, multipleSelection.length, ...props.modal.oid);
     else multipleSelection.splice(0, multipleSelection.length, props.modal.oid);
-    console.log("multipleSelection:", multipleSelection);
+    // console.log("multipleSelection:", multipleSelection);
     let ctx = Object.assign({}, proxy.$UserPreferences.Context);
     ctx.cache = guid.value;
     proxy.$ws

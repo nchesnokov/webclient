@@ -212,7 +212,7 @@ extensionCodec.register({
     type: 20,
     encode: (obj) => {
         if (typeof obj == 'object' && !Array.isArray() && '__exception__' in obj) {
-            return encode(new ExtData(19, encode(obj.__extepttion__)))
+            return encode(new ExtData(19, encode(obj.__exception__)))
         }
         else {
             return null

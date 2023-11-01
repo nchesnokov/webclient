@@ -11,6 +11,7 @@
   <el-form
     v-if="maps.__containers__[container].length > 0"
     :model="maps.__containers__[container][page - 1].__data__"
+    :rules="formRules"
     label-width="auto"
     status-icon
     inline-message
@@ -411,6 +412,7 @@ const colsLabel = reactive({});
 const colsTranslate = reactive({});
 const colsLang = reactive({});
 const selOptions = reactive({});
+const formRules = reactive({});
 const fields = reactive([]);
 const cols = reactive([]);
 const o2mcols = reactive([]);
@@ -527,67 +529,6 @@ const querySearch = (queryString, cb) => {
       });
   }
 };
-// const querySearch1 = (queryString, cb) => {
-//   if (queryString.length > 3 || queryString.search("%") >= 0) {
-//     console.log("querySearch:", queryString, cb, autoCompleteCol.value);
-//     let obj =
-//       props.metas[props.model].meta.columns[autoCompleteCol.value.col].obj;
-//     let rec_name =
-//       props.metas[
-//         props.metas[props.model].meta.columns[autoCompleteCol.value.col].obj
-//       ].meta["names"]["rec_name"];
-//     let cond = [
-//       {
-//         __tuple__: [
-//           rec_name,
-//           "like",
-//           queryString.search("%") >= 0 ? queryString : queryString + "%",
-//         ],
-//       },
-//     ];
-//     if (
-//       props.metas[props.model].meta.columns[autoCompleteCol.value.col].domain !=
-//       null
-//     )
-//       for (
-//         let i = 0,
-//           domain =
-//             props.metas[props.model].meta.columns[autoCompleteCol.value.col]
-//               .domain;
-//         i < domain.length;
-//         i++
-//       )
-//         if (Array.isArray(domain[i])) cond.push({ __tuple__: domain[i] });
-//         else cond.push(domain[i]);
-
-//     proxy.$ws
-//       .sendAsync({
-//         _msg: [
-//           props.cid,
-//           "models",
-//           obj,
-//           "select",
-//           {
-//             fields: [rec_name],
-//             cond: [{ __tuple__: [rec_name, "like", queryString + "%"] }],
-//             context: proxy.$UserPreferences.Context,
-//             limit: 10,
-//           },
-//         ],
-//       })
-//       .then((msg) => {
-//         let result = [];
-//         for (let i = 0, v; i < msg.length; i++) {
-//           v = {};
-//           v.id = msg[i].id;
-//           v[autoCompleteCol.value.col] = msg[i][rec_name];
-//           result.push(v);
-//         }
-//         console.log("Result:", result);
-//         cb(result);
-//       });
-//   }
-// };
 
 const handleSelect = (item) => {
   console.log("handleSelect:", item);
@@ -1116,6 +1057,7 @@ const getBase64 = (file) => {
 };
 
 onMounted(() => {
+  let rules = {};
   for (
     let i = 0,
       c = props.metas[props.model].views.form.columns
@@ -1132,9 +1074,28 @@ onMounted(() => {
     colsLang[c[i]] = proxy.$UserPreferences.lang;
     if (colsType[c[i]] == "selection")
       selOptions[c[i]] = _get_selections(meta[c[i]].selections);
+  if (meta[c[i]].required)
+      formRules[c[i]] = [
+        {
+          required: true,
+          message: `Please input ${colsLabel[c[i]]}`,
+          trigger: [
+            "char",
+            "varchar",
+            "composite",
+            "decomposite",
+            "tree",
+          ].indexOf(colsType[c[i]])
+            ? "blur"
+            : "change",
+        },
+      ];
+  
     if (colsType[c[i]] == "one2many") o2mcols.push(c[i]);
     else cols.push(c[i]);
   }
+      // Object.assign(formRules, rules);
+      console.log("formRules:",formRules);
   fields.splice(0, fields.length, ...fieldsBuild(props.model, "form"));
   // console.log("PROPS-O2MFORM:", props.maps.__containers__[props.container]);
 });

@@ -2,7 +2,7 @@
 </style>
 
 <template>
-    <el-dialog title="Login" v-model="isVisible">
+    <el-dialog title="Login" v-model="isVisible" :close-on-click-modal="false">
         <el-form :model="form">
             <el-form-item label="URL" :label-width="formLabelWidth">
                 <el-input v-model="form.url" class="input-with-select">
@@ -45,7 +45,7 @@ export default defineComponent({
     emits: ['update:login'],
     setup(props) {
         const {
-            proxy
+            proxy, root
         } = getCurrentInstance();
 
         const isVisible = ref(false);

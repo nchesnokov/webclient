@@ -3,6 +3,53 @@
 <template>
   <el-form :model="dataForm" label-width="200px">
     <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
+      <!-- <el-autocomplete
+          :fetch-suggestions="querySearch"
+          clearable
+          fit-input-width
+          :trigger-on-focus="false"
+          @focus="setAutocomleteCol(col)"
+          :value-key="col"
+          v-model="dataForm[col].name"
+          v-if="['many2one', 'referenced'].indexOf(colsType[col]) >= 0"
+          @select="handleSelect"
+          :readonly="readonly(col)"
+        >
+          <template v-if="isCompute(col)" #prefix>
+            <el-button type="primary" size="small" :icon="Monitor" />
+          </template>
+          <template #suffix>
+            <el-button
+              v-if="mode != 'lookup'"
+              type="primary"
+              size="small"
+              :icon="Search"
+              @click="do_find(col, 'single', [], { item: dataForm })"
+            ></el-button>
+            <el-button
+              v-if="mode != 'lookup'"
+              type="primary"
+              size="small"
+              :icon="DocumentAdd"
+              @click="do_add(col)"
+            ></el-button>
+            <el-button
+              v-if="dataForm.__data__[col].id != null && mode != 'lookup'"
+              type="primary"
+              size="small"
+              :icon="Edit"
+              @click="do_edit(col, dataForm.__data__[col].id)"
+            ></el-button>
+            <el-button
+              v-if="dataForm.__data__[col].id != null"
+              type="primary"
+              size="small"
+              :icon="View"
+              @click="do_lookup(col, dataForm.__data__[col].id)"
+            ></el-button>
+          </template>
+        </el-autocomplete> -->
+
       <el-input
         v-model="dataForm[col].name"
         v-if="['many2one', 'referenced', 'related'].indexOf(colsType[col]) >= 0"
@@ -170,6 +217,106 @@ const cond = reactive([]);
 const extcond = reactive({});
 const offset = ref(0);
 const limit = ref(80);
+
+const setAutocomleteCol = (col) => {
+  console.log("autocomplete:", col);
+  let obj = props.metas[props.model].meta.columns[col].obj,
+    rec_name = props.metas[obj].meta.names.rec_name,
+    sz =
+      props.metas[obj].meta.columns[rec_name].size == null
+        ? 32767
+        : props.metas[obj].meta.columns[rec_name].size;
+  autoCompleteCol.value = { col: col, sz: sz };
+};
+const querySearch = (queryString, cb) => {
+  if (
+    queryString.length > 3 ||
+    queryString.search("%") >= 0 ||
+    autoCompleteCol.value.sz < 5
+  ) {
+    console.log("querySearch:", queryString, cb, autoCompleteCol.value);
+    let obj =
+      props.metas[props.model].meta.columns[autoCompleteCol.value.col].obj;
+    let rec_name =
+      props.metas[
+        props.metas[props.model].meta.columns[autoCompleteCol.value.col].obj
+      ].meta["names"]["rec_name"];
+    let cond = [
+      {
+        __tuple__: [
+          rec_name,
+          "like",
+          queryString.search("%") >= 0 ? queryString : queryString + "%",
+        ],
+      },
+    ];
+    if (
+      props.metas[props.model].meta.columns[autoCompleteCol.value.col].type ==
+      "related"
+    )
+      for (
+        let i = 0, r = relatedyConditions(autoCompleteCol.value.col);
+        i < r.length;
+        i++
+      )
+        cond.push(r[i]);
+    if (
+      props.metas[props.model].meta.columns[autoCompleteCol.value.col].domain !=
+      null
+    )
+      if (cond.length > 0)
+        cond.push(
+          domainConditions(
+            props.metas[props.model].meta.columns[autoCompleteCol.value.col]
+              .domain
+          )
+        );
+      else
+        for (
+          let i = 0,
+            d = domainConditions(
+              props.metas[props.model].meta.columns[autoCompleteCol.value.col]
+                .domain
+            );
+          i < d.length;
+          i++
+        )
+          cond.push(d[i]);
+    proxy.$ws
+      .sendAsync({
+        _msg: [
+          props.cid,
+          "models",
+          obj,
+          "select",
+          {
+            fields: [rec_name],
+            cond: cond,
+            context: proxy.$UserPreferences.Context,
+            limit: 10,
+          },
+        ],
+      })
+      .then((msg) => {
+        let result = [];
+        for (let i = 0, v; i < msg.length; i++) {
+          v = {};
+          v.id = msg[i].id;
+          v[autoCompleteCol.value.col] = msg[i][rec_name];
+          result.push(v);
+        }
+        console.log("Result:", result, cond);
+        cb(result);
+      });
+  }
+};
+
+const handleSelect = (item) => {
+  console.log("handleSelect:", item);
+  if (props.metas[props.model].meta.columns[autoCompleteCol.value.col].type == "related") related_cache(dataForm,autoCompleteCol.value.col,props.metas[props.model].meta.columns[autoCompleteCol.value.col].relatedy)
+  else  m2o_cache(dataForm, autoCompleteCol.value.col);
+};
+
 
 const readonly = (col) => {
   return col in relatedcols;

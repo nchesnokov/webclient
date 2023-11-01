@@ -1,7 +1,7 @@
 
 
 <template>
-  <el-dialog :title="title" v-model="showDialog" width="75%">
+  <el-dialog :title="title" v-model="showDialog" width="75%" :close-on-click-modal="false">
     <gp-form
       v-if="Object.keys(metas).length > 0"
       :cid="cid"

@@ -39,6 +39,7 @@ button.active {
 </style>
 
 <template>
+  <iframe v-if="iframe != null" :src="iframe" name="debug"  scrolling="auto"></iframe>
   <el-drawer
     v-if="isLogged"
     append-to-body
@@ -137,7 +138,7 @@ export default defineComponent({
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 
-import  {msgpack } from './js/msgpack.js'
+import  { msgpack } from './js/msgpack.js'
 
 import VueApexCharts from "vue3-apexcharts";
 
@@ -157,6 +158,10 @@ import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 
 import ganttastic from '@infectoone/vue-ganttastic'
+
+// import {v4 as uuidv4} from 'uuid'
+
+// import WebSocketAsPromised from 'websocket-as-promised';
 
 const { proxy, root } = getCurrentInstance();
 
@@ -198,7 +203,39 @@ root.appContext.app.component('gp-schedule',defineAsyncComponent({loader:() => i
 root.appContext.app.component('QuillEditor', QuillEditor)
 
 //
+async function WSP(url){
+const wsp = new WebSocketAsPromised(url, {
+    packMessage: data => msgpack.encode(data),
+    unpackMessage: data => msgpack.decode(data),
+    attachRequestId: (data, requestId) => Object.assign({ id: requestId }, data), // attach requestId to message as `id` field
+    extractRequestId: data => data && data.id,
+});
+await wsp.open();
+return wsp
+}
 
+
+async function sendAsync(message,options={}){
+    if (!( 'requestId' in options)) options.requestId = uuidv4()
+    let res = await this.sendRequest('_msg' in message ? message:{_msg:message},options);
+    //if ('_msg' in res) return _json_pickle(res._msg);
+	if ('_msg' in res && '__exception__' in res._msg) iframe.value = "http://localhost:5555";
+  else {
+    if ('_msg' in res) return res._msg;
+    return null;
+  }
+}
+
+WebSocketAsPromised.prototype.sendAsync = sendAsync
+
+async function wsopen(){
+  root.appContext.app.config.globalProperties.$ws = await WSP('ws://localhost:8170');
+//app.config.globalProperties.$wsp = await WSP('ws://localhost:9000/');
+}
+wsopen();
+
+
+const iframe = ref(null);
 
 const cid = ref(null);
 const uid = reactive([]);
