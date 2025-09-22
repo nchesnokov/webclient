@@ -1,66 +1,32 @@
-<style>
-</style>
+<style></style>
 
 <template>
   <el-row>
-    <el-button
-      type="primary"
-      @click="add_row(model, container, 'list')"
-      v-if="mode != 'lookup'"
-      size="small"
-      :icon="DocumentAdd"
-    ></el-button>
-    <el-popconfirm
-      v-if="mode != 'lookup' && multipleSelection.length > 0"
-      confirmButtonText="OK"
-      cancelButtonText="No, Thanks"
-      :icon="InfoFilled"
-      iconColor="red"
-      title="Are you sure to delete?"
-      @confirm="remove_rows()"
-    >
+    <el-button type="primary" @click="add_row(model, container, 'list')" v-if="mode != 'lookup'" size="small"
+      :icon="DocumentAdd"></el-button>
+    <el-popconfirm v-if="mode != 'lookup' && multipleSelection.length > 0" confirmButtonText="OK"
+      cancelButtonText="No, Thanks" :icon="InfoFilled" iconColor="red" title="Are you sure to delete?"
+      @confirm="remove_rows()">
       <template #reference>
         <el-button type="danger" size="small" :icon="Delete"></el-button>
       </template>
     </el-popconfirm>
   </el-row>
   <el-container>
-    <el-table
-      @selection-change="handleSelectionChange"
-      :data="tableDataDisplay"
-      style="width: 100%"
-      fit
-      height="250"
-    >
+    <el-table @selection-change="handleSelectionChange" :data="tableDataDisplay" style="width: 100%" fit height="250">
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column type="expand" v-if="o2mcols.length > 0">
         <template #default="props">
           <el-tabs type="border-card" v-if="o2mcols.length > 0">
-            <el-tab-pane
-              :label="colsLabel[o2mcol]"
-              v-for="o2mcol in o2mcols"
-              :key="o2mcol"
-            >
-              <gp-o2m-components
-                :cid="cid"
-                :guid="guid"
-                :maps="maps"
-                :metas="metas"
-                :model="metas[model].meta.columns[o2mcol].obj"
-                :container="o2mcol + '.' + props.row.__path__"
-                :mode="mode"
-                :rel="metas[model].meta.columns[o2mcol].rel"
-              />
+            <el-tab-pane :label="colsLabel[o2mcol]" v-for="o2mcol in o2mcols" :key="o2mcol">
+              <gp-o2m-components :cid="cid" :guid="guid" :maps="maps" :metas="metas"
+                :model="metas[model].meta.columns[o2mcol].obj" :container="o2mcol + '.' + props.row.__path__"
+                :mode="mode" :rel="metas[model].meta.columns[o2mcol].rel" />
             </el-tab-pane>
           </el-tabs>
         </template>
       </el-table-column>
-      <el-table-column
-        :prop="getProp(col)"
-        :label="colsLabel[col]"
-        v-for="col in cols"
-        :key="col"
-      >
+      <el-table-column :prop="getProp(col)" :label="colsLabel[col]" v-for="col in cols" :key="col">
         <template v-if="colsType[col] == 'selection'" #default="scope">
           {{ selOptions[col][scope.row[col]] }}
         </template>
@@ -68,21 +34,10 @@
           <el-switch v-model="scope.row[col]" disabled></el-switch>
         </template>
       </el-table-column>
-      <el-table-column
-        fixed="right"
-        label="Operations"
-        width="120"
-        v-if="mode != 'lookup'"
-      >
+      <el-table-column fixed="right" label="Operations" width="120" v-if="mode != 'lookup'">
         <template #default="scope">
-          <el-popconfirm
-            confirmButtonText="OK"
-            cancelButtonText="No, Thanks"
-            :icon="InfoFilled"
-            iconColor="red"
-            title="Are you sure to delete?"
-            @confirm="remove_row(scope.row.__path__)"
-          >
+          <el-popconfirm confirmButtonText="OK" cancelButtonText="No, Thanks" :icon="InfoFilled" iconColor="red"
+            title="Are you sure to delete?" @confirm="remove_row(scope.row.__path__)">
             <template #reference>
               <el-button type="danger" size="small" :icon="Delete"></el-button>
             </template>
@@ -172,8 +127,8 @@ const getProp = (col) => {
 
 const add_row = (model, container, view) => {
   proxy.$ws
-    .sendAsync({
-      _msg: [
+    .send(
+      [
         props.cid,
         "_cache",
         "add",
@@ -185,29 +140,29 @@ const add_row = (model, container, view) => {
           view: view,
         },
       ],
-    })
+    )
     .then((msg) => on_modify_models(props.maps, msg[0]));
 };
 
 const remove_row = (path) => {
   //console.log('remove_row:',path,props.container)
   proxy.$ws
-    .sendAsync({
-      _msg: [
+    .send (
+      [
         props.cid,
         "_cache",
         "remove",
         props.guid,
         { path: path, container: props.container, context: {} },
       ],
-    })
+    )
     .then((msg) => on_modify_models(props.maps, msg[0]));
 };
 
 const remove_rows = () => {
   proxy.$ws
-    .sendAsync({
-      _msg: [
+    .send(
+      [
         props.cid,
         "_cache",
         "removes",
@@ -219,7 +174,7 @@ const remove_rows = () => {
           context: {},
         },
       ],
-    })
+    )
     .then((msg) =>
       //console.log('on_removes:',msg[0]))
       on_modify_models(props.maps, msg[0])
@@ -252,10 +207,10 @@ const tableDataDisplay = computed(() => {
 onMounted(() => {
   for (
     let i = 0,
-      c = props.metas[props.model].views.list.columns
-        .map((v) => v.col)
-        .filter((c) => c != props.rel),
-      meta = props.metas[props.model].meta.columns;
+    c = props.metas[props.model].views.list.columns
+      .map((v) => v.col)
+      .filter((c) => c != props.rel),
+    meta = props.metas[props.model].meta.columns;
     i < c.length;
     i++
   ) {

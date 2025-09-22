@@ -1,14 +1,8 @@
 <template>
   <slot name="search">
     <el-row>
-      <gp-selectable
-        v-if="showSearch"
-        :columns="metas[model].meta.columns"
-        :names="metas[model].meta.names"
-        :cid="cid"
-        @update:search="do_search"
-        @update:search-cancel="showSearch = false"
-      ></gp-selectable>
+      <gp-selectable v-if="showSearch" :columns="metas[model].meta.columns" :names="metas[model].meta.names" :cid="cid"
+        @update:search="do_search" @update:search-cancel="showSearch = false"></gp-selectable>
     </el-row>
   </slot>
   <slot>
@@ -21,181 +15,69 @@
         </span>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item
-              v-for="lang in $UserPreferences.langs"
-              :key="lang.code"
-              :command="{ lang: lang.code }"
-              >{{ lang.description }}</el-dropdown-item
-            >
+            <el-dropdown-item v-for="lang in $UserPreferences.langs" :key="lang.code" :command="{ lang: lang.code }">{{
+              lang.description }}</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
     </el-row>
     <el-row>
-      <el-button
-        v-if="!showSearch"
-        type="primary"
-        size="small"
-        :icon="Search"
-        @click="do_action('find')"
-      >
+      <el-button v-if="!showSearch" type="primary" size="small" :icon="Search" @click="do_action('find')">
       </el-button>
-      <el-button
-        v-if="multipleSelection.length == 0"
-        type="primary"
-        size="small"
-        :icon="DocumentAdd"
-        @click="do_action('new')"
-      ></el-button>
-      <el-button
-        v-if="multipleSelection.length > 0 && mode == 'lookup'"
-        type="primary"
-        size="small"
-        :icon="Edit"
-        @click="do_action('edit')"
-      ></el-button>
-      <el-button
-        v-if="multipleSelection.length > 0 && mode == 'edit'"
-        type="primary"
-        size="small"
-        :icon="View"
-        @click="do_action('lookup')"
-      ></el-button>
+      <el-button v-if="multipleSelection.length == 0" type="primary" size="small" :icon="DocumentAdd"
+        @click="do_action('new')"></el-button>
+      <el-button v-if="multipleSelection.length > 0 && mode == 'lookup'" type="primary" size="small" :icon="Edit"
+        @click="do_action('edit')"></el-button>
+      <el-button v-if="multipleSelection.length > 0 && mode == 'edit'" type="primary" size="small" :icon="View"
+        @click="do_action('lookup')"></el-button>
     </el-row>
-    <el-pagination
-      v-if="multipleSelection.length > 1"
-      background
-      layout="total, prev, pager, next, jumper"
-      @current-change="handleCurrentChange"
-      :page-size="pageSize"
-      :total="multipleSelection.length"
-    >
+    <el-pagination v-if="multipleSelection.length > 1" background layout="total, prev, pager, next, jumper"
+      @current-change="handleCurrentChange" :page-size="pageSize" :total="multipleSelection.length">
     </el-pagination>
-    <el-form
-      v-if="'__data__' in dataForm && Object.keys(dataForm.__data__).length > 0"
-      :model="dataForm.__data__"
-      :rules="formRules"
-      label-width="auto"
-      status-icon
-      inline-message
-    >
-      <el-form-item
-        :label="colsLabel[col]"
-        v-for="col in cols"
-        :key="col"
-        :prop="col"
-      >
-        <el-autocomplete
-          :fetch-suggestions="querySearch"
-          clearable
-          fit-input-width
-          :trigger-on-focus="false"
-          @focus="setAutocomleteCol(col)"
-          :value-key="col"
-          v-model="dataForm.__data__[col].name"
-          v-if="['many2one', 'referenced'].indexOf(colsType[col]) >= 0"
-          @select="handleSelect"
-          :readonly="readonly(col)"
-        >
+    <el-form v-if="'__data__' in dataForm && Object.keys(dataForm.__data__).length > 0" :model="dataForm.__data__"
+      :rules="formRules" label-width="auto" status-icon inline-message>
+      <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col" :prop="col">
+        <el-autocomplete :fetch-suggestions="querySearch" clearable fit-input-width :trigger-on-focus="false"
+          @focus="setAutocomleteCol(col)" :value-key="col" v-model="dataForm.__data__[col].name"
+          v-if="['many2one', 'referenced'].indexOf(colsType[col]) >= 0" @select="handleSelect"
+          :readonly="readonly(col)">
           <template v-if="isCompute(col)" #prefix>
             <el-button type="primary" size="small" :icon="Monitor" />
           </template>
           <template #suffix>
-            <el-button
-              v-if="mode != 'lookup'"
-              type="primary"
-              size="small"
-              :icon="Search"
-              @click="do_find(col, 'single', [], { item: dataForm })"
-            ></el-button>
-            <el-button
-              v-if="mode != 'lookup'"
-              type="primary"
-              size="small"
-              :icon="DocumentAdd"
-              @click="do_add(col)"
-            ></el-button>
-            <el-button
-              v-if="dataForm.__data__[col].id != null && mode != 'lookup'"
-              type="primary"
-              size="small"
-              :icon="Edit"
-              @click="do_edit(col, dataForm.__data__[col].id)"
-            ></el-button>
-            <el-button
-              v-if="dataForm.__data__[col].id != null"
-              type="primary"
-              size="small"
-              :icon="View"
-              @click="do_lookup(col, dataForm.__data__[col].id)"
-            ></el-button>
+            <el-button v-if="mode != 'lookup'" type="primary" size="small" :icon="Search"
+              @click="do_find(col, 'single', [], { item: dataForm })"></el-button>
+            <el-button v-if="mode != 'lookup'" type="primary" size="small" :icon="DocumentAdd"
+              @click="do_add(col)"></el-button>
+            <el-button v-if="dataForm.__data__[col].id != null && mode != 'lookup'" type="primary" size="small"
+              :icon="Edit" @click="do_edit(col, dataForm.__data__[col].id)"></el-button>
+            <el-button v-if="dataForm.__data__[col].id != null" type="primary" size="small" :icon="View"
+              @click="do_lookup(col, dataForm.__data__[col].id)"></el-button>
           </template>
         </el-autocomplete>
-        <el-autocomplete
-          :fetch-suggestions="querySearch"
-          clearable
-          :trigger-on-focus="false"
-          fit-input-width
-          @focus="setAutocomleteCol(col)"
-          :value-key="col"
-          v-model="dataForm.__data__[col].name"
-          v-if="colsType[col] == 'related'"
-          @select="handleSelect"
-          :readonly="readonly(col)"
-        >
+        <el-autocomplete :fetch-suggestions="querySearch" clearable :trigger-on-focus="false" fit-input-width
+          @focus="setAutocomleteCol(col)" :value-key="col" v-model="dataForm.__data__[col].name"
+          v-if="colsType[col] == 'related'" @select="handleSelect" :readonly="readonly(col)">
           <template v-if="isCompute(col)" #prefix>
             <el-button type="primary" size="small" :icon="Monitor" />
           </template>
           <template #suffix>
-            <el-button
-              v-if="mode != 'lookup'"
-              type="primary"
-              size="small"
-              :icon="Search"
-              @click="do_find(col, 'single', [], { item: dataForm })"
-            ></el-button>
-            <el-button
-              v-if="mode != 'lookup'"
-              type="primary"
-              size="small"
-              :icon="DocumentAdd"
-              @click="do_add(col)"
-            ></el-button>
-            <el-button
-              v-if="dataForm.__data__[col].id != null && mode != 'lookup'"
-              type="primary"
-              size="small"
-              :icon="Edit"
-              @click="do_edit(col, dataForm.__data__[col].id)"
-            ></el-button>
-            <el-button
-              v-if="dataForm.__data__[col].id != null"
-              type="primary"
-              size="small"
-              :icon="View"
-              @click="do_lookup(col, dataForm.__data__[col].id)"
-            ></el-button>
+            <el-button v-if="mode != 'lookup'" type="primary" size="small" :icon="Search"
+              @click="do_find(col, 'single', [], { item: dataForm })"></el-button>
+            <el-button v-if="mode != 'lookup'" type="primary" size="small" :icon="DocumentAdd"
+              @click="do_add(col)"></el-button>
+            <el-button v-if="dataForm.__data__[col].id != null && mode != 'lookup'" type="primary" size="small"
+              :icon="Edit" @click="do_edit(col, dataForm.__data__[col].id)"></el-button>
+            <el-button v-if="dataForm.__data__[col].id != null" type="primary" size="small" :icon="View"
+              @click="do_lookup(col, dataForm.__data__[col].id)"></el-button>
           </template>
         </el-autocomplete>
-        <el-input
-          v-model="dataForm.__data__[col]"
-          :maxlength="colsSize[col]"
-          show-word-limit
-          v-else-if="
-            ['char', 'varchar', 'composite', 'decomposite', 'tree'].indexOf(
-              colsType[col]
-            ) >= 0
-          "
-          @change="cache(dataForm, col)"
-          :readonly="readonly(col)"
-        >
+        <el-input v-model="dataForm.__data__[col]" :maxlength="colsSize[col]" show-word-limit v-else-if="['char', 'varchar', 'composite', 'decomposite', 'tree'].indexOf(
+          colsType[col]
+        ) >= 0
+        " @change="cache(dataForm, col)" :readonly="readonly(col)">
           <template v-if="isCompute(col) || colsTranslate[col]" #prepend>
-            <el-button
-              v-if="isCompute(col)"
-              type="primary"
-              size="small"
-              :icon="Monitor"
-            />
+            <el-button v-if="isCompute(col)" type="primary" size="small" :icon="Monitor" />
             <el-dropdown v-if="colsTranslate[col]" @command="i18nCommand">
               <span class="el-dropdown-link">
                 {{ colsLang[col].toLowerCase() }}
@@ -205,72 +87,42 @@
               </span>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item
-                    v-for="lang in $UserPreferences.langs"
-                    :key="lang.code"
-                    :command="{ col: col, lang: lang.code }"
-                    >{{ lang.description }}
+                  <el-dropdown-item v-for="lang in $UserPreferences.langs" :key="lang.code"
+                    :command="{ col: col, lang: lang.code }">{{ lang.description }}
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
           </template>
         </el-input>
-<!--
-        <json-viewer
-          v-if="colsType[col] == 'json'"
-          :value="dataForm.__data__[col]"
-          copyable
-          boxed
-          sort
-        />
- -->
-<JsonEditor  v-if="colsType[col] == 'json'"
-    :options="{
-        confirmText: 'confirm',
-        cancelText: 'cancel',
-    }"
-	v-model:objData="dataForm.__data__[col]"
-	/>
-        <el-input
-          v-model="dataForm.__data__[col]"
-          v-else-if="
-            [
-              'uuid',
-              'integer',
-              'float',
-              'decimal',
-              'numeric',
-              'timedelta',
-            ].indexOf(colsType[col]) >= 0
-          "
-          @change="cache(dataForm, col)"
-          :readonly="readonly(col)"
-        >
+        <json-viewer v-if="colsType[col] == 'json'" :value="dataForm.__data__[col]" copyable boxed sort />
+
+        <!--
+
+  <JsonEditor v-if="colsType[col] == 'json'" :options="{
+          confirmText: 'confirm',
+          cancelText: 'cancel',
+        }" v-model:objData="dataForm.__data__[col]" />
+         -->
+        <el-input v-model="dataForm.__data__[col]" v-else-if="[
+          'uuid',
+          'integer',
+          'float',
+          'decimal',
+          'numeric',
+          'timedelta',
+        ].indexOf(colsType[col]) >= 0
+        " @change="cache(dataForm, col)" :readonly="readonly(col)">
           <template v-if="isCompute(col)" #prefix>
             <el-button type="primary" size="small" :icon="Monitor" />
           </template>
         </el-input>
-        <QuillEditor
-          v-model:context="dataForm.__data__[col]"
-          theme="snow"
-          v-else-if="colsType[col] == 'richtext'"
-        />
-        <el-input
-          v-model="dataForm.__data__[col]"
-          autosize
-          type="textarea"
-          v-else-if="['text', 'xml'].indexOf(colsType[col]) >= 0"
-          @change="cache(dataForm, col)"
-          :readonly="readonly(col)"
-        >
+        <QuillEditor v-model:context="dataForm.__data__[col]" theme="snow" v-else-if="colsType[col] == 'richtext'" />
+        <el-input v-model="dataForm.__data__[col]" autosize type="textarea"
+          v-else-if="['text', 'xml'].indexOf(colsType[col]) >= 0" @change="cache(dataForm, col)"
+          :readonly="readonly(col)">
           <template v-if="isCompute(col) || colsTranslate[col]" #prepend>
-            <el-button
-              v-if="isCompute(col)"
-              type="primary"
-              size="small"
-              :icon="Monitor"
-            />
+            <el-button v-if="isCompute(col)" type="primary" size="small" :icon="Monitor" />
             <el-dropdown v-if="colsTranslate[col]" @command="i18nCommand">
               <span class="el-dropdown-link">
                 {{ colsLang[col].toLowerCase() }}
@@ -280,152 +132,76 @@
               </span>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item
-                    v-for="lang in $UserPreferences.langs"
-                    :key="lang.code"
-                    :command="{ col: col, lang: lang.code }"
-                    >{{ lang.description }}
+                  <el-dropdown-item v-for="lang in $UserPreferences.langs" :key="lang.code"
+                    :command="{ col: col, lang: lang.code }">{{ lang.description }}
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
           </template>
         </el-input>
-        <el-date-picker
-          v-model="dataForm.__data__[col]"
-          v-else-if="colsType[col] == 'date'"
-          @change="cache(dataForm, col)"
-          :readonly="readonly(col)"
-        ></el-date-picker>
-        <el-time-picker
-          v-model="dataForm.__data__[col]"
-          v-else-if="colsType[col] == 'time'"
-          @change="cache(dataForm, col)"
-          :readonly="readonly(col)"
-        ></el-time-picker>
-        <el-date-picker
-          v-model="dataForm.__data__[col]"
-          type="datetime"
-          v-else-if="colsType[col] == 'datetime'"
-          @change="cache(dataForm, col)"
-          :readonly="readonly(col)"
-        ></el-date-picker>
-        <el-select
-          v-model="dataForm.__data__[col]"
-          v-else-if="colsType[col] == 'selection'"
-          @change="cache(dataForm, col)"
-          :disabled="readonly(col)"
-        >
-          <el-option
-            v-for="item in selOptions[col]"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          ></el-option>
+        <el-date-picker v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'date'"
+          @change="cache(dataForm, col)" :readonly="readonly(col)"></el-date-picker>
+        <el-time-picker v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'time'"
+          @change="cache(dataForm, col)" :readonly="readonly(col)"></el-time-picker>
+        <el-date-picker v-model="dataForm.__data__[col]" type="datetime" v-else-if="colsType[col] == 'datetime'"
+          @change="cache(dataForm, col)" :readonly="readonly(col)"></el-date-picker>
+        <el-select v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'selection'"
+          @change="cache(dataForm, col)" :disabled="readonly(col)">
+          <el-option v-for="item in selOptions[col]" :key="item.value" :label="item.label"
+            :value="item.value"></el-option>
         </el-select>
         <el-row v-else-if="colsType[col] == 'many2many'">
-          <el-button
-            type="primary"
-            @click="do_find(col, 'multiple', [], { path: dataForm.__path__ })"
-            >Add</el-button
-          >
+          <el-button type="primary" @click="do_find(col, 'multiple', [], { path: dataForm.__path__ })">Add</el-button>
           <br />
-          <gp-m2m-list
-            :metas="metas"
-            :model="metas[model].meta.columns[col].obj"
-            :tableData="dataMaps.__containers__[col + '.' + dataForm.__path__]"
-          >
+          <gp-m2m-list :metas="metas" :model="metas[model].meta.columns[col].obj"
+            :tableData="dataMaps.__containers__[col + '.' + dataForm.__path__]">
           </gp-m2m-list>
         </el-row>
-        <el-switch
-          v-model="dataForm.__data__[col]"
-          v-else-if="colsType[col] == 'boolean'"
-          @change="cache(dataForm, col)"
-          :disabled="readonly(col)"
-        ></el-switch>
-        <el-image
-          v-else-if="
-            colsType[col] == 'binary' &&
-            metas[model].meta.columns[col].accept == 'image/*' &&
-            dataForm.__data__[col] != null
-          "
-          style="width: 100px; height: 100px"
-          :src="
-            'data:image/jpeg;base64,' +
-            dataForm.__data__[col].slice(1, dataForm.__data__[col].length - 8)
-          "
-          fit="fill"
-        ></el-image>
-        <el-upload
-          v-else-if="
-            colsType[col] == 'binary' &&
-            metas[model].meta.columns[col].accept == 'image/*' &&
-            dataForm.__data__[col] == null
-          "
-          ref="dataForm.__data__[col]"
-          :data="dataForm.__data__[col]"
-          list-type="picture"
-          action=""
-          :auto-upload="false"
-        >
+        <el-switch v-model="dataForm.__data__[col]" v-else-if="colsType[col] == 'boolean'"
+          @change="cache(dataForm, col)" :disabled="readonly(col)"></el-switch>
+        <el-image v-else-if="colsType[col] == 'binary' &&
+          metas[model].meta.columns[col].accept == 'image/*' &&
+          dataForm.__data__[col] != null
+        " style="width: 100px; height: 100px" :src="'data:image/jpeg;base64,' +
+          dataForm.__data__[col].slice(1, dataForm.__data__[col].length - 8)
+          " fit="fill"></el-image>
+        <el-upload v-else-if="colsType[col] == 'binary' &&
+          metas[model].meta.columns[col].accept == 'image/*' &&
+          dataForm.__data__[col] == null
+        " ref="dataForm.__data__[col]" :data="dataForm.__data__[col]" list-type="picture" action=""
+          :auto-upload="false">
           <template #trigger>
             <el-button type="primary">select file</el-button>
           </template>
         </el-upload>
       </el-form-item>
-      <el-tabs type="border-card" v-if="o2mcols.length > 0">
-        <el-tab-pane
-          :label="colsLabel[o2mcol]"
-          v-for="o2mcol in o2mcols"
-          :key="o2mcol"
-        >
-          <gp-o2m-components
-            :cid="cid"
-            :guid="guid"
-            :maps="dataMaps"
-            :metas="metas"
-            :model="metas[model].meta.columns[o2mcol].obj"
-            :container="o2mcol + '.' + dataForm.__path__"
-            :mode="mode"
-            :rel="metas[model].meta.columns[o2mcol].rel"
-          />
+      <el-tabs type="border-card" v-if="o2mcols.length > 0" tab-position="top">
+        <el-tab-pane :label="colsLabel[o2mcol]" v-for="o2mcol in o2mcols" :key="o2mcol">
+          <gp-o2m-components :cid="cid" :guid="guid" :maps="dataMaps" :metas="metas"
+            :model="metas[model].meta.columns[o2mcol].obj" :container="o2mcol + '.' + dataForm.__path__" :mode="mode"
+            :rel="metas[model].meta.columns[o2mcol].rel" />
         </el-tab-pane>
       </el-tabs>
     </el-form>
   </slot>
   <slot name="footer">
-    <el-popconfirm
-      v-if="mode == 'new'"
-      confirmButtonText="OK"
-      cancelButtonText="No, Thanks"
-      icon="el-icon-info"
-      iconColor="red"
-      title="Are you sure to clear?"
-      @confirm="onClear"
-    >
+    <el-popconfirm v-if="mode == 'new'" confirmButtonText="OK" cancelButtonText="No, Thanks" icon="el-icon-info"
+      iconColor="red" title="Are you sure to clear?" @confirm="onClear">
       <template #reference>
         <el-button type="danger">Clear</el-button>
       </template>
     </el-popconfirm>
-    <el-popconfirm
-      v-if="Object.keys(modal).length > 0 && mode != 'lookup'"
-      confirmButtonText="OK"
-      cancelButtonText="No, Thanks"
-      icon="el-icon-info"
-      iconColor="red"
-      title="Are you sure to close?"
-      @confirm="onClose"
-    >
+    <el-popconfirm v-if="Object.keys(modal).length > 0 && mode != 'lookup'" confirmButtonText="OK"
+      cancelButtonText="No, Thanks" icon="el-icon-info" iconColor="red" title="Are you sure to close?"
+      @confirm="onClose">
       <template #reference>
         <el-button type="danger">Close</el-button>
       </template>
     </el-popconfirm>
     <el-button v-else type="danger" @click="onClose">Close</el-button>
-    <el-button type="success" @click="onValidate" :disabled="mode == 'lookup'"
-      >Validate</el-button
-    >
-    <el-button type="primary" @click="onSubmit" :disabled="mode == 'lookup'"
-      >{{ mode == "copy" ? "Copy" : "Save" }}
+    <el-button type="success" @click="onValidate" :disabled="mode == 'lookup'">Validate</el-button>
+    <el-button type="primary" @click="onSubmit" :disabled="mode == 'lookup'">{{ mode == "copy" ? "Copy" : "Save" }}
     </el-button>
   </slot>
 </template>
@@ -461,9 +237,7 @@ import {
   View,
   ArrowDown,
 } from "@element-plus/icons-vue";
-// import { classType } from "element-plus/es/components/table-v2/src/common.js";
-import JsonEditor from "vue3-json-edit";
-import "vue3-json-edit/dist/style.css";
+
 const props = defineProps({
   cid: {
     type: String,
@@ -604,17 +378,17 @@ const querySearch = (queryString, cb) => {
       else
         for (
           let i = 0,
-            d = domainConditions(
-              props.metas[props.model].meta.columns[autoCompleteCol.value.col]
-                .domain
-            );
+          d = domainConditions(
+            props.metas[props.model].meta.columns[autoCompleteCol.value.col]
+              .domain
+          );
           i < d.length;
           i++
         )
           cond.push(d[i]);
     proxy.$ws
-      .sendAsync({
-        _msg: [
+      .send(
+        [
           props.cid,
           "models",
           obj,
@@ -626,7 +400,7 @@ const querySearch = (queryString, cb) => {
             limit: 10,
           },
         ],
-      })
+      )
       .then((msg) => {
         let result = [];
         for (let i = 0, v; i < msg.length; i++) {
@@ -643,10 +417,10 @@ const querySearch = (queryString, cb) => {
 
 const handleSelect = (item) => {
   // console.log("handleSelect:", item);
-  if (props.metas[props.model].meta.columns[autoCompleteCol.value.col].type == "related") related_cache(dataForm,autoCompleteCol.value.col,props.metas[props.model].meta.columns[autoCompleteCol.value.col].relatedy)
-  else  m2o_cache(dataForm, autoCompleteCol.value.col);
+  if (props.metas[props.model].meta.columns[autoCompleteCol.value.col].type == "related") related_cache(dataForm, autoCompleteCol.value.col, props.metas[props.model].meta.columns[autoCompleteCol.value.col].relatedy)
+  else m2o_cache(dataForm, autoCompleteCol.value.col);
 };
-const addRow = () => {};
+const addRow = () => { };
 
 const cache = (item, name) => {
   // console.log("cache-item:", name, item.__data__[name], item);
@@ -737,9 +511,9 @@ const cache = (item, name) => {
   };
   // console.log("cache:", r);
   proxy.$ws
-    .sendAsync({
-      _msg: [props.cid, "_cache", "cache", guid.value, r],
-    })
+    .send(
+      [props.cid, "_cache", "cache", guid.value, r],
+    )
     .then((v) => {
       // console.log("cache:", v);
       if (v.length > 0) on_modify_models(dataMaps, v[0]);
@@ -763,9 +537,9 @@ const m2o_cache = (item, name) => {
   };
   // console.log("cache:", r);
   proxy.$ws
-    .sendAsync({
-      _msg: [props.cid, "_cache", "m2ofind", guid.value, r],
-    })
+    .send(
+      [props.cid, "_cache", "m2ofind", guid.value, r],
+    )
     .then((v) => {
       // console.log("m2ofind:", v);
       let f = v[0];
@@ -820,9 +594,9 @@ const related_cache = (item, name, relatedy) => {
   };
   //console.log('cache-related:',r);
   proxy.$ws
-    .sendAsync({
-      _msg: [props.cid, "_cache", "relatedfind", guid.value, r],
-    })
+    .send(
+      [props.cid, "_cache", "relatedfind", guid.value, r],
+    )
     .then((v) => {
       // console.log("relatedfind:", v);
       let f = v[0];
@@ -842,7 +616,7 @@ const related_cache = (item, name, relatedy) => {
           )
             extcond.push({
               __tuple__: d[i],
-            });
+            }); _
         if (
           "relatedy" in props.metas[props.model].meta.columns[name] &&
           props.metas[props.model].meta.columns[name].relatedy != null
@@ -886,8 +660,8 @@ const i18nCommand = (command) => {
   let ctx = Object.assign({}, proxy.$UserPreferences.Context);
   ctx.lang = command.lang;
   proxy.$ws
-    .sendAsync({
-      _msg: [
+    .send(
+      [
         props.cid,
         "models",
         props.model,
@@ -898,13 +672,12 @@ const i18nCommand = (command) => {
           context: ctx,
         },
       ],
-    })
+    )
     .then((msg) => {
       dataForm.__data__[command.col] = msg[0][command.col];
     });
 };
 const handleSelectionChange = (val) => {
-  //console.log('selection:', val)
   multipleSelection.splice(0, multipleSelection.length, ...val);
 };
 
@@ -913,8 +686,8 @@ const handleCurrentChange = (val) => {
   let ctx = Object.assign({}, proxy.$UserPreferences.Context);
   ctx.cache = guid.value;
   proxy.$ws
-    .sendAsync({
-      _msg: [
+    .send(
+      [
         props.cid,
         "models",
         props.model,
@@ -925,7 +698,7 @@ const handleCurrentChange = (val) => {
           context: ctx,
         },
       ],
-    })
+    )
     .then((msg) => on_read(msg));
 };
 
@@ -961,8 +734,8 @@ const on_find_new = (value, opts) => {
 };
 const m2m_cache = (model, container, fields, obj, rel, id2, context) => {
   proxy.$ws
-    .sendAsync({
-      _msg: [
+    .send(
+      [
         props.cid,
         "_cache",
         "m2madd",
@@ -977,7 +750,7 @@ const m2m_cache = (model, container, fields, obj, rel, id2, context) => {
           context: {},
         },
       ],
-    })
+    )
     .then((msg) => on_modify_models(dataMaps, msg[0]));
 };
 const on_find_m2m = (value, opts) => {
@@ -1005,8 +778,8 @@ const fieldsBuild = (model, view) => {
   let fcols = [];
   for (
     let i = 0,
-      columns = props.metas[model].views[view].columns.map((v) => v.col),
-      k = {};
+    columns = props.metas[model].views[view].columns.map((v) => v.col),
+    k = {};
     i < columns.length;
     i++
   )
@@ -1031,8 +804,22 @@ const fieldsBuild = (model, view) => {
         ].views.m2mlist.columns.map((v) => v.col);
         fcols.push(k);
         break;
+      case "one2i18n":
+        k = {};
+        if (props.metas[model].meta.columns[columns[i]].obj != model)
+          k[columns[i]] = fieldsBuild(
+            props.metas[model].meta.columns[columns[i]].obj,
+            "form"
+          );
+        else
+          k[columns[i]] = props.metas[model].views.list.columns.map(
+            (v) => v.col
+          );
+        fcols.push(k);
+        break;
       default:
         fcols.push(columns[i]);
+
     }
   return fcols;
 };
@@ -1047,9 +834,9 @@ const relatedyConditions = (col) => {
   let cond = [];
   for (
     let i = 0,
-      relatedy = listRelatedFields(
-        props.metas[props.model].meta.columns[col].relatedy
-      );
+    relatedy = listRelatedFields(
+      props.metas[props.model].meta.columns[col].relatedy
+    );
     i < relatedy.length;
     i++
   )
@@ -1108,8 +895,8 @@ const do_find = (col, mode = "single", extcond = [], callbackopts = {}) => {
 
 const do_search = (event) => {
   proxy.$ws
-    .sendAsync({
-      _msg: [
+    .send(
+      [
         props.cid,
         "models",
         props.model,
@@ -1121,7 +908,7 @@ const do_search = (event) => {
           limit: event.limit.value,
         },
       ],
-    })
+    )
     .then((msg) => on_search(msg));
 };
 
@@ -1134,8 +921,8 @@ const on_search = (msg) => {
     let ctx = Object.assign({}, proxy.$UserPreferences.Context);
     ctx.cache = guid.value;
     proxy.$ws
-      .sendAsync({
-        _msg: [
+      .send(
+        [
           props.cid,
           "models",
           props.model,
@@ -1146,7 +933,7 @@ const on_search = (msg) => {
             context: ctx,
           },
         ],
-      })
+      )
       .then((msh) => on_read(msg));
   }
 };
@@ -1213,21 +1000,21 @@ const do_lookup = (col, oid) => {
 const onSubmit = async () => {
   (async () => {
     if (["new", "edit", "copy"].indexOf(mode.value) >= 0) {
-      let msg = await proxy.$ws.sendAsync({
-        _msg: [
+      let msg = await proxy.$ws.send(
+        [
           props.cid,
           "_cache",
           mode.value == "copy" ? "copy" : "save",
           guid.value,
           {},
         ],
-      });
+      );
       let action = msg[0],
         oid = msg[1];
       // console.log("action:", msg);
       if (action == "commit") {
-        await proxy.$ws.sendAsync({
-          _msg: [
+        await proxy.$ws.send(
+          [
             props.cid,
             "_cache",
             "commit",
@@ -1236,7 +1023,7 @@ const onSubmit = async () => {
               action: "commit work",
             },
           ],
-        });
+        );
         dataForm.__data__.id = oid;
         if (mode.value == "new") {
           if (
@@ -1294,8 +1081,8 @@ const onClose = () => {
 const onClear = () => {
   if (mode.value == "new")
     proxy.$ws
-      .sendAsync({
-        _msg: [
+      .send(
+        [
           props.cid,
           "_cache",
           "initialize",
@@ -1305,17 +1092,12 @@ const onClear = () => {
             view: "form",
           },
         ],
-      })
+      )
       .then((msg) => {
         if (msg && msg.length > 0) {
           init_metacache();
-          // Object.assign(dataForm, dataRowForm(msg[0]));
-          // dataRowMaps(dataMaps,dataForm);
           dataRowMaps(dataMaps, msg[0]);
           Object.assign(dataForm, dataMaps.__ids__[msg[0].__path__]);
-          // console.log("dataRowMaps:", dataMaps);
-
-          // console.log("initialize:", msg);
         }
       });
 };
@@ -1327,17 +1109,18 @@ const on_read = (msg) => {
   // console.log("on_read:", msg);
   if (msg && msg.length > 0) {
     init_metacache();
+    console.log("DATA:", msg);
     dataRowMaps(dataMaps, msg[0]);
     Object.assign(dataForm, dataMaps.__ids__[msg[0].__path__]);
-    // console.log("dataRowMaps:", dataMaps);
-    // console.log("dataForm:", dataForm);
+    console.log("dataRowMaps:", dataMaps);
+    console.log("dataForm:", dataForm);
   }
 };
 
 onBeforeMount(async () => {
   if ("mode" in props.modal) mode.value = props.modal.mode;
-  let msg = await proxy.$ws.sendAsync({
-    _msg: [
+  let msg = await proxy.$ws.send(
+    [
       props.cid,
       "_cache",
       "open",
@@ -1346,11 +1129,23 @@ onBeforeMount(async () => {
         context: proxy.$UserPreferences.Context,
       },
     ],
-  });
+  );
   if (msg && msg.length > 0) guid.value = msg[0];
   if (mode.value == "new") {
-    msg = await proxy.$ws.sendAsync({
-      _msg: [
+    msg = await proxy.$ws.send(    // console.log("multipleSelection:", multipleSelection);
+      // console.log("multipleSelection:", multipleSelection);
+      // console.log("multipleSelection:", multipleSelection);
+      // console.log("multipleSelection:", multipleSelection);
+      // console.log("multipleSelection:", multipleSelection);
+      // console.log("multipleSelection:", multipleSelection);
+      // console.log("multipleSelection:", multipleSelection);
+      // console.log("multipleSelection:", multipleSelection);
+      // console.log("multipleSelection:", multipleSelection);
+      // console.log("multipleSelection:", multipleSelection);
+      // console.log("multipleSelection:", multipleSelection);
+      // console.log("multipleSelection:", multipleSelection);
+
+      [
         props.cid,
         "_cache",
         "initialize",
@@ -1360,7 +1155,7 @@ onBeforeMount(async () => {
           view: "form",
         },
       ],
-    });
+    );
     if (msg && msg.length > 0) {
       init_metacache();
 
@@ -1371,10 +1166,10 @@ onBeforeMount(async () => {
       // console.log("dataForm:", dataForm);
     }
   }
-    for (
+  for (
     let i = 0,
-      c = props.metas[props.model].views.form.columns.map((v) => v.col),
-      meta = props.metas[props.model].meta.columns;
+    c = props.metas[props.model].views.form.columns.map((v) => v.col),
+    meta = props.metas[props.model].meta.columns;
     i < c.length;
     i++
   ) {
@@ -1412,18 +1207,16 @@ onBeforeMount(async () => {
   //Object.assign(formRules, rules);
   console.log("rules:", formRules);
 
-  //console.log('translate:',colsTranslate,colsType)
   fields.splice(0, fields.length, ...fieldsBuild(props.model, "form"));
   if (mode.value !== "new" && "oid" in props.modal) {
     if (Array.isArray(props.modal.oid))
       multipleSelection.splice(0, multipleSelection.length, ...props.modal.oid);
     else multipleSelection.splice(0, multipleSelection.length, props.modal.oid);
-    // console.log("multipleSelection:", multipleSelection);
     let ctx = Object.assign({}, proxy.$UserPreferences.Context);
     ctx.cache = guid.value;
-    proxy.$ws
-      .sendAsync({
-        _msg: [
+    let msgread = await proxy.$ws
+      .send(
+        [
           props.cid,
           "models",
           props.model,
@@ -1434,8 +1227,16 @@ onBeforeMount(async () => {
             context: ctx,
           },
         ],
-      })
-      .then((msg) => on_read(msg));
+      )
+    on_read(msgread);
   }
 });
 </script>
+<style>
+.demo-tabs>.el-tabs__content {
+  padding: 32px;
+  color: #6b778c;
+  font-size: 32px;
+  font-weight: 600;
+}
+</style>

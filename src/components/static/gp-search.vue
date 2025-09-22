@@ -46,11 +46,11 @@
         <el-table-column type="selection" width="55" />
         <el-table-column :prop="col" :label="colsLabel[col]" v-for="col in cols" :key="col">
             <template v-if="colsType[col] == 'selection'" #default="scope">{{ selOptions[col][scope.row[col]]
-            }}</template>
+                }}</template>
             <template v-else-if="colsType[col] == 'boolean'" #default="scope">
                 <el-switch v-model="scope.row[col]" disabled />
             </template>
-            <template v-else-if="['many2one','referenced','related'].indexOf(colsType[col]) >= 0" #default="scope">{{
+            <template v-else-if="['many2one', 'referenced', 'related'].indexOf(colsType[col]) >= 0" #default="scope">{{
                 scope.row[col].name }}</template>
 
             <template v-else #default="scope">{{ scope.row[col] }}</template>
@@ -139,21 +139,18 @@ const do_select = () => {
 
 const do_search = event => {
     //console.log('select data:', event)
-    proxy.$ws.sendAsync({
-        _msg: [
-            props.cid,
-            'models',
-            props.model,
-            'select', {
-                fields: props.metas[props.model].views.search.columns.map((v) => v.col),
-                cond: event.cond,
-                context: proxy.$UserPreferences.Context,
-                offset: event.offset.value,
-                limit: event.limit.value
-            }
-        ]
-    }
-
+    proxy.$ws.send([
+        props.cid,
+        'models',
+        props.model,
+        'select', {
+            fields: props.metas[props.model].views.search.columns.map((v) => v.col),
+            cond: event.cond,
+            context: proxy.$UserPreferences.Context,
+            offset: event.offset.value,
+            limit: event.limit.value
+        }
+    ]
     ).then(msg => on_select_data(msg))
 }
 
@@ -208,8 +205,8 @@ const do_action = action => {
             )
             break
         case 'delete':
-            proxy.$ws.sendAsync({
-                _msg: [
+            proxy.$ws.send(
+                [
                     props.cid,
                     'models',
                     props.model,
@@ -218,16 +215,16 @@ const do_action = action => {
                         context: proxy.$UserPreferences.Context
                     }
                 ]
-            }
+
             ).then((msg) => {
                 //console.log('action:', msg)
                 if (msg.length > 0) {
-                    proxy.$ws.sendAsync({
-                        _msg: [
+                    proxy.$ws.send(
+                        [
                             props.cid,
                             '_commit'
                         ]
-                    }).then(() => {
+                    ).then(() => {
                         proxy.$notify({
                             title: 'Information',
                             message: h(

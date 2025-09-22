@@ -39,7 +39,8 @@ import {
     defineComponent, reactive, ref, getCurrentInstance
 }
     from 'vue'
-export default defineComponent({
+
+    export default defineComponent({
     name: 'gp-login-form',
     props: ['isLogged'],
     emits: ['update:login'],
@@ -51,7 +52,7 @@ export default defineComponent({
         const isVisible = ref(false);
         const select = ref('ws://')
         const form = reactive({
-            url: 'localhost:8170',
+            url: 'localhost:8170/ws',
             slot: 'test003',
             user: 'admin',
             password: 'admin'

@@ -1,20 +1,11 @@
-
-
 <template>
   <el-dialog :title="title" v-model="showDialog" width="75%" :close-on-click-modal="false">
-    <gp-form
-      v-if="Object.keys(metas).length > 0"
-      :cid="cid"
-      :metas="metas"
-      :model="model"
-      :modal="{
-        oid: oid,
-        mode: mode,
-        callback: callback,
-        callbackOpts: callbackOpts,
-      }"
-      @update:close="showDialog = false"
-    />
+    <gp-form v-if="Object.keys(metas).length > 0" :cid="cid" :metas="metas" :model="model" :modal="{
+      oid: oid,
+      mode: mode,
+      callback: callback,
+      callbackOpts: callbackOpts,
+    }" @update:close="showDialog = false" />
   </el-dialog>
 </template>
 
@@ -66,22 +57,22 @@ const metas = reactive({});
 const title = ref("Modal Form");
 
 onBeforeMount(() => {
-  proxy.$ws
-    .sendAsync({
-      _msg: [
-        props.cid,
-        "uis",
-        "get_meta_of_models_v2",
-        {
-          model: props.model,
-          context: proxy.$UserPreferences.Context,
-        },
-      ],
-    })
+  proxy.$ws.send(
+    [
+      props.cid,
+      "uis",
+      "get_meta_of_models_v2",
+      {
+        model: props.model,
+        context: proxy.$UserPreferences.Context,
+      },
+    ],
+  )
     .then((msg) => {
       if (msg && msg.length > 0) {
         Object.assign(metas, msg[0]);
         title.value = metas[props.model].meta.description;
+        console.log("META:", msg[0]);
       }
     });
 });

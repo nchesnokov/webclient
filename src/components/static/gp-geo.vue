@@ -1,27 +1,27 @@
-
-
 <template>
 
-<slot name="search">
-    <el-row>
-        <gp-selectable v-if="showSearch" :columns="metas[model].meta.columns" :names="metas[model].meta.names" @update:search="do_search" @update:search-cancel="showSearch = false"></gp-selectable>
-    </el-row>
-</slot>
-<slot>
-    <el-row>{{ metas[model].meta.description }}</el-row>
-    <el-row>
-        <el-button type="primary" size="small" :icon="Search" @click="do_action('find')"></el-button>
-    </el-row>
-    <el-pagination v-if="multipleSelection.length > 1" background layout="prev, pager, next" @current-change="handleCurrentChange" :page-size="pageSize" :total="multipleSelection.length">
-    </el-pagination>
+    <slot name="search">
+        <el-row>
+            <gp-selectable v-if="showSearch" :columns="metas[model].meta.columns" :names="metas[model].meta.names"
+                @update:search="do_search" @update:search-cancel="showSearch = false"></gp-selectable>
+        </el-row>
+    </slot>
+    <slot>
+        <el-row>{{ metas[model].meta.description }}</el-row>
+        <el-row>
+            <el-button type="primary" size="small" :icon="Search" @click="do_action('find')"></el-button>
+        </el-row>
+        <el-pagination v-if="multipleSelection.length > 1" background layout="prev, pager, next"
+            @current-change="handleCurrentChange" :page-size="pageSize" :total="multipleSelection.length">
+        </el-pagination>
 
-    <l-map v-model="zoom" v-model:zoom="zoom" :zoom="zoom" :center="center" @move="log('move')">
-        <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
-        <l-marker :lat-lng="marker">
-            <l-icon :icon-url="iconUrl" :icon-size="iconSize" />
-        </l-marker>
-    </l-map>
-</slot>
+        <l-map v-model="zoom" v-model:zoom="zoom" :zoom="zoom" :center="center" @move="log('move')">
+            <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
+            <l-marker :lat-lng="marker">
+                <l-icon :icon-url="iconUrl" :icon-size="iconSize" />
+            </l-marker>
+        </l-map>
+    </slot>
 
 </template>
 
@@ -31,15 +31,15 @@ import "leaflet//dist/leaflet.css"
 import {
     latLng
 }
-from "leaflet/dist/leaflet-src.esm";
+    from "leaflet/dist/leaflet-src.esm";
 import {
     defineComponent, ref, reactive, computed, getCurrentInstance, onMounted
 }
-from 'vue';
+    from 'vue';
 import {
     LMap, LTileLayer, LMarker, LIcon
 }
-from '@vue-leaflet/vue-leaflet';
+    from '@vue-leaflet/vue-leaflet';
 
 import { Search } from '@element-plus/icons-vue'
 
@@ -69,13 +69,13 @@ export default defineComponent({
 
         const handleCurrentChange = (val) => {
             page.value = val;
-            proxy.$ws.sendAsync({
-                _msg: [props.cid, 'models', props.model, 'read', {
+            proxy.$ws.send(
+                [props.cid, 'models', props.model, 'read', {
                     'fields': fields,
                     'ids': multipleSelection[page.value - 1],
                     'context': proxy.$UserPreferences.Context
                 }]
-            }).then(msg => on_read(msg) );
+            ).then(msg => on_read(msg));
         };
 
         const fieldsBuild = (model, view) => {
@@ -111,14 +111,14 @@ export default defineComponent({
         };
 
         const do_search = (event) => {
-            proxy.$ws.sendAsync({
-                _msg: [props.cid, 'models', props.model, 'search', {
+            proxy.$ws.send(
+                [props.cid, 'models', props.model, 'search', {
                     'cond': event.cond,
                     'context': proxy.$UserPreferences.Context,
                     'offset': event.offset.value,
                     'limit': event.limit.value
                 }]
-            }).then(msg => on_search(msg));
+            ).then(msg => on_search(msg));
 
         };
 
@@ -127,13 +127,13 @@ export default defineComponent({
             if (msg.length > 0) {
                 multipleSelection.splice(0, multipleSelection.length, ...msg);
                 showSearch.value = false;
-                proxy.$ws.sendAsync({
-                    _msg: [props.cid, 'models', props.model, 'read', {
+                proxy.$ws.send(
+                    [props.cid, 'models', props.model, 'read', {
                         'fields': fields,
                         'ids': multipleSelection[page.value - 1],
                         'context': proxy.$UserPreferences.Context
                     }]
-                }).then(msg => on_read(msg) );
+                ).then(msg => on_read(msg));
 
             }
         };

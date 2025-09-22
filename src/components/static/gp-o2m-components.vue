@@ -1,78 +1,69 @@
 
 
 <template>
-
     <el-row>
         <el-button v-for="tab in tabs" :key="tab" :class="['tab-button', { active: currentTab === tab }]"
             @click="on_clicktab(tab)">{{ tab.split('-')[2] }}</el-button>
     </el-row>
-    <component :is="currentTab" :cid="cid" :guid="guid" :maps="maps" :metas="metas" :model="model"
-        :container="container" :mode="mode" :rel="rel" />
-
+    <component :is="currentTab" :cid="cid" :guid="guid" :maps="maps" :metas="metas" :model="model" :container="container"
+        :mode="mode" :rel="rel" />
 </template>
 
 <script>
 
 import {
-    defineComponent, ref, reactive, onMounted
+    defineComponent, ref, reactive, onMounted,getCurrentInstance
 }
     from 'vue'
 
 export default defineComponent({
-    name: 'gp-o2m-components',
-    props: {
-        'cid': {
-            type: String
-        },
-        'guid': {
-            type: String
-        },
+    name: 'gp-o2m-components'
+});
+</script> 
 
-        'maps': {
-            type: Object
-        },
-
-        'metas': {
-            type: Object
-        },
-        'model': {
-            type: String
-        },
-        'container': {
-            type: String
-        },
-        'mode': {
-            type: String
-        },
-        'rel': {
-            type: String
-        }
+<script setup>
+const props = defineProps({
+    'cid': {
+        type: String
     },
-    setup(props) {
-        //const {proxy} = getCurrentInstance();
-        const tabs = reactive([]);
-        const currentTab = ref('gp-o2m-list');
+    'guid': {
+        type: String
+    },
 
-        const on_clicktab = (tab) => {
-            currentTab.value = tab;
-        };
+    'maps': {
+        type: Object
+    },
 
-        onMounted(() => {
-            for (let i = 0; i < props.metas[props.model].allow.length; i++)
-                //if (['form', 'tree', 'graph', 'calendar', 'geo', 'kanban'].indexOf(metas[model.value].allow[i]) >= 0) tabs.push('gp-' + metas[model.value].allow[i]);
-                if (['form', 'list'].indexOf(props.metas[props.model].allow[i]) >= 0) {
-                    //if (['form'].indexOf(props.metas[props.model].allow[i]) >= 0) tabs.push("gp-o2m-" + props.metas[props.model].allow[i] + '-' + props.model.replaceAll(".", "-"))
-                    //else 
-                    tabs.push('gp-o2m-' + props.metas[props.model].allow[i]);
-                }
-
-        });
-        return {
-            tabs,
-            currentTab,
-            on_clicktab
-        };
+    'metas': {
+        type: Object
+    },
+    'model': {
+        type: String
+    },
+    'container': {
+        type: String
+    },
+    'mode': {
+        type: String
+    },
+    'rel': {
+        type: String
     }
+})
+const { root, proxy } = getCurrentInstance();
+const tabs = reactive([]);
+const currentTab = ref('gp-o2m-list');
+
+const on_clicktab = (tab) => {
+    currentTab.value = tab;
+};
+
+onMounted(async () => {
+    for (let i = 0; i < props.metas[props.model].allow.length; i++)
+        if (['form', 'list'].indexOf(props.metas[props.model].allow[i]) >= 0) {
+            tabs.push('gp-o2m-' + props.metas[props.model].allow[i]);
+        }
+
 });
 
 </script>

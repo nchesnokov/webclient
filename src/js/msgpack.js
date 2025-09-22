@@ -173,7 +173,6 @@ extensionCodec.register({
         else return null
     },
     decode: (data) => {
-        console.log('decimal:',decode(data))
         return decode(data)
     },
 })

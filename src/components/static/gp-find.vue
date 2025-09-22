@@ -1,82 +1,40 @@
-<style>
-</style>
+<style></style>
 
 <template>
   <el-dialog :title="'Find:' + model" v-model="showDialog" width="60%">
     <template v-if="Object.keys(metas).length > 0">
-      <gp-selectable
-        v-if="showSearch || callbackOpts.mode == 'find'"
-        :cid="cid"
-        :columns="metas[model].meta.columns"
-        :names="metas[model].meta.names"
-        @update:search="do_search"
-        @update:search-cancel="showSearch = false"
-        :extcond="extcond"
-      ></gp-selectable>
+      <gp-selectable v-if="showSearch || callbackOpts.mode == 'find'" :cid="cid" :columns="metas[model].meta.columns"
+        :names="metas[model].meta.names" @update:search="do_search" @update:search-cancel="showSearch = false"
+        :extcond="extcond"></gp-selectable>
       <el-row>{{ metas[model].meta.description }}</el-row>
       <el-row v-if="!showSearch">
         <el-button type="primary" @click="do_select">Search</el-button>
       </el-row>
       <el-container>
         <template v-if="mode == 'single'">
-          <el-table
-            border
-            highlight-current-row
-            @current-change="handleCurrentChange"
-            :data="tableDataDisplay"
-            fit
-          >
-            <el-table-column
-              :type="mode == 'single' ? 'index' : 'selection'"
-              width="55"
-            ></el-table-column>
-            <el-table-column
-              :prop="getProp(col)"
-              :label="colsLabel[col]"
-              v-for="col in cols"
-              :key="col"
-            ></el-table-column>
+          <el-table border highlight-current-row @current-change="handleCurrentChange" :data="tableDataDisplay" fit>
+            <el-table-column :type="mode == 'single' ? 'index' : 'selection'" width="55"></el-table-column>
+            <el-table-column :prop="getProp(col)" :label="colsLabel[col]" v-for="col in cols"
+              :key="col"></el-table-column>
           </el-table>
         </template>
         <template v-else-if="mode == 'multiple'">
-          <el-table
-            border
-            @selection-change="handleSelectionChange"
-            :data="tableDataDisplay"
-          >
-            <el-table-column
-              :type="mode == 'single' ? 'index' : 'selection'"
-              width="55"
-            ></el-table-column>
-            <el-table-column
-              :prop="getProp(col)"
-              :label="colsLabel[col]"
-              v-for="col in cols"
-              :key="col"
-            ></el-table-column>
+          <el-table border @selection-change="handleSelectionChange" :data="tableDataDisplay">
+            <el-table-column :type="mode == 'single' ? 'index' : 'selection'" width="55"></el-table-column>
+            <el-table-column :prop="getProp(col)" :label="colsLabel[col]" v-for="col in cols"
+              :key="col"></el-table-column>
           </el-table>
         </template>
       </el-container>
       <el-row>
         <el-button type="danger" @click="onCancel">Cancel</el-button>
-        <el-button
-          v-if="
-            (mode == 'single' && currentRow != null) ||
-            multipleSelection.length > 0
-          "
-          type="primary"
-          @click="onSelect"
-          >Select</el-button
-        >
+        <el-button v-if="
+          (mode == 'single' && currentRow != null) ||
+          multipleSelection.length > 0
+        " type="primary" @click="onSelect">Select</el-button>
       </el-row>
-      <el-pagination
-        v-if="tableData.length > pageSize"
-        background
-        layout="total, prev, pager, next, jumper"
-        @current-change="handleCurrentPageChange"
-        :page-size="pageSize"
-        :total="tableData.length"
-      ></el-pagination>
+      <el-pagination v-if="tableData.length > pageSize" background layout="total, prev, pager, next, jumper"
+        @current-change="handleCurrentPageChange" :page-size="pageSize" :total="tableData.length"></el-pagination>
     </template>
   </el-dialog>
 </template>
@@ -212,8 +170,8 @@ const do_search = (event) => {
     for (let i = 0; i < props.domaincond.length; i++)
       event.cond.push(props.domaincond[i]);
   proxy.$ws
-    .sendAsync({
-      _msg: [
+    .send(
+      [
         props.cid,
         "models",
         props.model,
@@ -226,7 +184,7 @@ const do_search = (event) => {
           limit: event.limit.value,
         },
       ],
-    })
+    )
     .then((msg) => on_select_data(msg));
 };
 
@@ -248,8 +206,8 @@ const on_load_meta = (msg) => {
   Object.assign(metas, msg[0]);
   for (
     let i = 0,
-      c = metas[props.model].views.find.columns.map((v) => v.col),
-      meta = metas[props.model].meta.columns;
+    c = metas[props.model].views.find.columns.map((v) => v.col),
+    meta = metas[props.model].meta.columns;
     i < c.length;
     i++
   ) {
@@ -264,17 +222,16 @@ const on_load_meta = (msg) => {
 
 onMounted(() => {
   proxy.$ws
-    .sendAsync({
-      _msg: [
-        props.cid,
-        "uis",
-        "get_meta_of_models_v2",
-        {
-          model: props.model,
-          context: proxy.$UserPreferences.Context,
-        },
-      ],
-    })
+    .send([
+      props.cid,
+      "uis",
+      "get_meta_of_models_v2",
+      {
+        model: props.model,
+        context: proxy.$UserPreferences.Context,
+      },
+    ],
+    )
     .then((msg) => on_load_meta(msg));
 });
 </script>

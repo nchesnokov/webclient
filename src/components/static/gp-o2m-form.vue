@@ -1,164 +1,81 @@
 <template>
-  <el-pagination
-    v-if="maps.__containers__[container].length > 1"
-    background
-    layout="total, prev, pager, next, jumper"
-    @current-change="handleCurrentChange"
-    :page-size="pageSize"
-    :total="maps.__containers__[container].length"
-  ></el-pagination>
+  <el-pagination v-if="maps.__containers__[container].length > 1" background layout="total, prev, pager, next, jumper"
+    @current-change="handleCurrentChange" :page-size="pageSize"
+    :total="maps.__containers__[container].length"></el-pagination>
 
-  <el-form
-    v-if="maps.__containers__[container].length > 0"
-    :model="maps.__containers__[container][page - 1].__data__"
-    :rules="formRules"
-    label-width="auto"
-    status-icon
-    inline-message
-  >
+  <el-form v-if="maps.__containers__[container].length > 0" :model="maps.__containers__[container][page - 1].__data__"
+    :rules="formRules" label-width="auto" status-icon inline-message>
     <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
-      <el-autocomplete
-        :fetch-suggestions="querySearch"
-        clearable
-        :trigger-on-focus="false"
-        @focus="setAutocomleteCol(col)"
-        :value-key="col"
+      <el-autocomplete :fetch-suggestions="querySearch" clearable :trigger-on-focus="false"
+        @focus="setAutocomleteCol(col)" :value-key="col"
         v-model="maps.__containers__[container][page - 1].__data__[col].name"
-        v-if="['many2one', 'referenced'].indexOf(colsType[col]) >= 0"
-        @select="handleSelect"
-        :prefix-icon="isCompute(col) ? Monitor : ''"
-        :readonly="readonly(col)"
-      >
+        v-if="['many2one', 'referenced'].indexOf(colsType[col]) >= 0" @select="handleSelect"
+        :prefix-icon="isCompute(col) ? Monitor : ''" :readonly="readonly(col)">
         <template #suffix>
-          <el-button
-            type="primary"
-            size="small"
-            :icon="Search"
-            @click="
-              do_find(col, 'single', [], {
-                item: maps.__containers__[container][page - 1],
-              })
-            "
-          ></el-button>
-          <el-button
-            type="primary"
-            size="small"
-            :icon="DocumentAdd"
-            @click="do_add(col)"
-          ></el-button>
-          <el-button
-            v-if="
-              maps.__containers__[container][page - 1].__data__[col].id != null
-            "
-            type="primary"
-            size="small"
-            :icon="Edit"
-            @click="
-              do_edit(
-                col,
-                maps.__containers__[container][page - 1].__data__[col].id
-              )
-            "
-          ></el-button>
-          <el-button
-            v-if="
-              maps.__containers__[container][page - 1].__data__[col].id != null
-            "
-            type="primary"
-            size="small"
-            :icon="View"
-            @click="
-              do_lookup(
-                col,
-                maps.__containers__[container][page - 1].__data__[col].id
-              )
-            "
-          ></el-button>
+          <el-button type="primary" size="small" :icon="Search" @click="
+            do_find(col, 'single', [], {
+              item: maps.__containers__[container][page - 1],
+            })
+            "></el-button>maps.__containers__[container][page - 1].__data__[col]
+          <el-button type="primary" size="small" :icon="DocumentAdd" @click="do_add(col)"></el-button>
+          <el-button v-if="
+            maps.__containers__[container][page - 1].__data__[col].id != null
+          " type="primary" size="small" :icon="Edit" @click="
+            do_edit(
+              col,
+              maps.__containers__[container][page - 1].__data__[col].id
+            )
+            "></el-button>
+          <el-button v-if="
+            maps.__containers__[container][page - 1].__data__[col].id != null
+          " type="primary" size="small" :icon="View" @click="
+            do_lookup(
+              col,
+              maps.__containers__[container][page - 1].__data__[col].id
+            )
+            "></el-button>
         </template>
       </el-autocomplete>
-      <el-autocomplete
-      :fetch-suggestions="querySearch"
-          clearable
-          :trigger-on-focus="false"
-          @focus="setAutocomleteCol(col)"
-          :value-key="col"
-          v-model="maps.__containers__[container][page - 1].__data__[col].name"
-          v-if="colsType[col] == 'related'"
-          @select="handleSelect"
-          :readonly="readonly(col)"
-      >
+      <el-autocomplete :fetch-suggestions="querySearch" clearable :trigger-on-focus="false"
+        @focus="setAutocomleteCol(col)" :value-key="col"
+        v-model="maps.__containers__[container][page - 1].__data__[col].name" v-if="colsType[col] == 'related'"
+        @select="handleSelect" :readonly="readonly(col)">
         <template #suffix>
-          <el-button
-            type="primary"
-            size="small"
-            :icon="Search"
-            @click="
-              do_find(col, 'single', [], {
-                item: maps.__containers__[container][page - 1],
-              })
-            "
-          ></el-button>
-          <el-button
-            type="primary"
-            size="small"
-            :icon="DocumentAdd"
-            @click="do_add(col)"
-          ></el-button>
-          <el-button
-            v-if="
-              maps.__containers__[container][page - 1].__data__[col].id != null
-            "
-            type="primary"
-            size="small"
-            :icon="Edit"
-            @click="
-              do_edit(
-                col,
-                maps.__containers__[container][page - 1].__data__[col].id
-              )
-            "
-          ></el-button>
-          <el-button
-            v-if="
-              maps.__containers__[container][page - 1].__data__[col].id != null
-            "
-            type="primary"
-            size="small"
-            :icon="View"
-            @click="
-              do_lookup(
-                col,
-                maps.__containers__[container][page - 1].__data__[col].id
-              )
-            "
-          ></el-button>
+          <el-button type="primary" size="small" :icon="Search" @click="
+            do_find(col, 'single', [], {
+              item: maps.__containers__[container][page - 1],
+            })
+            "></el-button>
+          <el-button type="primary" size="small" :icon="DocumentAdd" @click="do_add(col)"></el-button>
+          <el-button v-if="
+            maps.__containers__[container][page - 1].__data__[col].id != null
+          " type="primary" size="small" :icon="Edit" @click="
+            do_edit(
+              col,
+              maps.__containers__[container][page - 1].__data__[col].id
+            )
+            "></el-button>
+          <el-button v-if="
+            maps.__containers__[container][page - 1].__data__[col].id != null
+          " type="primary" size="small" :icon="View" @click="
+            do_lookup(
+              col,
+              maps.__containers__[container][page - 1].__data__[col].id
+            )
+            "></el-button>
         </template>
       </el-autocomplete>
-      <json-viewer
-        v-if="colsType[col] == 'json'"
-        :value="maps.__containers__[container][page - 1].__data__[col]"
-        copyable
-        boxed
-        sort
-      />
+      <json-viewer v-if="colsType[col] == 'json'" :value="maps.__containers__[container][page - 1].__data__[col] ? maps.__containers__[container][page - 1].__data__[col]: {}"
+        copyable boxed sort />
 
-      <el-input
-        v-model="maps.__containers__[container][page - 1].__data__[col]"
-        @change="cache(maps.__containers__[container][page - 1], col)"
-        v-else-if="
+      <el-input v-model="maps.__containers__[container][page - 1].__data__[col]"
+        @change="cache(maps.__containers__[container][page - 1], col)" v-else-if="
           ['char', 'varchar', 'composite', 'decomposite', 'tree'].indexOf(
             colsType[col]
           ) >= 0
-        "
-        :readonly="readonly(col)"
-      >
+        " :readonly="readonly(col)">
         <template v-if="isCompute(col) || colsTranslate[col]" #prepend>
-          <el-button
-            v-if="isCompute(col)"
-            type="primary"
-            size="small"
-            :icon="Monitor"
-          />
+          <el-button v-if="isCompute(col)" type="primary" size="small" :icon="Monitor" />
           <el-dropdown v-if="colsTranslate[col]" @command="i18nCommand">
             <span class="el-dropdown-link">
               {{ colsLang[col].toLowerCase() }}
@@ -168,11 +85,8 @@
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item
-                  v-for="lang in $UserPreferences.langs"
-                  :key="lang.code"
-                  :command="{ col: col, lang: lang.code }"
-                  >{{ lang.description }}
+                <el-dropdown-item v-for="lang in $UserPreferences.langs" :key="lang.code"
+                  :command="{ col: col, lang: lang.code }">{{ lang.description }}
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -180,34 +94,19 @@
         </template>
       </el-input>
 
-      <el-input
-        v-model="maps.__containers__[container][page - 1].__data__[col]"
-        @change="cache(maps.__containers__[container][page - 1], col)"
-        v-else-if="
+      <el-input v-model="maps.__containers__[container][page - 1].__data__[col]"
+        @change="cache(maps.__containers__[container][page - 1], col)" v-else-if="
           ['integer', 'float', 'decimal', 'numeric', 'timedelta'].indexOf(
             colsType[col]
           ) >= 0
-        "
-        :prefix-icon="isCompute(col) ? Monitor : ''"
-        :readonly="readonly(col)"
-      >
+        " :prefix-icon="isCompute(col) ? Monitor : ''" :readonly="readonly(col)">
       </el-input>
-      <el-input
-        v-model="maps.__containers__[container][page - 1].__data__[col]"
-        @change="cache(maps.__containers__[container][page - 1], col)"
-        autosize
-        type="textarea"
-        v-else-if="['text', 'xml'].indexOf(colsType[col]) >= 0"
-        :prefix-icon="isCompute(col) ? Monitor : ''"
-        :readonly="readonly(col)"
-      >
+      <el-input v-model="maps.__containers__[container][page - 1].__data__[col]"
+        @change="cache(maps.__containers__[container][page - 1], col)" autosize type="textarea"
+        v-else-if="['text', 'xml'].indexOf(colsType[col]) >= 0" :prefix-icon="isCompute(col) ? Monitor : ''"
+        :readonly="readonly(col)">
         <template v-if="isCompute(col) || colsTranslate[col]" #prepend>
-          <el-button
-            v-if="isCompute(col)"
-            type="primary"
-            size="small"
-            :icon="Monitor"
-          />
+          <el-button v-if="isCompute(col)" type="primary" size="small" :icon="Monitor" />
           <el-dropdown v-if="colsTranslate[col]" @command="i18nCommand">
             <span class="el-dropdown-link">
               {{ colsLang[col].toLowerCase() }}
@@ -217,89 +116,48 @@
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item
-                  v-for="lang in $UserPreferences.langs"
-                  :key="lang.code"
-                  :command="{ col: col, lang: lang.code }"
-                  >{{ lang.description }}
+                <el-dropdown-item v-for="lang in $UserPreferences.langs" :key="lang.code"
+                  :command="{ col: col, lang: lang.code }">{{ lang.description }}
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
         </template>
       </el-input>
-      <el-date-picker
-        v-model="maps.__containers__[container][page - 1].__data__[col]"
-        type="date"
-        @change="cache(maps.__containers__[container][page - 1], col)"
-        v-else-if="colsType[col] == 'date'"
-        :readonly="readonly(col)"
-      ></el-date-picker>
-      <el-time-picker
-        v-model="maps.__containers__[container][page - 1].__data__[col]"
-        @change="cache(maps.__containers__[container][page - 1], col)"
-        v-else-if="colsType[col] == 'time'"
-        :readonly="readonly(col)"
-      ></el-time-picker>
-      <el-date-picker
-        v-model="maps.__containers__[container][page - 1].__data__[col]"
-        @change="cache(maps.__containers__[container][page - 1], col)"
-        type="datetime"
-        v-else-if="colsType[col] == 'datetime'"
-        :readonly="readonly(col)"
-      ></el-date-picker>
-      <el-select
-        v-model="maps.__containers__[container][page - 1].__data__[col]"
-        @change="cache(maps.__containers__[container][page - 1], col)"
-        v-else-if="colsType[col] == 'selection'"
-        :disabled="readonly(col)"
-      >
-        <el-option
-          v-for="item in selOptions[col]"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value"
-        >
+      <el-date-picker v-model="maps.__containers__[container][page - 1].__data__[col]" type="date"
+        @change="cache(maps.__containers__[container][page - 1], col)" v-else-if="colsType[col] == 'date'"
+        :readonly="readonly(col)"></el-date-picker>
+      <el-time-picker v-model="maps.__containers__[container][page - 1].__data__[col]"
+        @change="cache(maps.__containers__[container][page - 1], col)" v-else-if="colsType[col] == 'time'"
+        :readonly="readonly(col)"></el-time-picker>
+      <el-date-picker v-model="maps.__containers__[container][page - 1].__data__[col]"
+        @change="cache(maps.__containers__[container][page - 1], col)" type="datetime"
+        v-else-if="colsType[col] == 'datetime'" :readonly="readonly(col)"></el-date-picker>
+      <el-select v-model="maps.__containers__[container][page - 1].__data__[col]"
+        @change="cache(maps.__containers__[container][page - 1], col)" v-else-if="colsType[col] == 'selection'"
+        :disabled="readonly(col)">
+        <el-option v-for="item in selOptions[col]" :key="item.value" :label="item.label" :value="item.value">
         </el-option>
       </el-select>
-      <gp-m2m-list
-        :maps="maps"
-        :metas="metas"
-        :model="metas[model].meta.columns[col].obj"
-        :tableData="maps.__containers__[container][page - 1]"
-        v-else-if="colsType[col] == 'many2many'"
-        >{{ colsLabel[col] }}</gp-m2m-list
-      >
-      <el-switch
-        v-model="maps.__containers__[container][page - 1].__data__[col]"
-        @change="cache(maps.__containers__[container][page - 1], col)"
-        v-else-if="colsType[col] == 'boolean'"
-        :disabled="readonly(col)"
-      ></el-switch>
-      <el-image
-        v-else-if="
-          colsType[col] == 'binary' &&
-          metas[model].meta.columns[col].accept == 'image/*' &&
-          maps.__containers__[container][page - 1].__data__[col] != null
-        "
-        style="width: 100px; height: 100px"
-        :src="maps.__containers__[container][page - 1].__data__[col]"
-        fit="fill"
-      ></el-image>
-      <el-upload
-        v-else-if="
-          colsType[col] == 'binary' &&
-          metas[model].meta.columns[col].accept == 'image/*' &&
-          maps.__containers__[container][page - 1].__data__[col] == null
-        "
-        ref="maps.__containers__[container][page-1].__data__[col]"
-        :data="maps.__containers__[container][page - 1].__data__[col]"
-        list-type="picture"
-        :action="col"
-        :http-request="request"
-        :auto-upload="true"
-        drag
-      >
+      <gp-m2m-list :maps="maps" :metas="metas" :model="metas[model].meta.columns[col].obj"
+        :tableData="maps.__containers__[container][page - 1]" v-else-if="colsType[col] == 'many2many'">{{ colsLabel[col]
+        }}</gp-m2m-list>
+      <el-switch v-model="maps.__containers__[container][page - 1].__data__[col]"
+        @change="cache(maps.__containers__[container][page - 1], col)" v-else-if="colsType[col] == 'boolean'"
+        :disabled="readonly(col)"></el-switch>
+      <el-image v-else-if="
+        colsType[col] == 'binary' &&
+        metas[model].meta.columns[col].accept == 'image/*' &&
+        maps.__containers__[container][page - 1].__data__[col] != null
+      " style="width: 100px; height: 100px" :src="maps.__containers__[container][page - 1].__data__[col]"
+        fit="fill"></el-image>
+      <el-upload v-else-if="
+        colsType[col] == 'binary' &&
+        metas[model].meta.columns[col].accept == 'image/*' &&
+        maps.__containers__[container][page - 1].__data__[col] == null
+      " ref="maps.__containers__[container][page-1].__data__[col]"
+        :data="maps.__containers__[container][page - 1].__data__[col]" list-type="picture" :action="col"
+        :http-request="request" :auto-upload="true" drag>
         <el-icon class="el-icon--upload"><upload-filled /></el-icon>
         <div class="el-upload__text">
           Drop file here or <em>click to upload</em>
@@ -312,23 +170,10 @@
       </el-upload>
     </el-form-item>
     <el-tabs type="border-card" v-if="o2mcols.length > 0">
-      <el-tab-pane
-        :label="colsLabel[o2mcol]"
-        v-for="o2mcol in o2mcols"
-        :key="o2mcol"
-      >
-        <gp-o2m-components
-          :cid="cid"
-          :guid="guid"
-          :maps="maps"
-          :metas="metas"
-          :model="metas[model].meta.columns[o2mcol].obj"
-          :container="
-            o2mcol + '.' + maps.__containers__[container][page - 1].__path__
-          "
-          :mode="mode"
-          :rel="metas[model].meta.columns[o2mcol].rel"
-        />
+      <el-tab-pane :label="colsLabel[o2mcol]" v-for="o2mcol in o2mcols" :key="o2mcol">
+        <gp-o2m-components :cid="cid" :guid="guid" :maps="maps" :metas="metas"
+          :model="metas[model].meta.columns[o2mcol].obj" :container="o2mcol + '.' + maps.__containers__[container][page - 1].__path__
+            " :mode="mode" :rel="metas[model].meta.columns[o2mcol].rel" />
       </el-tab-pane>
     </el-tabs>
   </el-form>
@@ -434,9 +279,7 @@ const isRelatedEmpry = (col) => {
         props.maps.__containers__[props.container][page.value - 1].__data__[
           v[0]
         ].id == null) ||
-      props.maps.__containers__[props.container][page.value - 1].__data__[v[0]][
-        v[0]
-      ] == null
+      props.maps.__containers__[props.container][page.value - 1].__data__[v[0]][v[0]] == null
   );
 };
 
@@ -444,7 +287,7 @@ const setAutocomleteCol = (col) => {
   console.log("autocomplete:", col);
   let obj = props.metas[props.model].meta.columns[col].obj,
     rec_name = props.metas[obj].meta.names.rec_name,
-    sz = props.metas[obj].meta.columns[rec_name].size == null? 32767:props.metas[obj].meta.columns[rec_name].size;
+    sz = props.metas[obj].meta.columns[rec_name].size == null ? 32767 : props.metas[obj].meta.columns[rec_name].size;
   autoCompleteCol.value = { col: col, sz: sz };
 };
 const querySearch = (queryString, cb) => {
@@ -493,17 +336,17 @@ const querySearch = (queryString, cb) => {
       else
         for (
           let i = 0,
-            d = domainConditions(
-              props.metas[props.model].meta.columns[autoCompleteCol.value.col]
-                .domain
-            );
+          d = domainConditions(
+            props.metas[props.model].meta.columns[autoCompleteCol.value.col]
+              .domain
+          );
           i < d.length;
           i++
         )
           cond.push(d[i]);
     proxy.$ws
-      .sendAsync({
-        _msg: [
+      .send(
+        [
           props.cid,
           "models",
           obj,
@@ -515,7 +358,7 @@ const querySearch = (queryString, cb) => {
             limit: 10,
           },
         ],
-      })
+      )
       .then((msg) => {
         let result = [];
         for (let i = 0, v; i < msg.length; i++) {
@@ -532,8 +375,8 @@ const querySearch = (queryString, cb) => {
 
 const handleSelect = (item) => {
   console.log("handleSelect:", item);
-  if (props.metas[props.model].meta.columns[autoCompleteCol.value.col].type == "related") related_cache(props.maps.__containers__[props.container][page.value - 1],autoCompleteCol.value.col,props.metas[props.model].meta.columns[autoCompleteCol.value.col].relatedy)
-  else  m2o_cache(props.maps.__containers__[props.container][page.value - 1], autoCompleteCol.value.col);
+  if (props.metas[props.model].meta.columns[autoCompleteCol.value.col].type == "related") related_cache(props.maps.__containers__[props.container][page.value - 1], autoCompleteCol.value.col, props.metas[props.model].meta.columns[autoCompleteCol.value.col].relatedy)
+  else m2o_cache(props.maps.__containers__[props.container][page.value - 1], autoCompleteCol.value.col);
 };
 
 
@@ -580,11 +423,11 @@ const m2o_cache = (item, name) => {
     value: item.__data__[name],
     context: proxy.$UserPreferences.Context,
   };
-  //console.log('cache:',r);
+  
   proxy.$ws
-    .sendAsync({
-      _msg: [props.cid, "_cache", "m2ofind", props.guid, r],
-    })
+    .send(
+      [props.cid, "_cache", "m2ofind", props.guid, r],
+    )
     .then((v) => {
       console.log("m2ofind:", v);
       let f = v[0];
@@ -597,7 +440,7 @@ const m2o_cache = (item, name) => {
           else
             props.maps.__containers__[props.container][page.value - 1].__data__[
               name
-            ].  name = f.__m2o_find__.__data__.v[0][key];
+            ].name = f.__m2o_find__.__data__.v[0][key];
         cache(item, name);
       } else {
         let extcond = [];
@@ -642,9 +485,9 @@ const related_cache = (item, name, relatedy) => {
   };
   //console.log('cache-related:',r);
   proxy.$ws
-    .sendAsync({
-      _msg: [props.cid, "_cache", "relatedfind", props.guid, r],
-    })
+    .send(
+      [props.cid, "_cache", "relatedfind", props.guid, r],
+    )
     .then((v) => {
       console.log("relatedfind:", v);
       let f = v[0];
@@ -788,9 +631,9 @@ const cache = (item, name) => {
   };
   console.log("cache:", r);
   proxy.$ws
-    .sendAsync({
-      _msg: [props.cid, "_cache", "cache", props.guid, r],
-    })
+    .send(
+      [props.cid, "_cache", "cache", props.guid, r],
+    )
     .then((v) => {
       console.log("cache:", v);
       on_modify_models(props.maps, v[0]);
@@ -856,8 +699,8 @@ const on_find_m2m = (value, opts) => {
 
 const m2m_cache = (model, container, fields, obj, rel, id2, context) => {
   proxy.$ws
-    .sendAsync({
-      _msg: [
+    .send(
+      [
         props.cid,
         "_cache",
         "m2madd",
@@ -872,7 +715,7 @@ const m2m_cache = (model, container, fields, obj, rel, id2, context) => {
           context: proxy.$UserPreferences.Context,
         },
       ],
-    })
+    )
     .then((msg) => on_modify_models(props.maps, msg[0]));
 };
 
@@ -880,10 +723,10 @@ const fieldsBuild = (model, view) => {
   let fcols = [];
   for (
     let i = 0,
-      columns = props.metas[model].views[view].columns
-        .map((v) => v.col)
-        .filter((c) => c != props.rel),
-      k = {};
+    columns = props.metas[model].views[view].columns
+      .map((v) => v.col)
+      .filter((c) => c != props.rel),
+    k = {};
     i < columns.length;
     i++
   )
@@ -924,9 +767,9 @@ const relatedyConditions = (col) => {
   let cond = [];
   for (
     let i = 0,
-      relatedy = listRelatedFields(
-        props.metas[props.model].meta.columns[col].relatedy
-      );
+    relatedy = listRelatedFields(
+      props.metas[props.model].meta.columns[col].relatedy
+    );
     i < relatedy.length;
     i++
   )
@@ -950,7 +793,7 @@ const do_find = (col, mode = "single", extcond = [], callbackopts = {}) => {
     loader: () => import("../static/gp-find.vue"),
     suspensible: false,
   });
-  let domaincond = props.metas[props.model].meta.columns[col].domain != null ? (domainConditions(props.metas[props.model].meta.columns[col].domain)):[]
+  let domaincond = props.metas[props.model].meta.columns[col].domain != null ? (domainConditions(props.metas[props.model].meta.columns[col].domain)) : []
   const rootProps = {
     cid: props.cid,
     model: props.metas[props.model].meta.columns[col].obj,
@@ -1060,10 +903,10 @@ onMounted(() => {
   let rules = {};
   for (
     let i = 0,
-      c = props.metas[props.model].views.form.columns
-        .map((v) => v.col)
-        .filter((c) => c != props.rel),
-      meta = props.metas[props.model].meta.columns;
+    c = props.metas[props.model].views.form.columns
+      .map((v) => v.col)
+      .filter((c) => c != props.rel),
+    meta = props.metas[props.model].meta.columns;
     i < c.length;
     i++
   ) {
@@ -1074,7 +917,7 @@ onMounted(() => {
     colsLang[c[i]] = proxy.$UserPreferences.lang;
     if (colsType[c[i]] == "selection")
       selOptions[c[i]] = _get_selections(meta[c[i]].selections);
-  if (meta[c[i]].required)
+    if (meta[c[i]].required)
       formRules[c[i]] = [
         {
           required: true,
@@ -1090,12 +933,12 @@ onMounted(() => {
             : "change",
         },
       ];
-  
+
     if (colsType[c[i]] == "one2many") o2mcols.push(c[i]);
     else cols.push(c[i]);
   }
-      // Object.assign(formRules, rules);
-      console.log("formRules:",formRules);
+  // Object.assign(formRules, rules);
+  console.log("formRules:", formRules);
   fields.splice(0, fields.length, ...fieldsBuild(props.model, "form"));
   // console.log("PROPS-O2MFORM:", props.maps.__containers__[props.container]);
 });

@@ -1,5 +1,3 @@
-
-
 <template>
   <el-form :model="dataForm" label-width="200px">
     <el-form-item :label="colsLabel[col]" v-for="col in cols" :key="col">
@@ -18,7 +16,7 @@
           <template v-if="isCompute(col)" #prefix>
             <el-button type="primary" size="small" :icon="Monitor" />
           </template>
-          <template #suffix>
+<template #suffix>
             <el-button
               v-if="mode != 'lookup'"
               type="primary"
@@ -48,94 +46,44 @@
               @click="do_lookup(col, dataForm.__data__[col].id)"
             ></el-button>
           </template>
-        </el-autocomplete> -->
+</el-autocomplete> -->
 
-      <el-input
-        v-model="dataForm[col].name"
-        v-if="['many2one', 'referenced', 'related'].indexOf(colsType[col]) >= 0"
-        :prefix-icon="isCompute(col) ? 'el-icon-s-data' : ''"
-        :readonly="readonly(col)"
-      >
+      <el-input v-model="dataForm[col].name" v-if="['many2one', 'referenced', 'related'].indexOf(colsType[col]) >= 0"
+        :prefix-icon="isCompute(col) ? 'el-icon-s-data' : ''" :readonly="readonly(col)">
         <template #suffix>
-          <el-button
-            type="primary"
-            size="small"
-            :icon="Search"
-            @click="do_search(col)"
-          ></el-button>
+          <el-button type="primary" size="small" :icon="Search" @click="do_search(col)"></el-button>
         </template>
       </el-input>
-      <el-input
-        v-model="dataForm[col]"
-        v-if="
-          [
-            'char',
-            'varchar',
-            'composite',
-            'i18n',
-            'tree',
-            'integer',
-            'float',
-            'decimal',
-            'numeric',
-            'timedelta',
-          ].indexOf(colsType[col]) >= 0
-        "
-        :prefix-icon="isCompute(col) ? 'el-icon-s-data' : ''"
-        :readonly="readonly(col)"
-      >
+      <el-input v-model="dataForm[col]" v-if="
+        [
+          'char',
+          'varchar',
+          'composite',
+          'i18n',
+          'tree',
+          'integer',
+          'float',
+          'decimal',
+          'numeric',
+          'timedelta',
+        ].indexOf(colsType[col]) >= 0
+      " :prefix-icon="isCompute(col) ? 'el-icon-s-data' : ''" :readonly="readonly(col)">
         <template #prefix>
-          <el-button
-            type="primary"
-            size="small"
-            :icon="Monitor"
-            v-if="isCompute(col)"
-          ></el-button>
+          <el-button type="primary" size="small" :icon="Monitor" v-if="isCompute(col)"></el-button>
         </template>
       </el-input>
-      <el-input
-        v-model="dataForm[col]"
-        type="textarea"
-        v-if="['text', 'xml'].indexOf(colsType[col]) >= 0"
-        :prefix-icon="isCompute(col) ? 'el-icon-s-data' : ''"
-        :readonly="readonly(col)"
-      ></el-input>
-      <el-date-picker
-        v-model="dataForm[col]"
-        v-if="colsType[col] == 'date'"
-        :readonly="readonly(col)"
-      ></el-date-picker>
-      <el-time-picker
-        v-model="dataForm[col]"
-        v-if="colsType[col] == 'time'"
-        :readonly="readonly(col)"
-      ></el-time-picker>
-      <el-date-picker
-        v-model="dataForm[col]"
-        type="datetime"
-        v-if="colsType[col] == 'datetime'"
-        :readonly="readonly(col)"
-      ></el-date-picker>
-      <el-select
-        v-model="dataForm[col]"
-        multiple
-        v-if="colsType[col] == 'selection'"
-        :readonly="readonly(col)"
-      >
-        <el-option
-          v-for="item in selOptions[col]"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value"
-        >
+      <el-input v-model="dataForm[col]" type="textarea" v-if="['text', 'xml'].indexOf(colsType[col]) >= 0"
+        :prefix-icon="isCompute(col) ? 'el-icon-s-data' : ''" :readonly="readonly(col)"></el-input>
+      <el-date-picker v-model="dataForm[col]" v-if="colsType[col] == 'date'" :readonly="readonly(col)"></el-date-picker>
+      <el-time-picker v-model="dataForm[col]" v-if="colsType[col] == 'time'" :readonly="readonly(col)"></el-time-picker>
+      <el-date-picker v-model="dataForm[col]" type="datetime" v-if="colsType[col] == 'datetime'"
+        :readonly="readonly(col)"></el-date-picker>
+      <el-select v-model="dataForm[col]" multiple v-if="colsType[col] == 'selection'" :readonly="readonly(col)">
+        <el-option v-for="item in selOptions[col]" :key="item.value" :label="item.label" :value="item.value">
         </el-option>
       </el-select>
-      <el-checkbox
-        v-model="dataForm[col]"
-        v-if="colsType[col] == 'boolean'"
-        :readonly="readonly(col)"
-        >{{ colsLabel[col] }}</el-checkbox
-      >
+      <el-checkbox v-model="dataForm[col]" v-if="colsType[col] == 'boolean'" :readonly="readonly(col)">{{ colsLabel[col]
+        }}</el-checkbox>
     </el-form-item>
     <el-form-item>
       <el-button type="primary" @click="onSearch">Search</el-button>
@@ -143,18 +91,10 @@
     </el-form-item>
     <el-row>
       <el-form-item label="Offset">
-        <el-input-number
-          v-model="offset"
-          :min="0"
-          :max="999999"
-        ></el-input-number>
+        <el-input-number v-model="offset" :min="0" :max="999999"></el-input-number>
       </el-form-item>
       <el-form-item label="Limit">
-        <el-input-number
-          v-model="limit"
-          :min="1"
-          :max="999999"
-        ></el-input-number>
+        <el-input-number v-model="limit" :min="1" :max="999999"></el-input-number>
       </el-form-item>
     </el-row>
   </el-form>
@@ -274,17 +214,17 @@ const querySearch = (queryString, cb) => {
       else
         for (
           let i = 0,
-            d = domainConditions(
-              props.metas[props.model].meta.columns[autoCompleteCol.value.col]
-                .domain
-            );
+          d = domainConditions(
+            props.metas[props.model].meta.columns[autoCompleteCol.value.col]
+              .domain
+          );
           i < d.length;
           i++
         )
           cond.push(d[i]);
     proxy.$ws
-      .sendAsync({
-        _msg: [
+      .send(
+        [
           props.cid,
           "models",
           obj,
@@ -296,7 +236,7 @@ const querySearch = (queryString, cb) => {
             limit: 10,
           },
         ],
-      })
+      )
       .then((msg) => {
         let result = [];
         for (let i = 0, v; i < msg.length; i++) {
@@ -313,8 +253,8 @@ const querySearch = (queryString, cb) => {
 
 const handleSelect = (item) => {
   console.log("handleSelect:", item);
-  if (props.metas[props.model].meta.columns[autoCompleteCol.value.col].type == "related") related_cache(dataForm,autoCompleteCol.value.col,props.metas[props.model].meta.columns[autoCompleteCol.value.col].relatedy)
-  else  m2o_cache(dataForm, autoCompleteCol.value.col);
+  if (props.metas[props.model].meta.columns[autoCompleteCol.value.col].type == "related") related_cache(dataForm, autoCompleteCol.value.col, props.metas[props.model].meta.columns[autoCompleteCol.value.col].relatedy)
+  else m2o_cache(dataForm, autoCompleteCol.value.col);
 };
 
 
@@ -357,15 +297,14 @@ const do_search = (col) => {
       let i = 0, relatedy = props.columns[col].relatedy;
       i < relatedy.length;
       i++
-    )
-    {  
-    let rf =Array.isArray(relatedy[i]) ? rf = relatedy[i][0]:relatedy[i];
-      
+    ) {
+      let rf = Array.isArray(relatedy[i]) ? rf = relatedy[i][0] : relatedy[i];
+
       extcond.push({
         __tuple__: [
           rf,
           "=",
-          ["many2one", "related","referenced"].indexOf(colsType[rf]) >= 0
+          ["many2one", "related", "referenced"].indexOf(colsType[rf]) >= 0
             ? dataForm[rf].name
             : dataForm[rf],
         ],

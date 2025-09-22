@@ -213,15 +213,15 @@ onBeforeMount(async () => {
   );
 
   onMDX(
-    await proxy.$ws.sendAsync({
-      _msg: [
+    await proxy.$ws.send(
+       [
         props.cid,
         "models",
         props.model,
         "select",
         { fields: vfields, context: proxy.$UserPreferences.Context },
       ],
-    })
+    )
   );
 });
 </script>

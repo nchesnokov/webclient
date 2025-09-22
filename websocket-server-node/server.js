@@ -11,6 +11,8 @@ const wsServer = new WebSocket.Server({ port: 9000 });
 
 wsServer.on('connection', onConnect);
 
+console.log("Server start port:9000")
+
 function onConnect(wsClient) {
   //console.log('Новый пользователь');
   // отправка приветственного сообщения клиенту
